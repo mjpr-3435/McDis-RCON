@@ -1,6 +1,4 @@
-import requests
-import hashlib
-import uuid
+from ..modules import *
 
 def mc_uuid(player: str, *, online : bool = True):
     if online:

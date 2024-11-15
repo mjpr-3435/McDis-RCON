@@ -20,16 +20,25 @@
 
 ### To apply the changes, you must restart McDis!!!
 
-Bot Token: 
+### Description   : The bot token that will be used to initialize McDis
+Bot Token:
+
+### Description   : The ID of the channel where the McDis panel will be created
 Panel ID:
+
+### Description   : Language that McDis will use.
+### Valid Values  : [en, es]
+### Default Value : en
 Language: en
+
+### Description   : Number of backups that McDis will save.
+### Valid Values  : [1, 5] (inclusive)
+### Default Value : 3
 Backups: 3
 
-Booleans:
-  upload overwrite        : false
-  allow flask             : false
-
+### Description   : Flask configuration
 Flask:
+  Allow : false
   IP    : '0.0.0.0'
   Port  : 8000
 

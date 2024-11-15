@@ -1,3 +1,9 @@
+from ..modules import *
+
+def truncate (string: str, max_lenght:int) -> str:
+    string = string if len(string) < max_lenght else f'{string[:max_lenght-3]}...'
+    return string
+
 sct = {
         "c:black"         : "§0",
         "c:dark_blue"     : "§1",

@@ -10,7 +10,7 @@ class CustomInstall(install):
 
 setup(
     name="mcdis_rcon",
-    version="0.3.0-alpha",
+    version="0.4.0-alpha",
     packages=find_packages(),
     include_package_data=True,
     package_data={
