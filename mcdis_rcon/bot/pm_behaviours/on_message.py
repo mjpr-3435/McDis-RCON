@@ -24,14 +24,14 @@ async def pm_on_message(client: commands.Bot, message: discord.Message):
             await message.delete()
             for process in processes: process.stop()
                             
-        elif message.content.lower().split(' ')[0] == f'{mcdis_prefix}make-bkp':
-            process_name = message.content.removeprefix(f'{mcdis_prefix}make-bkp').strip().lower()
+        elif message.content.lower().split(' ')[0] == f'{mcdis_prefix}mk-bkp':
+            process_name = message.content.removeprefix(f'{mcdis_prefix}mk-bkp').strip().lower()
             process = next(filter(lambda x: process_name == x.name.lower(), processes), None)
 
             await message.delete()
 
             if not process:
-                response = await message.channel.send(content = _('✖ Specify the process. E.g.: `{}make-bkp <name>`.').format(mcdis_prefix))
+                response = await message.channel.send(content = _('✖ Specify the process. E.g.: `{}mk-bkp <name>`.').format(mcdis_prefix))
                 await response.delete(delay = 5)
                 return
             elif process.disk_usage(string = False) > psutil.disk_usage("/").free:

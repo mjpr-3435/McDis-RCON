@@ -47,7 +47,7 @@ def files_manager_embed(path: str = '.', page = 1) -> discord.Embed:
         embed = discord.Embed(
                 title = f"> **{mcdis_path(path)}**",
                 color = embed_colour,
-                description = f'```\n{truncate(value,1990)}```' if value else '')
+                description = f'```\n{truncate(value,1990).replace("`","’")}```' if value else '')
 
         
         date = datetime.fromtimestamp(os.path.getctime(path)).strftime("%Y-%m-%d %H:%M:%S")

@@ -45,7 +45,6 @@ emoji_file                              = '📄'
 emoji_new_command                       = '📦'
 emoji_pin                               = '📌'
 emoji_warning                           = '⚠️'
-emoji_clip                              = '📎'
 emoji_update                            = '🔄'
 emoji_arrow_left                        = '⬅️'
 emoji_arrow_right                       = '➡️'
@@ -56,10 +55,9 @@ uncheck                                 = '✖'
 request_size_limit                      = 5 * 1024**2
 max_queue                               = 1000
 max_processes                           = 5
-max_flask_files                         = 10
 
 allowed_languages                       = ['en','es']
-panel_commands                          = ['start-all','stop-all','make-bkp','upload','restart']
+panel_commands                          = ['start-all','stop-all','mk-bkp','upload','restart']
 console_commands                        = ['start', 'stop', 'kill', 'restart', 'reload mdplugins']
 terminal_commands                       = ['mkdir <name>', 
                                            'zip <dir:index>', 

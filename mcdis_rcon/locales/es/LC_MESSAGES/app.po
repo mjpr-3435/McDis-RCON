@@ -103,8 +103,8 @@ msgstr  "Procesos cerrados."
 
 ### mcdis_rcon.bot.pm_behaviours.on_message
 
-msgid   "✖ Specify the process. E.g.: `{}make-bkp <name>`."
-msgstr  "✖ Especifíca el proceso. Ej.: `{}make-bkp <name>`."
+msgid   "✖ Specify the process. E.g.: `{}mk-bkp <name>`."
+msgstr  "✖ Especifíca el proceso. Ej.: `{}mk-bkp <name>`."
 
 msgid   "✖ There's not enough space on the disk to create the backup."
 msgstr  "✖ No hay suficiente espacio en el disco para crear el backup"

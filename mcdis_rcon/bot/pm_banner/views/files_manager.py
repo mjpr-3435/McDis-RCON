@@ -474,7 +474,7 @@ async def cmd_interface(command: str, interaction: discord.Interaction, path: st
                 await update_files_interface(interaction, path, path)
  
     else:
-        await interaction.response.send_message( _('✖ Invalid command`{}`.').format(args[0]), ephemeral=True)
+        await interaction.response.send_message( _('✖ Invalid command `{}`.').format(args[0]), ephemeral=True)
 
       
 async def update_files_interface(interaction : discord.Interaction, new_path : str, path : str):

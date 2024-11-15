@@ -2,21 +2,16 @@
 #         McDis-RCON Configuration
 # =========================================
 
-### Application designed to stream the Minecraft console to Discord.
-###
-### Designed to run on Ubuntu 22.04.3 LTS and for
-### - Servers         : Vanilla
-### - Networks        : Waterfall, Bungeecord, or Velocity
-###
-### It may work with other types of servers, but the event system may not function properly
-### In that case, McDis allows you to disable the default event system and implement a custom one
+### Application designed to stream the Minecraft console to Discord. This has been tested on Ubuntu 22.04.3 LTS.
+### - Servers         :   Vanilla, Fabric, Paper, etc...
+### - Networks        :   Waterfall, Bungeecord, or Velocity
 
-### start_command     :   Start command for the process, example: java -Xms6G -Xmx6G -Dfile.encoding=UTF-8 -jar launcher.jar nogui
-### stop_command      :   Command to stop the process; if left blank, the process will be terminated abruptly
+### start_command     :   Start command for the process, e.g.: java -Xms6G -Xmx6G -Dfile.encoding=UTF-8 -jar <launcher>.jar nogui
+### stop_command      :   Command to stop the process
 ### relay_blacklist   :   List of terms; if contained in the log, it will not be sent to Discord
-
-### Even with MCDReforged, set the .jar start command; McDis will edit the MCDReforged config
 ### 
+### If you are using MCDReforged, you must set 'advanced_console' to False in the MCDR config.
+ 
 ### Recommended terms for the relay blacklist
 ### - 'Changed the block at'            # Prevents spam when pasting litematics or using WorldEdit
 ### - 'Successfully filled'             # Prevents spam when pasting litematics or using WorldEdit
@@ -31,7 +26,6 @@ Language: en
 Backups: 3
 
 Booleans:
-  omit crash report relay : false
   upload overwrite        : false
   allow flask             : false
 
@@ -52,7 +46,6 @@ Processes:
   Servers:
     server 1:
       start_command: start
-      mcdreforged: false
       stop_command: stop
       relay_blacklist: 
         - 'example 1'
@@ -61,7 +54,6 @@ Processes:
     
     server 2:
       start_command: start
-      mcdreforged: false
       stop_command: stop
       relay_blacklist: 
         - 'example 1'
