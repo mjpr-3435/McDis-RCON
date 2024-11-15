@@ -13,3 +13,20 @@ async def excute_and_wait(function: Callable, *, args: tuple = tuple(), kwargs: 
 
 async def excute(function: Callable, *, args: tuple = tuple(), kwargs: dict = dict()):
     threading.Thread(target = function, args = args, kwargs = kwargs).start()
+
+async def call_addons(function: str, args: tuple):
+    from ..pm_loader import addons, flask_manager, processes, servers, networks, panel
+    extras = {"flask_manager" : flask_manager,
+              "processes"     : processes,
+              "networks"      : networks,
+              "servers"       : servers,
+              "panel"         : panel}
+    
+    for addon in addons:
+        try:
+            try: func = getattr(addon, 'call_behaviours')
+            except AttributeError: continue
+        
+            await func(function, args, extras)
+        except: 
+            print(f'Error in {function}() of {addon.__name__}:\n{traceback.format_exc()}\n')

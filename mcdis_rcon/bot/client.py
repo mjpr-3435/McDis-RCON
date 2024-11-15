@@ -44,3 +44,4 @@ async def on_message(message: discord.Message):
     
     from .pm_behaviours import pm_on_message
     await pm_on_message(client, message)
+    await call_addons('on_message', (client, message))

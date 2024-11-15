@@ -75,7 +75,7 @@ def backups_views(process: Process) -> discord.ui.View:
         @discord.ui.button( label = emoji_arrow_left,
                             style = discord.ButtonStyle.gray)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-            await interaction.response.edit_message(embed = files_manager_embed('Backups'), view = files_manager_views('Backups'))
+            await interaction.response.edit_message(embed = files_manager_embed('.mdbackups'), view = files_manager_views('.mdbackups'))
 
         @discord.ui.button( label = emoji_update,
                             style = discord.ButtonStyle.gray)

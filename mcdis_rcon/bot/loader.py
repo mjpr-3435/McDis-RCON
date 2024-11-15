@@ -51,10 +51,6 @@ def load_config():
             print(f'The \'Backups\' variable must be between 1 and 5, not {config["Backups"]}.')
             os._exit(0)
 
-        elif    not isinstance(config['Booleans']['omit crash report relay'], bool):
-            print('The \'Booleans: omit crash report relay\' variable must be a boolean.')
-            os._exit(0)
-
         elif    not isinstance(config['Booleans']['upload overwrite'], bool):
             print('The \'Booleans: upload overwrite\' variable must be a boolean.')
             os._exit(0)
@@ -77,6 +73,10 @@ def load_config():
         names = []
         
         for process_type in config['Processes']:
+            if config['Processes'][process_type] == None: 
+                config['Processes'][process_type] = []
+                continue
+
             for process in config['Processes'][process_type]:
                 process_config = config['Processes'][process_type][process]
 
@@ -88,8 +88,8 @@ def load_config():
                     print(f'{process}: The process name must not exceed 40 characters.')
                     os._exit(0)
 
-                elif process == 'Backups':
-                    print(f'{process}:  A process cannot be named \'Backups\'.')
+                elif process in ['.mdbackups', '.mdaddons']:
+                    print(f'{process}:  A process cannot be named \'.mdbackups\' or \'.mdaddons\'.')
                     os._exit(0)
                 
                 elif process.lower() in names:

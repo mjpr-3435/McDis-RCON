@@ -10,7 +10,7 @@ class Process():
         self.client                 = client
         self.prefix                 = mcdis_prefix
         self.path_files             = name
-        self.path_bkps              = os.path.join('Backups',self.name)
+        self.path_bkps              = os.path.join('.mdbackups',self.name)
         self.path_plugins           = os.path.join(self.path_files,'md_plugins')
         self.path_plugins_config    = os.path.join(self.path_plugins,'configs')
         self.path_commands          = os.path.join(self.path_files,'md_commands')
@@ -186,6 +186,7 @@ class Process():
         if self.state() == 'Cerrado': return
         
         path_temp = os.path.join(self.path_plugins, 'tmp')
+        os.makedirs(path_temp, exist_ok = True)
 
         if reload:
             self.unload_plugins()
@@ -199,6 +200,7 @@ class Process():
 
         if modules:
             logs.append('Importing mdplugins...')
+            sys.path.insert(0, path_temp)
             for module in modules:
                 try:
                     if module.endswith('.py'):
@@ -210,25 +212,23 @@ class Process():
                         zip_path = os.path.join(self.path_plugins, module)
                         temp_dir = os.path.join(path_temp, module[:-6])
                         os.makedirs(temp_dir, exist_ok = True) 
-                        sys.path.insert(0, path_temp)
 
                         with zipfile.ZipFile(zip_path, 'r') as zip_file:
                             zip_file.extractall(temp_dir)
-
+                            
                         package_spec = importlib.util.spec_from_file_location(module[:-6], os.path.join(temp_dir, '__init__.py'))
                         mod = importlib.util.module_from_spec(package_spec)
                         package_spec.loader.exec_module(mod)
-                        sys.path.pop(0)
-                        
 
                     self.plugins.append(mod)
                     logs.append(f'Plugin imported:: {module}')
                 except:
                     asyncio.create_task(self.error_report(_('Error while trying to load the plugin {}.\n\n{}').format(module,traceback.format_exc())))
                     logs.append(f'Unable to import plugin {module}')
+            sys.path.pop(0)
         else:
             logs.append('No plugins to import')
-
+        
         if not reload: logs.append('Initializing process...')
         asyncio.create_task(self.call_plugins('load', (self,)))
 
@@ -271,7 +271,13 @@ class Process():
         await  error_reports.send(f'**Error report: ** {error_report.jump_url}')
 
         print(mrkd_error[7:-3])
-       
+    
+    async def   send_to_console     (self, message : str):
+        mrkd = f'```md\n{message[:1950]}\n```'
+        remote_console = await thread(f'Console {self.name}', panel)
+
+        await remote_console.send(mrkd)
+
     async def   discord_listener     (self, message: discord.Message):
         await self.call_plugins('on_discord_message', (self, message))
          
@@ -352,5 +358,6 @@ class Process():
                 asyncio.create_task(self.listener_events(log))
         except:
             await self.error_report(_('Closing Process.\nError in the function listener_console().\n\n{}').format(traceback.format_exc()))
+            return
         
         self.stop()

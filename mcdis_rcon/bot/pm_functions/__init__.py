@@ -18,7 +18,8 @@ from .hardware import (
 )
 from .utils import (
     truncate,
-    excute_and_wait
+    excute_and_wait,
+    call_addons
 )
 
 from .terminal import (
