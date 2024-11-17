@@ -10,5 +10,5 @@ class on_scheduled_event_create(commands.Cog):
     async def on_scheduled_event_create(self, event: discord.ScheduledEvent):
         await self.client.call_addons('on_scheduled_event_create', (self.client, event))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_scheduled_event_create(client))

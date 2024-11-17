@@ -10,5 +10,5 @@ class on_raw_reaction_clear(commands.Cog):
     async def on_raw_reaction_clear(self, payload: discord.RawReactionClearEvent):
         await self.client.call_addons('on_raw_reaction_clear', (self.client, payload))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_raw_reaction_clear(client))

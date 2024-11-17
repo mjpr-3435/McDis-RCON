@@ -10,5 +10,5 @@ class on_socket_raw_receive(commands.Cog):
     async def on_socket_raw_receive(self, message: str):
         await self.client.call_addons('on_socket_raw_receive', (self.client, message))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_socket_raw_receive(client))

@@ -10,5 +10,5 @@ class on_private_channel_update(commands.Cog):
     async def on_private_channel_update(self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel):
         await self.client.call_addons('on_private_channel_update', (self.client, before, after))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_private_channel_update(client))

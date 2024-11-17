@@ -10,5 +10,5 @@ class on_presence_update(commands.Cog):
     async def on_presence_update(self, before: discord.Member, after: discord.Member):
         await self.client.call_addons('on_presence_update', (self.client, before, after))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_presence_update(client))

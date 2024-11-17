@@ -10,5 +10,5 @@ class on_automod_action(commands.Cog):
     async def on_automod_action(self, execution: discord.AutoModAction):
         await self.client.call_addons('on_automod_action', (self.client, execution))
     
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_automod_action(client))

@@ -10,5 +10,5 @@ class on_voice_server_update(commands.Cog):
     async def on_voice_server_update(self, data: dict):
         await self.client.call_addons('on_voice_server_update', (self.client, data))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_voice_server_update(client))

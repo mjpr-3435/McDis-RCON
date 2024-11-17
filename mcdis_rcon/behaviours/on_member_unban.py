@@ -10,5 +10,5 @@ class on_member_unban(commands.Cog):
     async def on_member_unban(self, guild: discord.Guild, user: discord.User):
         await self.client.call_addons('on_member_unban', (self.client, guild, user))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_member_unban(client))

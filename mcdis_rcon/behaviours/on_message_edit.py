@@ -10,5 +10,5 @@ class on_message_edit(commands.Cog):
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
         await self.client.call_addons('on_message_edit', (self.client, before, after))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_message_edit(client))

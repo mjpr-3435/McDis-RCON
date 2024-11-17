@@ -10,5 +10,5 @@ class on_guild_join(commands.Cog):
     async def on_guild_join(self, guild: discord.Guild):
         await self.client.call_addons('on_guild_join', (self.client, guild))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_guild_join(client))

@@ -35,7 +35,7 @@ def command_views(client: McDisClient, process: Process, file_name: str) -> disc
         @discord.ui.button( label = 'Execute',
                             style = discord.ButtonStyle.gray)
         async def execute_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-            if self.process.state() != 'Open':
+            if self.process.is_running() != 'Open':
                 await interaction.response.send_message(client._('✖ The server isn\'t open.'), ephemeral=True)
                 return
 

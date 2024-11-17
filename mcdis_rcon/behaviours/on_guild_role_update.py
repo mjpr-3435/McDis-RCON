@@ -10,5 +10,5 @@ class on_guild_role_update(commands.Cog):
     async def on_guild_role_update(self, before: discord.Role, after: discord.Role):
         await self.client.call_addons('on_guild_role_update', (self.client, before, after))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_guild_role_update(client))

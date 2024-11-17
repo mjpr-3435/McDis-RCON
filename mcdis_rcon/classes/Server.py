@@ -2,25 +2,21 @@ from ..modules import *
 from ..utils import *
 
 from .Process import Process
+from .McDisClient import McDisClient
 
 class Server(Process):
-    def __init__(self, name: str, client: commands.Bot, process_config: dict):
-        super().__init__(name, client, process_config)
+    def __init__(self, name: str, client: McDisClient, config: dict):
+        super().__init__(name, client, config)
 
     def         send_response       (self, target : str, message : Union[str, list[str]], *, colour : str = 'gray'):
         if isinstance(message, str):
             message = message.replace("\n","")
             self.execute(f'tellraw {target} {{"text": "{message}","color":"{colour}"}}')
+        
         elif isinstance(message, list) and all(isinstance(i, str) for i in message):
             for msg in message:
                 msg = msg.replace("\n","")
                 self.execute(f'tellraw {target} {{"text": "{msg}","color":"{colour}"}}')
-        else:
-            try: message = str(message)
-            except: return
-            else:
-                message = message.replace("\n","")
-                self.execute(f'tellraw {target} {{"text": "{message}","color":"{colour}"}}')
     
     def         is_command          (self, message: str, command: str):
         dummy = message + ' '
@@ -30,14 +26,14 @@ class Server(Process):
         signs = [self.prefix, '<', '>', ':', '|']
         command = f'!!{command}'
         
-        for sign in signs:
+        for sign in signs: 
             command = command.replace(sign, f'§6{sign}§f')
         
         description = '  ↳ ' + description
 
         self.send_response(target, [command, description])
 
-    def         find_real_process   (self):
+    def         _find_real_process   (self):
         for process in psutil.process_iter():
             try:
                 javas = ['java', 'java.exe']

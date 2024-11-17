@@ -68,8 +68,8 @@ def files_manager_views(client: McDisClient, path: str = '.') -> discord.ui.View
                             style = discord.ButtonStyle.gray)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button):
             new_path = os.path.abspath(os.path.dirname(path))
-            if not cwd in new_path: new_path = cwd
-            new_path = os.path.relpath(new_path, cwd)
+            if not client.cwd in new_path: new_path = client.cwd
+            new_path = os.path.relpath(new_path, client.cwd)
 
             await update_files_interface(interaction, new_path, path)
 
@@ -94,10 +94,8 @@ def files_manager_views(client: McDisClient, path: str = '.') -> discord.ui.View
                     download_link = client.flask.download_link(path, interaction.user.name)
                     view = self.remove_item(button).add_item(discord.ui.Button(label = 'Download', url = download_link))
                     embed = interaction.message.embeds[0]
-                    embed.description = f'**Download Link**:\n```{download_link}```'
+                    embed.description = f'**Download Link:**\n```{download_link}```'
                     await interaction.response.edit_message(embed=embed, view = view)
-                        
-
 
             @discord.ui.button( label = 'Edit',
                         style = discord.ButtonStyle.gray)
@@ -389,7 +387,7 @@ async def cmd_interface(client: McDisClient, command: str, interaction: discord.
 
             path_provided = ' '.join(args[2:])
             new_path = os.path.join(un_mcdis_path(path_provided), os.path.basename(path_to_copy))
-            dummy = is_valid_mcdis_dir(path_provided)
+            dummy = client.is_valid_mcdis_path(path_provided)
 
             if not dummy == True:
                 await interaction.response.send_message(dummy, ephemeral = True)
@@ -427,7 +425,7 @@ async def cmd_interface(client: McDisClient, command: str, interaction: discord.
 
             path_provided = ' '.join(args[2:])
             new_path = os.path.join(un_mcdis_path(path_provided), os.path.basename(path_to_move))
-            dummy = is_valid_mcdis_dir(path_provided)
+            dummy = client.is_valid_mcdis_path(path_provided)
 
             if not dummy == True:
                 await interaction.response.send_message(dummy, ephemeral = True)
@@ -474,7 +472,7 @@ async def cmd_interface(client: McDisClient, command: str, interaction: discord.
         await interaction.response.send_message( client._('✖ Invalid command `{}`.').format(args[0]), ephemeral=True)
 
       
-async def update_files_interface(interaction : discord.Interaction, new_path : str, path : str):
+async def update_files_interface(client: McDisClient, interaction : discord.Interaction, new_path : str, path : str):
     if not interaction.response.is_done():
         await interaction.response.defer()
     from .commands import commands_views
@@ -484,7 +482,7 @@ async def update_files_interface(interaction : discord.Interaction, new_path : s
     dummy_path = ''
 
     if new_path == path:
-        new_path = os.path.relpath(new_path, cwd)
+        new_path = os.path.relpath(new_path, client.cwd)
         await interaction.followup.edit_message(message_id = interaction.message.id, embed = files_manager_embed(new_path), view = files_manager_views(new_path))
         return
     elif path in new_path:
@@ -492,30 +490,14 @@ async def update_files_interface(interaction : discord.Interaction, new_path : s
     elif new_path in path:
         dummy_path = path
 
-    dummy_path = os.path.relpath(dummy_path, cwd)
-    process_cmd = next(filter(lambda process: dummy_path == process.path_commands, processes), None)
-    process_bkp = next(filter(lambda process: dummy_path == process.path_bkps, processes), None)
+    dummy_path = os.path.relpath(dummy_path, client.cwd)
+    process_cmd = next(filter(lambda process: dummy_path == process.path_commands, client.processes), None)
+    process_bkp = next(filter(lambda process: dummy_path == process.path_bkps, client.processes), None)
 
     if process_cmd:
         await interaction.followup.edit_message(message_id = interaction.message.id, embed = commands_embed(process_cmd), view = commands_views(process_cmd))
     elif process_bkp:
         await interaction.followup.edit_message(message_id = interaction.message.id, embed = backups_embed(process_bkp), view = backups_views(process_bkp))
     else:
-        new_path = os.path.relpath(new_path, cwd)
+        new_path = os.path.relpath(new_path, client.cwd)
         await interaction.followup.edit_message(message_id = interaction.message.id, embed = files_manager_embed(new_path), view = files_manager_views(new_path))
-
-
-def is_valid_mcdis_dir(client: McDisClient, path: str):
-    real_path = un_mcdis_path(path)
-    new_path = os.path.join(cwd, real_path)
-    
-    if not path.split(os.sep)[0] == 'McDis':
-        return client._('✖ The path must be a McDis path. E.g.: `McDis/Backups`.')
-    if not cwd in new_path:
-        return client._('✖ You must work within the directory where McDis is running.')
-    elif not os.path.exists(real_path):
-        return client._('✖ The path must exist.')
-    elif not os.path.isdir(real_path):
-        return client._('✖ The path must be a directory.')
-    
-    return True

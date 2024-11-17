@@ -10,5 +10,5 @@ class on_reaction_clear_emoji(commands.Cog):
     async def on_reaction_clear_emoji(self, reaction: discord.Reaction):
         await self.client.call_addons('on_reaction_clear_emoji', (self.client, reaction))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_reaction_clear_emoji(client))

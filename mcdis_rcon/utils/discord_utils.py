@@ -34,7 +34,7 @@ async def confirmation_request( description     : str                           
                             style = discord.ButtonStyle.gray)
         async def proceed_button(self, interaction: discord.Interaction, button: discord.ui.Button):
             if not on_confirmation: 
-                await interaction.response.edit_message(delete_after=0)
+                await interaction.response.edit_message(delete_after = 0)
                 return
 
             if inspect.iscoroutinefunction(on_confirmation):
@@ -46,7 +46,7 @@ async def confirmation_request( description     : str                           
                             style = discord.ButtonStyle.red)
         async def reject_button(self, interaction: discord.Interaction, button: discord.ui.Button):
             if not on_reject:
-                await interaction.response.edit_message(delete_after=0)
+                await interaction.response.edit_message(delete_after = 0)
                 return
 
             if inspect.iscoroutinefunction(on_confirmation):

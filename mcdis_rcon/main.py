@@ -1,6 +1,6 @@
 from .modules import *
 
-def start():
+def run():
     locales_dir = os.path.join(package_path, 'locales')
     try:
         for language in allowed_languages[1:]:

@@ -10,5 +10,5 @@ class on_member_ban(commands.Cog):
     async def on_member_ban(self, guild: discord.Guild, user: Union[discord.User, discord.Member]):
         await self.client.call_addons('on_member_ban', (self.client, guild, user))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_member_ban(client))

@@ -10,5 +10,5 @@ class on_thread_join(commands.Cog):
     async def on_thread_join(self, thread: discord.Thread):
         await self.client.call_addons('on_thread_join', (self.client, thread))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_thread_join(client))

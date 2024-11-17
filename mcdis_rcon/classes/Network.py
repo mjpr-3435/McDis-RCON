@@ -2,12 +2,13 @@ from ..modules import *
 from ..utils import *
 
 from .Process import Process
+from .McDisClient import McDisClient
 
 class Network(Process):
-    def __init__(self, name: str, client: commands.Bot, process_config: dict):
-        super().__init__(name, client, process_config)
+    def __init__(self, name: str, client: McDisClient, config: dict):
+        super().__init__(name, client, config)
 
-    def         find_real_process   (self):
+    def         _find_real_process   (self):
         for process in psutil.process_iter():
             try:
                 javas = ['java', 'java.exe']
@@ -19,6 +20,3 @@ class Network(Process):
                     self.real_process = process
                     break
             except: pass
-    
-    def         on_start            (self):
-        self.already_started = True

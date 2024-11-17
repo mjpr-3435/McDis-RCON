@@ -10,5 +10,5 @@ class on_invite_delete(commands.Cog):
     async def on_invite_delete(self, invite: discord.Invite):
         await self.client.call_addons('on_invite_delete', (self.client, invite))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_invite_delete(client))

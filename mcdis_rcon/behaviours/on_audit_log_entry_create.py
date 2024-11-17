@@ -10,5 +10,5 @@ class on_audit_log_entry_create(commands.Cog):
     async def on_audit_log_entry_create(self, entry: discord.AuditLogEntry):
         await self.client.call_addons('on_audit_log_entry_create', (self.client, entry))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_audit_log_entry_create(client))

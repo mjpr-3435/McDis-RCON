@@ -10,5 +10,5 @@ class on_guild_role_create(commands.Cog):
     async def on_guild_role_create(self, role: discord.Role):
         await self.client.call_addons('on_guild_role_create', (self.client, role))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_guild_role_create(client))

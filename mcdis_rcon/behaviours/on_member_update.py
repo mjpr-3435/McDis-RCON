@@ -10,5 +10,5 @@ class on_member_update(commands.Cog):
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         await self.client.call_addons('on_member_update', (self.client, before, after))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_member_update(client))

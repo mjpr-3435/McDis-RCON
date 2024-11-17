@@ -10,5 +10,5 @@ class on_scheduled_event_delete(commands.Cog):
     async def on_scheduled_event_delete(self, event: discord.ScheduledEvent):
         await self.client.call_addons('on_scheduled_event_delete', (self.client, event))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_scheduled_event_delete(client))

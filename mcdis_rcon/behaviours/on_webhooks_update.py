@@ -10,5 +10,5 @@ class on_webhooks_update(commands.Cog):
     async def on_webhooks_update(self, channel: discord.abc.GuildChannel):
         await self.client.call_addons('on_webhooks_update', (self.client, channel))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_webhooks_update(client))

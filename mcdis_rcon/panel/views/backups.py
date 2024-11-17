@@ -28,7 +28,7 @@ def backups_views(client: McDisClient, process: Process) -> discord.ui.View:
                     
                     async def on_submit(modal, interaction: discord.Interaction):
                         if str(modal.action).lower() == client._('unpack'):
-                            if process.state() in ['Initializing','Open']: 
+                            if process.is_running() in ['Initializing','Open']: 
                                 await interaction.response.send_message(content= client._('✖ The process must be closed.'), ephemeral=True,delete_after=5)
                                 return
 

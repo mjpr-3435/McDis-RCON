@@ -10,5 +10,5 @@ class on_thread_delete(commands.Cog):
     async def on_thread_delete(self, thread: discord.Thread):
         await self.client.call_addons('on_thread_delete', (self.client, thread))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_thread_delete(client))

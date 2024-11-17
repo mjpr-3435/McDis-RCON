@@ -10,5 +10,5 @@ class on_raw_app_command_permissions_update(commands.Cog):
     async def on_raw_app_command_permissions_update(self, payload: discord.RawAppCommandPermissionsUpdateEvent):
         await self.client.call_addons('on_raw_app_command_permissions_update', (self.client, payload))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_raw_app_command_permissions_update(client))

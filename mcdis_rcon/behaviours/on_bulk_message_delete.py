@@ -10,5 +10,5 @@ class on_bulk_message_delete(commands.Cog):
     async def on_bulk_message_delete(self, messages : list[discord.Message]):
         await self.client.call_addons('on_bulk_message_delete', (self.client,  messages))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_bulk_message_delete(client))

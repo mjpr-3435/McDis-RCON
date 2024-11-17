@@ -10,5 +10,5 @@ class on_automod_rule_create(commands.Cog):
     async def on_automod_rule_create(self, rule: discord.AutoModRule):
         await self.client.call_addons('on_automod_rule_create', (self.client, rule))
     
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_automod_rule_create(client))

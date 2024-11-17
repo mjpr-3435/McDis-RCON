@@ -10,5 +10,5 @@ class on_app_command_completion(commands.Cog):
     async def on_app_command_completion(self, interaction: discord.Interaction, command: Union[discord.app_commands.Command, discord.app_commands.ContextMenu]):
         await self.client.call_addons('on_app_command_completion', (self.client, interaction, command))
     
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_app_command_completion(client))

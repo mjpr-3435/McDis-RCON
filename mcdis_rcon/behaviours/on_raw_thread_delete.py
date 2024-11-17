@@ -10,5 +10,5 @@ class on_raw_thread_delete(commands.Cog):
         await self.client.call_addons('on_raw_thread_delete', (self.client, payload))
 
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_raw_thread_delete(client))

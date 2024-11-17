@@ -10,5 +10,5 @@ class on_error(commands.Cog):
     async def on_error(self, event, *args, **kwargs):
         await self.client.call_addons('on_error', (self.client, event, args, kwargs))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_error(client))

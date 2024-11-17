@@ -10,5 +10,5 @@ class on_integration_create(commands.Cog):
     async def on_integration_create(self, integration: discord.Integration):
         await self.client.call_addons('on_integration_create', (self.client, integration))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_integration_create(client))

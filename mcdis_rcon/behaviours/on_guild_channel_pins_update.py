@@ -10,5 +10,5 @@ class on_guild_channel_pins_update(commands.Cog):
     async def on_guild_channel_pins_update(self, channel: discord.abc.GuildChannel, last_pin: datetime):
         await self.client.call_addons('on_guild_channel_pins_update', (self.client, channel, last_pin))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_guild_channel_pins_update(client))

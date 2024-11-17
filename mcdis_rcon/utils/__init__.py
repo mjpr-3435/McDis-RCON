@@ -1,4 +1,4 @@
-from .mrkd import (
+from .mrkd_functions import (
     truncate,
     sct,
     hover,
@@ -32,8 +32,7 @@ from .hardware import (
     ram_usage
 )
 from .executors import (
-    execute_and_wait,
-    execute
+    execute_and_wait
 )
 
 from .terminal import (

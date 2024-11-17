@@ -10,5 +10,5 @@ class on_shard_disconnect(commands.Cog):
     async def on_shard_disconnect(self, shard_id: int):
         await self.client.call_addons('on_shard_disconnect', (self.client, shard_id))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_shard_disconnect(client))

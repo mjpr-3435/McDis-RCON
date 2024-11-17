@@ -10,5 +10,5 @@ class on_interaction(commands.Cog):
     async def on_interaction(self, interaction: discord.Interaction):
         await self.client.call_addons('on_interaction', (self.client, interaction))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_interaction(client))

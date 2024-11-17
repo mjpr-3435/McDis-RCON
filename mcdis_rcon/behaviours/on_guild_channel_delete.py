@@ -10,5 +10,5 @@ class on_guild_channel_delete(commands.Cog):
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel):
         await self.client.call_addons('on_guild_channel_delete', (self.client, channel))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_guild_channel_delete(client))

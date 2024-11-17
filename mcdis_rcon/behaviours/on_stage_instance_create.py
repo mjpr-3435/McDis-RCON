@@ -10,5 +10,5 @@ class on_stage_instance_create(commands.Cog):
     async def on_stage_instance_create(self, stage_instance: discord.StageInstance):
         await self.client.call_addons('on_stage_instance_create', (self.client, stage_instance))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_stage_instance_create(client))

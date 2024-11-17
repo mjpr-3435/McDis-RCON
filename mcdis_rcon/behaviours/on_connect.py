@@ -10,5 +10,5 @@ class on_connect(commands.Cog):
     async def on_connect(self):
         await self.client.call_addons('on_connect', (self.client))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_connect(client))

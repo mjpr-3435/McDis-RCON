@@ -45,7 +45,7 @@ def processes_views(client: McDisClient, path: str, processes: list[psutil.Proce
                                                             embed = processes_embed(path, processes), 
                                                             view = processes_views(path, processes))
                 
-                process_path = os.path.relpath(selected_process.cwd(), cwd)
+                process_path = os.path.relpath(selected_process.cwd(), client.cwd)
                 process_path = truncate(mcdis_path(process_path), 50)
                 label = process_path + ' | ' + selected_process.name() 
                 await confirmation_request(client._('Are you sure about killing the `{}` process?').format(label),

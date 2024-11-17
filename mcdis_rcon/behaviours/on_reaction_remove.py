@@ -10,5 +10,5 @@ class on_reaction_remove(commands.Cog):
     async def on_reaction_remove(self, reaction: discord.Reaction, user: Union[discord.User, discord.Member]):
         await self.client.call_addons('on_reaction_remove', (self.client, reaction, user))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_reaction_remove(client))

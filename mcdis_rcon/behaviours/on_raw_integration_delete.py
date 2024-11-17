@@ -10,5 +10,5 @@ class on_raw_integration_delete(commands.Cog):
     async def on_raw_integration_delete(self, payload: discord.RawIntegrationDeleteEvent):
         await self.client.call_addons('on_raw_integration_delete', (self.client, payload))
 
-async def setup(client: commands.Bot):
+async def setup(client: McDisClient):
     await client.add_cog(on_raw_integration_delete(client))
