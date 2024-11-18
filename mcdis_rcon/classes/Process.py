@@ -9,9 +9,9 @@ class Process():
         self.path_files             = name
         self.client                 = client
         self.path_bkps              = os.path.join(client.path_backups  , self.name)
-        self.path_plugins           = os.path.join(self.path_files      ,'md_plugins'   )
-        self.path_plugins_config    = os.path.join(self.path_plugins    ,'configs'      )
-        self.path_commands          = os.path.join(self.path_files      ,'md_commands'  )
+        self.path_plugins           = os.path.join(self.path_files      ,'mdplugins' )
+        self.path_plugins_config    = os.path.join(self.path_plugins    ,'configs'   )
+        self.path_commands          = os.path.join(self.path_files      ,'mdcommands')
         self.relay_blacklist        = config['relay_blacklist']
         self.stop_command           = config['stop_command']
         self.start_command          = config['start_command']

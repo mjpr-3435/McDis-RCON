@@ -16,23 +16,28 @@ def uploader_views(client: McDisClient) -> discord.ui.View:
                 name = discord.ui.TextInput(label = 'Path to upload', style = discord.TextStyle.short, default = mcdis_path(client.uploader.path_to_upload))
                 
                 async def on_submit(modal, interaction: discord.Interaction):
-                    if client.is_valid_mcdis_path(modal.name.value):
-                        client.uploader.path_to_upload = modal.name.value
+                    response = client.is_valid_mcdis_path(modal.name.value, check_if_dir = True)
+
+                    if response == True:
+                        client.uploader.path_to_upload = un_mcdis_path(modal.name.value)
                         await interaction.response.edit_message(embed = uploader_embed(client))
+                    else:
+                        await interaction.response.send_message(response, ephemeral = True)
 
             await interaction.response.send_modal(edit_path())
         
-        @discord.ui.button( label = emoji_update,
+        @discord.ui.button( label = 'Close' if client.uploader.is_running else 'Run',
                             style = discord.ButtonStyle.gray)
         async def start_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-            if client.uploader.is_running == 'Closed':
-                client.uploader.is_running = 'Running'
+            if client.uploader.is_running:
+                client.uploader.is_running = False
             else:
-                client.uploader.is_running = 'Closed'
+                client.uploader.is_running = True
 
-            await interaction.response.edit_message(embed = uploader_embed(client))
+            button.label = 'Close' if client.uploader.is_running else 'Run'
+            await interaction.response.edit_message(embed = uploader_embed(client), view = self)
 
-        @discord.ui.button( label = emoji_writing,
+        @discord.ui.button( label = 'Do Not Overwrite' if client.uploader.overwrite else 'Overwrite',
                             style = discord.ButtonStyle.gray)
         async def overwrite_button(self, interaction: discord.Interaction, button: discord.ui.Button):
             if client.uploader.overwrite:
@@ -40,6 +45,7 @@ def uploader_views(client: McDisClient) -> discord.ui.View:
             else:
                 client.uploader.overwrite = True
 
-            await interaction.response.edit_message(embed = uploader_embed(client))
+            button.label = 'Do Not Overwrite' if client.uploader.overwrite else 'Overwrite'
+            await interaction.response.edit_message(embed = uploader_embed(client), view = self)
 
     return views()
