@@ -11,7 +11,7 @@ class UploaderView          (discord.ui.View):
         self.add_item(EditButton        (self.client))
         self.add_item(StateButton       (self.client))
         self.add_item(OverwriteButton   (self.client))
-
+        
 class UpdateButton          (discord.ui.Button):
     def __init__(self, client : McDisClient):
         super().__init__(label = emoji_update, style = discord.ButtonStyle.gray)
