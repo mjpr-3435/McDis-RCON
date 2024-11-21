@@ -2,7 +2,7 @@ import discord
 import json
 import os
 
-from mcdis_rcon.bot.classes import Server
+from mcdis_rcon.classes import Server
 
 send_to = lambda server, x: server.send_response('@a', x)
 webhook = None

@@ -8,7 +8,7 @@ import re
 
 from datetime import datetime
 from mcdis_rcon.utils import hover_and_suggest, extras
-from mcdis_rcon.bot.classes import Server
+from mcdis_rcon.classes import Server
 
 admins = []
 
@@ -113,8 +113,8 @@ def show_bkps(self: Server, player : str):
         date = datetime.fromtimestamp(os.path.getctime(os.path.join(self.path_bkps, zip))).strftime("%Y-%m-%d %H:%M:%S")
 
         dummy = [
-        hover_and_suggest('[>] ' , color = 'green', suggest = f'!!load-bkp {zip[:-4]}', hoover = 'Load backup'),
-        hover_and_suggest('[x] ' , color = 'red', suggest = f'!!del-bkp {zip[:-4]}', hoover = 'Del backup'),
+        hover_and_suggest('[>] ' , color = 'green', suggest = f'!!load-bkp {zip.removesuffix(".zip")}', hoover = 'Load backup'),
+        hover_and_suggest('[x] ' , color = 'red', suggest = f'!!del-bkp {zip.removesuffix(".zip")}', hoover = 'Del backup'),
         f'{{"text":"{zip} [{date}]"}}'
         ]
 

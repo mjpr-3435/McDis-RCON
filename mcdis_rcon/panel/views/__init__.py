@@ -1,1 +1,0 @@
-from .panel import panel_views

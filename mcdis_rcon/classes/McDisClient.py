@@ -13,7 +13,7 @@ class McDisClient(commands.Bot):
         self.cwd                                                = os.getcwd()
         self.config     : dict                                  = {}
         self.panel      : discord.TextChannel                   = None
-        self._          : gettext.GNUTranslations.gettext       = None
+        self._          : Callable[[str], str]                  = None
         self.path_backups                                       = '.mdbackups'
         self.path_addons                                        = '.mdaddons'
         self.addons                                             = []
@@ -22,12 +22,14 @@ class McDisClient(commands.Bot):
         self.networks   : list[Network]                         = []
         self.servers    : list[Server]                          = []
         self.uploader                                           = Uploader()
-        self.running                                            = False
+        self.is_running                                         = False
         
+        self.max_processes                                           = 5
+
         os.makedirs(self.path_backups, exist_ok = True)
         os.makedirs(self.path_addons , exist_ok = True)
         
-        self.__load_config()
+        self._load_config()
 
         try:
             self.run(self.config['Bot Token'])
@@ -37,14 +39,9 @@ class McDisClient(commands.Bot):
 
     ###         Loaders             ###
 
-    def         __load_config           (self):
+    def         _load_config           (self):
         try:
-            with open('md_config.yml', "r+") as file:
-                yaml = ruamel.yaml.YAML()
-                yaml.indent(mapping = 2, sequence = 4, offset = 2)
-                yaml.preserve_quotes = True
-
-                self.config = yaml.load(file)
+            self.config = read_yml('md_config.yml')
 
         except Exception as error:
             print('The file \'md_config.yml\' could not be opened.')
@@ -117,16 +114,16 @@ class McDisClient(commands.Bot):
                         print(f'{process}: Process names can only contain letters, numbers, periods (.), hyphens (-), underscores (_), and spaces.')
                         os._exit(0)
 
-                    elif not isinstance(process_config['start_command'], str):
-                        print(f'{process}: The \'start_command\' variable must be a string.')
+                    elif not isinstance(process_config['start_cmd'], str):
+                        print(f'{process}: The \'start_cmd\' variable must be a string.')
                         os._exit(0)
                     
-                    elif not isinstance(process_config['stop_command'], str):
-                        print(f'{process}: The \'start_command\' variable must be a string.')
+                    elif not isinstance(process_config['stop_cmd'], str):
+                        print(f'{process}: The \'start_cmd\' variable must be a string.')
                         os._exit(0)
 
-                    elif not all([isinstance(x,str) for x in process_config['relay_blacklist']]):
-                        print(f'{process}: The \'relay_blacklist\' variable must be a list of strings.')
+                    elif not all([isinstance(x,str) for x in process_config['blacklist']]):
+                        print(f'{process}: The \'blacklist\' variable must be a list of strings.')
                         os._exit(0)
                     
                     names.append(process.lower())
@@ -149,7 +146,7 @@ class McDisClient(commands.Bot):
 
         print(self._('Your configuration has been loaded successfully.'))
 
-    def         __load_panel            (self):
+    def         _load_panel            (self):
         panel_id = self.config['Panel ID']
         self.panel = self.get_channel(panel_id)
             
@@ -160,11 +157,9 @@ class McDisClient(commands.Bot):
             print(self._('Error: The panel channel must be a text channel.'))
             os._exit(0)
         
-    async def   __load_processes        (self):
+    async def   _load_processes        (self):
         from .Network import Network
         from .Server import Server
-
-        print(self._('Loading Processes Manager:'))
         
         for name in self.config['Processes']['Servers']:
             server = Server(name, self, self.config['Processes']['Servers'][name])
@@ -177,13 +172,13 @@ class McDisClient(commands.Bot):
             self.networks.append(network)
 
         processes_objects = "\n".join([f'     -> {process.name}' for process in self.processes])
-        print(self._('   • Creating objects:\n{}').format(processes_objects))
+        print(self._('   • Creating processes objects\n{}').format(processes_objects))
             
         for process in self.processes:
             await thread(f'Console {process.name}', self.panel, public = True)
         await thread(f'Error Reports', self.panel, public = True)
 
-    async def   __load_addons           (self):
+    async def   _load_addons           (self):
         files_in_addons_dir = os.listdir(self.path_addons)
         
         def condition(file):
@@ -214,19 +209,16 @@ class McDisClient(commands.Bot):
 
         await self.call_addons('load', (self,), exit_on_error = True)
 
-    async def   __load_behaviours       (self):
+    async def   _load_behaviours       (self):
         behaviours_dir = os.path.join(package_path, 'behaviours')
 
         scripts = [filename for filename in os.listdir(behaviours_dir)]
 
         for script in scripts:
-            await self.load_extension(f'mcdis_rcon.behaviours.{script[:-3]}')
-        
-        print(self._('   • Loaded Behaviours'))
+            await self.load_extension(f'mcdis_rcon.behaviours.{script.removesuffix(".py")}')
     
-    async def   __load_banner           (self, *, loop: bool = True, view: bool = True):
-        from ..panel.embeds import banner_embed
-        from ..panel.views import panel_views
+    async def   _load_banner           (self, *, loop: bool = True, view: bool = True):
+        from ..gui.Panel import PanelView, PanelEmbed
         first_iteration = True
         file = None
 
@@ -241,24 +233,29 @@ class McDisClient(commands.Bot):
                 
                 if not messages:
                     await self.panel.send(
-                        embed = banner_embed(self), 
-                        view = panel_views(self), 
+                        embed = PanelEmbed(self), 
+                        view = PanelView(self), 
                         file = file)
 
                 elif not messages[0].author.id == self.user.id:
                     while messages:
-                        await self.panel.purge(limit = 100)
+                        await self.panel.purge()
                         messages =  [msg async for msg in self.panel.history(limit = None, oldest_first = True)]
+                        
+                    await self.panel.send(
+                        embed = PanelEmbed(self), 
+                        view = PanelView(self), 
+                        file = file)
 
                 elif not view:
                     await messages[0].edit(
-                        embed = banner_embed(self), 
+                        embed = PanelEmbed(self), 
                         attachments = [file] if file else [])
 
                 else:
                     await messages[0].edit(
-                        embed = banner_embed(self), 
-                        view = panel_views(self), 
+                        embed = PanelEmbed(self), 
+                        view = PanelView(self), 
                         attachments = [file] if file else [])
 
             except:
@@ -274,32 +271,35 @@ class McDisClient(commands.Bot):
     
     async def   on_ready                (self):
         from .Flask import FlaskManager
-        self.__load_panel()
+        self._load_panel()
 
         print(self._('Logged in as {}!').format(self.user))
 
         try:
-            await self.__load_processes()
-            await self.__load_addons()
-            await self.__load_behaviours()
+            await self._load_processes()
+            await self._load_addons()
+            await self._load_behaviours()
+            print(self._('   • Loaded behaviours'))
             await self.tree.sync()
+            print(self._('   • Client commands synchronized to Discord'))
 
             if self.config['Flask']['Allow']: 
                 self.flask = FlaskManager(self)
+                print(self._('   • Flask object created'))
                 
         except Exception as error:
             print(self._('There was an error while loading McDis-RCON.'))
             print(self._('Error: {}').format(error))
             os._exit(0)
 
-        asyncio.create_task(self.__load_banner())
-        print(self._('   • Loaded Server Panel'))
+        asyncio.create_task(self._load_banner())
+        print(self._('   • Loaded server panel'))
         print(self._('Loading Complete'))
 
         signal_handler = lambda sig, frame: threading.Thread(target = self.on_stop).start()
         
         signal.signal(signal.SIGINT, signal_handler)
-        self.running = True
+        self.is_running = True
 
     async def   panel_interface         (self, message: discord.Message):
         if message.author.bot: 
@@ -436,7 +436,9 @@ class McDisClient(commands.Bot):
             content = self._('Checking if there are open processes...'),
             embed = None,
             view = None)
-
+        
+        await asyncio.sleep(1)
+        
         await self.call_addons('on_restart', (self, interaction))
 
         any_process_open = lambda: any([process.is_running()  for process in self.processes])
@@ -524,10 +526,14 @@ class McDisClient(commands.Bot):
     def         is_valid_mcdis_path     (self, path: str, *, check_if_file: bool = False, check_if_dir: bool = False):
         real_path = un_mcdis_path(path)
         new_path = os.path.join(self.cwd, real_path)
+        # Note: If `real_path` is an absolute path, `os.path.join(self.cwd, real_path)` will ignore `self.cwd` 
+        # and use only `real_path`. This behavior ensures that absolute paths override the base path provided.
+        # To prevent escaping from `self.cwd`, a check is performed to ensure `new_path` starts with `self.cwd`.
+
         
         if not path.split(os.sep)[0] == 'McDis':
             return self._('✖ The path must be a McDis path. E.g.: `McDis/Backups`.')
-        if not self.cwd in new_path:
+        if not new_path.startswith(self.cwd):
             return self._('✖ You must work within the directory where McDis is running.')
         elif not os.path.exists(real_path):
             return self._('✖ The path must exist.')

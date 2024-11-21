@@ -4,7 +4,7 @@ import discord
 import json
 import asyncio
 
-from mcdis_rcon.bot.classes import Server
+from mcdis_rcon.classes import Server
 from mcdis_rcon.utils import extras, hover_and_suggest
 
 config = dict()

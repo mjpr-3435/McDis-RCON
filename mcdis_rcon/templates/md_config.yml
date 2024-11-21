@@ -3,27 +3,13 @@
 # =========================================
 
 ### Application designed to stream the Minecraft console to Discord. This has been tested on Ubuntu 22.04.3 LTS.
-### - Servers         :   Vanilla, Fabric, Paper, etc...
-### - Networks        :   Waterfall, Bungeecord, or Velocity
-
-### start_command     :   Start command for the process, e.g.: java -Xms6G -Xmx6G -Dfile.encoding=UTF-8 -jar <launcher>.jar nogui
-### stop_command      :   Command to stop the process
-### relay_blacklist   :   List of terms; if contained in the log, it will not be sent to Discord
-### 
-### If you are using MCDReforged, you must set 'advanced_console' to False in the MCDR config.
- 
-### Recommended terms for the relay blacklist
-### - 'Changed the block at'            # Prevents spam when pasting litematics or using WorldEdit
-### - 'Successfully filled'             # Prevents spam when pasting litematics or using WorldEdit
-### - '[WARN]:'                         # Prevents lag warning spam
-### - '~[server-intermediary.jar:?]'    # Prevents spam when doing update suppression
-
 ### To apply the changes, you must restart McDis!!!
 
 ### Description   : The bot token that will be used to initialize McDis
 Bot Token:
 
 ### Description   : The ID of the channel where the McDis panel will be created
+### Advice        : Use a clean channel for the McDis panel
 Panel ID:
 
 ### Description   : Language that McDis will use.
@@ -42,29 +28,39 @@ Flask:
   IP    : '0.0.0.0'
   Port  : 8000
 
+### Description   : Defines the processes managed by McDis.
+###                 These include Minecraft servers (e.g., Vanilla, Fabric, Paper)
+###                 and networks (e.g., Waterfall, Bungeecord, Velocity).
+
+### • start_cmd   : Command to start the process. e.g.: java -Xms6G -Xmx6G -Dfile.encoding=UTF-8 -jar <launcher>.jar nogui
+### • stop_cmd    : Command to stop the process.
+### • blacklist   : List of terms; logs containing these terms will not be sent to Discord.
+
+### Note: For MCDReforged users, ensure 'advanced_console' is set to False in the MCDR configuration.
+
 Processes:
   Networks: 
     network 1:
-      start_command: start
-      stop_command: end
-      relay_blacklist: 
+      start_cmd: start
+      stop_cmd : end
+      blacklist: 
         - 'example 1'
         - 'example 2'
         - 'example 3'
 
   Servers:
     server 1:
-      start_command: start
-      stop_command: stop
-      relay_blacklist: 
+      start_cmd: start
+      stop_cmd : stop
+      blacklist: 
         - 'example 1'
         - 'example 2'
         - 'example 3'
     
     server 2:
-      start_command: start
-      stop_command: stop
-      relay_blacklist: 
+      start_cmd: start
+      stop_cmd : stop
+      blacklist: 
         - 'example 1'
         - 'example 2'
         - 'example 3'

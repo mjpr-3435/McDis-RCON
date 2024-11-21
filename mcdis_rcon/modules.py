@@ -47,7 +47,7 @@ emoji_dir           = '📦'
 emoji_file          = '📄'
 emoji_new_command   = '📦'
 emoji_pin           = '📌'
-emoji_writing       = '🗒️'
+emoji_log           = '🗒️'
 emoji_warning       = '⚠️'
 emoji_update        = '🔄'
 emoji_arrow_left    = '⬅️'
@@ -55,10 +55,6 @@ emoji_arrow_right   = '➡️'
 emoji_arrow_down    = '⤵️'
 check               = '✔'
 uncheck             = '✖'
-
-### Mover estos a sus respectivos lugares
-request_size_limit  = 5 * 1024**2
-max_processes       = 5
 
 allowed_languages   = [ 'en', 'es']
 panel_commands      = [ 'start-all', 'stop-all', 'start', 'stop', 'kill', 'restart', 'reload mdplugins']

@@ -2,7 +2,7 @@ import json
 import os
 
 from datetime import datetime
-from mcdis_rcon.bot.classes import Server
+from mcdis_rcon.classes import Server
 foundation_date = ''
 
 async def load(self: Server):

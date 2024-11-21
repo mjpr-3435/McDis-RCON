@@ -1,4 +1,4 @@
-from mcdis_rcon.bot.classes import Server
+from mcdis_rcon.classes import Server
 from mcdis_rcon.utils import hover, extras
 
 async def on_player_message(self: Server, player: str, message: str):

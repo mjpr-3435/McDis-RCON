@@ -2,7 +2,7 @@ import re
 import os
 import json
 
-from mcdis_rcon.bot.classes import Server
+from mcdis_rcon.classes import Server
 
 config = dict()
 

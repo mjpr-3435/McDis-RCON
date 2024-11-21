@@ -5,7 +5,7 @@ import os
 import re
 
 from mcdis_rcon.utils import read_dat_files, mc_uuid, sct, hover_and_suggest, extras
-from mcdis_rcon.bot.classes import Server
+from mcdis_rcon.classes import Server
 
 target = ''
 

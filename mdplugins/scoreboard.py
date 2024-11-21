@@ -3,7 +3,7 @@ import discord
 import math
 
 from mcdis_rcon.utils import read_dat_files
-from mcdis_rcon.bot.classes import Server
+from mcdis_rcon.classes import Server
 
 
 async def on_discord_message(self: Server, message: discord.Message):

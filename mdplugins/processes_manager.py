@@ -1,7 +1,7 @@
 import json
 import os
 
-from mcdis_rcon.bot.classes import Server
+from mcdis_rcon.classes import Server
 admins = []
 
 async def load(self: Server):

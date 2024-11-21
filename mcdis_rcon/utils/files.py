@@ -31,6 +31,23 @@ def dat_to_dict(nbt):
     else:
         return nbt
 
+def read_file(file_path: str) -> str:
+    with open(file_path, 'r', encoding = 'utf-8') as file:
+        return file.read()
+
+def write_in_file(file_path: str, content: str):
+    with open(file_path, 'w') as file:
+        for line in content.split('\n'):
+            file.write(line + '\n')
+
+def read_yml(file_path: str) -> dict:
+    with open(file_path, 'r') as file:
+        yaml = ruamel.yaml.YAML()
+        yaml.indent(mapping = 2, sequence = 4, offset=2)
+        yaml.preserve_quotes = True
+
+        return yaml.load(file)
+
 def is_valid_path_name(folder_name) -> bool:
     pattern = r'^[A-Za-z0-9._\- ]+$'
 
@@ -73,7 +90,7 @@ def get_path_size(path: str, *, string = True) -> Union[str, int]:
         return 'Error' if string else 0
 
 def make_zip(source : str, destination : str, counter : list = None):
-    if counter: counter[0], counter[1] = 0, files_on(source)
+    if counter: counter[0], counter[1] = 0, elements_on(source)
     
     with zipfile.ZipFile(destination, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(source):
@@ -96,12 +113,24 @@ def unpack_zip(source: str, destination: str, counter: list = None):
             zip_ref.extract(file, destination)
             if counter: counter[0] += 1
 
-def files_on(path : str, *, files : bool = True, dirs : bool = True):
-    if not os.path.isdir(path): return 1
+def elements_on(path: str, *, include_files: bool = True, include_dirs: bool = True, recursive: bool = True):
+    if not os.path.isdir(path):
+        return 1
 
     total = 0
-    for root, dirs, files in os.walk(path):
-        if dirs: total += len(dirs)
-        if files: total += len(files)
+
+    if recursive:
+        for root, dirs, files in os.walk(path):
+            if include_dirs:
+                total += len(dirs)
+            if include_files:
+                total += len(files)
+    else:
+        with os.scandir(path) as entries:
+            for entry in entries:
+                if entry.is_file() and include_files:
+                    total += 1
+                elif entry.is_dir() and include_dirs:
+                    total += 1
 
     return total
