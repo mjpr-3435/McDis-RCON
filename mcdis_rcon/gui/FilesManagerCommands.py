@@ -9,7 +9,10 @@ class CommandsView          (discord.ui.View):
         self.process = process
         self.options = self._get_options()
 
-        self.add_item(CommandSelect(self.client, self.options))
+        self.add_item(CommandSelect     (self.client, self.options))
+        self.add_item(BackButton        (self.client))
+        self.add_item(UpdateButton      (self.client))
+        self.add_item(DirButton         (self.client))
     
     def _get_options(self):
         options = []
@@ -35,12 +38,12 @@ class CommandSelect            (discord.ui.Select):
         self.view : CommandsView
         
     async def callback(self, interaction: discord.Interaction):
-        from .Command import CommandEmbed, CommandView
+        from .FilesManagerCommand import CommandEmbed, CommandView
 
         if self.values[0] != 'New Command':
             await interaction.response.edit_message(
-                embed = CommandEmbed(self.view.process, self.values[0]),
-                view = CommandView(self.view.process, self.values[0]))
+                embed = CommandEmbed(self.view.client, self.view.process, self.values[0]),
+                view = CommandView(self.view.client, self.view.process, self.values[0]))
         
         elif len(self.view.options) == 25: 
             await interaction.response.send_message(
@@ -55,23 +58,24 @@ class CommandSelect            (discord.ui.Select):
             
                 async def on_submit(modal, interaction: discord.Interaction):
                     file = f'{str(modal.name)[:40]}.yml'
+
                     if file in os.listdir(self.view.process.path_commands):
                         await interaction.response.send_message(
                             self.view.client._('✖ There is already a command with that name.'), 
                             ephemeral = True)
-                        
                         return
                     
                     template = os.path.join(package_path, 'templates','md_command.yml')
                     new_command = os.path.join(self.view.process.path_commands, file)
                     shutil.copy(template, new_command)
                     
-                    await interaction.response.edit_message( embed = CommandEmbed(self.view.process, file), 
-                                                            view = CommandView(self.view.process, file))
+                    await interaction.response.edit_message(
+                        embed = CommandEmbed(self.view.client, self.view.process, file), 
+                        view = CommandView(self.view.client, self.view.process, file))
     
             await interaction.response.send_modal(message_modal())
 
-class BackButton          (discord.ui.Button):
+class BackButton                (discord.ui.Button):
     def __init__(self, client : McDisClient):
         super().__init__(label = emoji_arrow_left, style = discord.ButtonStyle.gray)
         self.view : CommandsView
@@ -84,20 +88,20 @@ class BackButton          (discord.ui.Button):
             view = FilesManagerView(self.view.client, self.view.process.path_files)
         )
 
-class UpdateButton          (discord.ui.Button):
+class UpdateButton              (discord.ui.Button):
     def __init__(self, client : McDisClient):
         super().__init__(label = emoji_update, style = discord.ButtonStyle.gray)
         self.view : CommandsView
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.edit_message(
-            embed = CommandsEmbed(self.view.client, self.view.process.path_files),
-            view = CommandsView(self.view.client, self.view.process.path_files)
+            embed = CommandsEmbed(self.view.client, self.view.process),
+            view = CommandsView(self.view.client, self.view.process)
         )
 
-class DirButton             (discord.ui.Button):
+class DirButton                 (discord.ui.Button):
     def __init__(self, client : McDisClient):
-        super().__init__(label = emoji_update, style = discord.ButtonStyle.gray)
+        super().__init__(label = emoji_dir, style = discord.ButtonStyle.gray)
         self.view : CommandsView
 
     async def callback(self, interaction: discord.Interaction):
@@ -108,7 +112,7 @@ class DirButton             (discord.ui.Button):
             view = FilesManagerView(self.view.client, self.view.process.path_commands)
         )
 
-class CommandsEmbed         (discord.Embed):
+class CommandsEmbed             (discord.Embed):
     def __init__(self, client : McDisClient, process: Process):
         super().__init__(title = f'> {mcdis_path(process.path_commands)}', colour = embed_colour)
         self.client = client

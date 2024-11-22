@@ -90,7 +90,8 @@ def get_path_size(path: str, *, string = True) -> Union[str, int]:
         return 'Error' if string else 0
 
 def make_zip(source : str, destination : str, counter : list = None):
-    if counter: counter[0], counter[1] = 0, elements_on(source)
+    if counter: 
+        counter[0], counter[1] = 0, elements_on(source)
     
     with zipfile.ZipFile(destination, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(source):
@@ -106,6 +107,7 @@ def make_zip(source : str, destination : str, counter : list = None):
 def unpack_zip(source: str, destination: str, counter: list = None):
     with zipfile.ZipFile(source, 'r') as zip_ref:
         total_files = len(zip_ref.namelist())
+
         if counter:
             counter[0], counter[1] = 0, total_files
 

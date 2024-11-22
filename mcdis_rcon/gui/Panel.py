@@ -13,7 +13,7 @@ class PanelView             (discord.ui.View):
         self.add_item(FlaskButton       (self.client))
         self.add_item(RestartButton     (self.client))
 
-class ManagerButton       (discord.ui.Button):
+class ManagerButton         (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Processes', style = discord.ButtonStyle.gray)
         self.view : PanelView

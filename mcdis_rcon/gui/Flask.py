@@ -7,8 +7,8 @@ class FlaskView             (discord.ui.View):
         super().__init__(timeout = None)
         self.client = client
 
-        self.add_item(UpdateButton(self.client))
-        self.add_item(StateButton(self.client))
+        self.add_item(UpdateButton      (self.client))
+        self.add_item(StateButton       (self.client))
 
 class UpdateButton          (discord.ui.Button):
     def __init__(self, client: McDisClient):

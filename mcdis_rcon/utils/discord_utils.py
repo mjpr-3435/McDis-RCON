@@ -24,7 +24,7 @@ async def confirmation_request( description     : str                           
                                 on_reject       : Callable                  = None , 
                                 interaction     : discord.Interaction       = None ,
                                 channel         : discord.TextChannel       = None ,
-                                ephemeral       : bool                      = True  ):
+                                ephemeral       : bool                      = True):
     
     class confirmation_views(discord.ui.View):
         def __init__(self):
@@ -55,9 +55,12 @@ async def confirmation_request( description     : str                           
                 on_reject(interaction)
         
     if interaction:
-        await interaction.response.send_message(embed       = discord.Embed(description = description), 
-                                                view        = confirmation_views(),
-                                                ephemeral   = ephemeral)
+        await interaction.response.send_message(
+            embed = discord.Embed(description = description, colour = embed_colour), 
+            view = confirmation_views(),
+            ephemeral = ephemeral)
+        
     elif channel:
-        await channel.send(embed       = discord.Embed(description = description), 
-                           view        = confirmation_views())
+        await channel.send(
+            embed = discord.Embed(description = description, colour = embed_colour), 
+            view = confirmation_views())

@@ -3,7 +3,7 @@ from ..classes import *
 from ..utils import *
 
 class CommandView           (discord.ui.View):
-    def __init__(self, client : McDisClient, process: Process, command: str):
+    def __init__(self, client : McDisClient, process: Process, command: str, action: int = 1):
         super().__init__(timeout = None)
         self.client         = client
         self.process        = process
@@ -14,37 +14,31 @@ class CommandView           (discord.ui.View):
         self.actions        = self._get_actions()
         self.options        = self._get_options()
 
-        self.add_item(ActionSelect(self.client, self.options))
-        self.add_item(BackButton(self.client))
-        self.add_item(UpdateButton(self.client))
-        self.add_item(ExecuteButton(self.client))
-        self.add_item(EditButton(self.client))
-        self.add_item(DeleteButton(self.client))
+        self.add_item(ActionSelect      (self.client, self.options))
+        self.add_item(BackButton        (self.client))
+        self.add_item(UpdateButton      (self.client))
+        self.add_item(ExecuteButton     (self.client))
+        self.add_item(EditButton        (self.client))
+        self.add_item(DeleteButton      (self.client))
     
     def _load_data(self):
         return read_yml(self.command_path)
     
     def _get_actions(self):
-        return self.data.keys()[1:]
+        return list(self.data.keys())[1:]
     
     def _get_options(self):
         options = []
-        actions = self.data.keys()[1:]
 
-        options.append(discord.SelectOption(
-            label = self.client._('[New Action]'), 
-            emoji = emoji_pin,
-            value = 'New Action'))
-
-        for i, action in enumerate(actions):
+        for i, action in enumerate(self.actions):
             options.append(discord.SelectOption(
                 label = action, 
-                value = i))
+                value = i + 1))
                 
         return options
 
     def _get_commands(self) -> list[str]:
-        return self.data[self.actions[self.action + 1]]
+        return self.data[self.actions[self.action]]
 
 class ActionSelect          (discord.ui.Select):
     def __init__(self, client: McDisClient, options: list):
@@ -52,33 +46,11 @@ class ActionSelect          (discord.ui.Select):
         self.view : CommandView
         
     async def callback(self, interaction: discord.Interaction):
-        if self.values[0] != 'New Action':
-            await interaction.response.edit_message(
-                embed = CommandEmbed(self.view.process, self.values[0]),
-                view = CommandView(self.view.process, self.values[0]))
-        
-        elif len(self.view.actions) == 25: 
-            await interaction.response.send_message(
-                self.view.client._('✖ At the moment, only up to 24 actions are allowed.'),
-                ephemeral = True)
-        else:
-            class message_modal(discord.ui.Modal, title = self.view.client._('New command')):
-                name = discord.ui.TextInput(
-                    label = self.view.client._('Command name'), 
-                    style = discord.TextStyle.paragraph)
-            
-                async def on_submit(modal, interaction: discord.Interaction):
-                    file = f'{str(modal.name)[:40]}'
+        self.view.action = int(self.values[0])
 
-                    if file in self.view.actions:
-                        await interaction.response.send_message(
-                            self.view.client._('✖ There is already a command with that name.'), 
-                            ephemeral = True)
-                    
-                    await interaction.response.edit_message( embed = CommandEmbed(self.view.process, file), 
-                                                            view = CommandView(self.view.process, file))
-    
-            await interaction.response.send_modal(message_modal())
+        await interaction.response.edit_message(
+            embed = CommandEmbed(self.view.client, self.view.process, self.view.command, self.view.action),
+            view = self.view)
 
 class BackButton            (discord.ui.Button):
     def __init__(self, client : McDisClient):
@@ -86,7 +58,7 @@ class BackButton            (discord.ui.Button):
         self.view : CommandView
 
     async def callback(self, interaction: discord.Interaction):
-        from .Commands import CommandsEmbed, CommandsView
+        from .FilesManagerCommands import CommandsEmbed, CommandsView
 
         await interaction.response.edit_message(
             embed = CommandsEmbed(self.view.client, self.view.process),
@@ -95,16 +67,17 @@ class BackButton            (discord.ui.Button):
 
 class UpdateButton          (discord.ui.Button):
     def __init__(self, client : McDisClient):
-        super().__init__(label = emoji_arrow_left, style = discord.ButtonStyle.gray)
+        super().__init__(label = emoji_update, style = discord.ButtonStyle.gray)
         self.view : CommandView
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.edit_message(
-            embed = CommandEmbed(self.view.client, self.view.process, self.view.command))
+            embed = CommandEmbed(self.view.client, self.view.process, self.view.command),
+            view = CommandView(self.view.client, self.view.process, self.view.command))
 
 class ExecuteButton         (discord.ui.Button):
     def __init__(self, client : McDisClient):
-        super().__init__(label = emoji_arrow_left, style = discord.ButtonStyle.gray)
+        super().__init__(label = 'Execute', style = discord.ButtonStyle.gray)
         self.view : CommandView
 
     async def callback(self, interaction: discord.Interaction):
@@ -112,7 +85,6 @@ class ExecuteButton         (discord.ui.Button):
             await interaction.response.send_message(
                 self.view.client._('✖ The server isn\'t open.'), 
                 ephemeral = True)
-            
             return
 
         await interaction.response.send_message(
@@ -133,7 +105,7 @@ class ExecuteButton         (discord.ui.Button):
 
 class EditButton            (discord.ui.Button):
     def __init__(self, client : McDisClient):
-        super().__init__(label = emoji_arrow_left, style = discord.ButtonStyle.gray)
+        super().__init__(label = 'Edit', style = discord.ButtonStyle.gray)
         self.view : CommandView
 
     async def callback(self, interaction: discord.Interaction):
@@ -167,11 +139,11 @@ class EditButton            (discord.ui.Button):
 
 class DeleteButton          (discord.ui.Button):
     def __init__(self, client : McDisClient):
-        super().__init__(label = 'Delete', style = discord.ButtonStyle.gray)
+        super().__init__(label = 'Delete', style = discord.ButtonStyle.red)
         self.view : CommandView
 
     async def callback(self, interaction: discord.Interaction):
-        from .Commands import CommandsEmbed, CommandsView
+        from .FilesManagerCommands import CommandsEmbed, CommandsView
         async def on_confirmation(confirmation_interaction: discord.Interaction):
             try: 
                 os.remove(self.view.command_path)
@@ -195,7 +167,9 @@ class DeleteButton          (discord.ui.Button):
 
 class CommandEmbed          (discord.Embed):
     def __init__(self, client : McDisClient, process: Process, command: str, action: int = 1):
-        super().__init__(title = command.removesuffix('.yml'), colour = embed_colour)
+        title = os.path.join(process.name, command.removesuffix('.yml'))
+        super().__init__(title = title, colour = embed_colour)
+
         self.client         = client
         self.process        = process
         self.command        = command
@@ -218,18 +192,15 @@ class CommandEmbed          (discord.Embed):
     def _add_description_field(self):
         self.add_field(inline = False, 
             name = f'> {self.client._("Description")}:', 
-            value = self.data.get('Description', self.client('No description provided'))
+            value = self.data.get('Description')
         )
 
     def _add_action_field(self):
-        action_key = list(self.data.keys())[self.action + 1]
-        action_values = list(self.data.values())[self.action + 1]
+        action_key = list(self.data.keys())[self.action]
+        action_values = list(self.data.values())[self.action]
         value_text = ''.join([f'```{truncate(value, 56)}```' for value in action_values])
 
         self.add_field(inline = False, name = f'> {action_key}:', value = value_text)
 
     def _set_footer(self):
-        self.set_footer(text = 
-            f'{184 * blank_space}\n'
-            f'{self.client._("Use {} to iterate over the options.").format(emoji_update)}'
-        )
+        self.set_footer(text = f'{185 * blank_space}')

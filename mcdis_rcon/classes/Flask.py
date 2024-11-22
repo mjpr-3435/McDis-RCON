@@ -26,14 +26,14 @@ class FlaskManager (Flask):
     def         _download_file           (self):
         id = request.args.get('id')
         if id in self.active_downloads.keys():
-            filepath = self.active_downloads[id]['file']
+            file_path = self.active_downloads[id]['file']
             user = self.active_downloads[id]['user']
-            filepath = os.path.join(self._client.cwd, filepath)
+            file_path = os.path.join(self._client.cwd, file_path)
             self.active_downloads.pop(id)
 
             print(f'Link requested by: {user} -> Used')
 
-            return send_file(filepath, as_attachment = True)
+            return send_file(file_path, as_attachment = True)
         return abort(404)
         
     def         _run_app                 (self):
@@ -71,20 +71,20 @@ class FlaskManager (Flask):
         if id in self.active_downloads.keys():
             self.active_downloads.pop(id)
     
-    def         _generate_id           (self, filepath : str):
-        encoded_filepath = filepath.encode()
-        id = hashlib.sha256(encoded_filepath).hexdigest()
+    def         _generate_id           (self, file_path : str):
+        encoded_file_path = file_path.encode()
+        id = hashlib.sha256(encoded_file_path).hexdigest()
         id += f'.{random.randint(20000, 30000)}'
 
         return id
 
-    def         download_link           (self, filepath: str, user : str):
-        id = self._generate_id(filepath)
+    def         download_link           (self, file_path: str, user : str):
+        id = self._generate_id(file_path)
 
         while id in self.active_downloads.keys(): 
-            id = self._generate_id(filepath)
+            id = self._generate_id(file_path)
 
-        self.active_downloads[id] = {'user' : user, 'file': filepath}
+        self.active_downloads[id] = {'user' : user, 'file': file_path}
         asyncio.create_task(self._remove_link(id))
 
         return f'http://{self._client.config["Flask"]["IP"]}:{self._client.config["Flask"]["Port"]}/file_request?id={id}'

@@ -16,16 +16,17 @@ class FilesManagerView      (discord.ui.View):
         self.up_to_99       = self.file_count > 99 or self.dir_count > 99
         self.max_page       = max(self.file_count // 99 + 1, self.dir_count // 99 + 1)
 
-        self.add_item(BackButton(self.client))
-        self.add_item(UpdateButton(self.client))
-
         if self.options:
             self.add_item(FileSelect(self.client, self.options))
+
+        self.add_item(BackButton(self.client))
+        self.add_item(UpdateButton(self.client))
 
         if os.path.isdir(self.path):
             self.add_item(ProcessesButton(self.client))
             self.add_item(TerminalButton(self.client))
-            if path != '.':
+
+            if path != '.': 
                 self.add_item(DeleteDirButton(self.client))
         else:
             self.add_item(RequestButton(self.client))
@@ -35,7 +36,7 @@ class FilesManagerView      (discord.ui.View):
         if self.up_to_99:
             self._add_pagination_buttons()
     
-    def _add_pagination_buttons     (self):
+    def         _add_pagination_buttons     (self):
         if self.max_page > 3:
             self.add_item(FirstPageButton(self.client))
         
@@ -45,7 +46,7 @@ class FilesManagerView      (discord.ui.View):
         if self.max_page > 3:
             self.add_item(LastPageButton(self.client))
     
-    def _get_options                (self):
+    def         _get_options                (self):
         options = []
 
         if os.path.isdir(self.path):
@@ -66,7 +67,7 @@ class FilesManagerView      (discord.ui.View):
                 
         return options
 
-    async def _update_embed         (self, interaction : discord.Interaction):
+    async def   _update_embed               (self, interaction : discord.Interaction):
         if not interaction.response.is_done():
             await interaction.response.defer()
             
@@ -74,35 +75,38 @@ class FilesManagerView      (discord.ui.View):
                 message_id = interaction.message.id, 
                 embed = FilesManagerEmbed(self.client, self.path, self.page))
         
-    async def _update_interface     (self, interaction : discord.Interaction):
+    async def   _update_interface           (self, interaction : discord.Interaction, back: bool = False):
         if not interaction.response.is_done():
             await interaction.response.defer()
             
-        await interaction.followup.edit_message(
-                message_id = interaction.message.id, 
-                embed = FilesManagerEmbed(self.client, self.path), 
-                view = FilesManagerView(self.client, self.path))
-            
-        return
-    
         process_cmd = next(filter(lambda process: self.path == process.path_commands, self.client.processes), None)
         process_bkp = next(filter(lambda process: self.path == process.path_bkps, self.client.processes), None)
-
+        
         if process_cmd:
+            from .FilesManagerCommands import CommandsEmbed, CommandsView
             await interaction.followup.edit_message(
                 message_id = interaction.message.id,
-                embed = commands_embed(self.client, process_cmd),
-                view = commands_views(self.client, process_cmd))
-        elif process_bkp:
+                embed = CommandsEmbed(self.client, process_cmd),
+                view = CommandsView(self.client, process_cmd))
+            
+        elif process_bkp and False:
             await interaction.followup.edit_message(
                 message_id = interaction.message.id,
-                embed = backups_embed(self.client, process_bkp),
-                view = backups_views(self.client, process_bkp))
+                embed = BackupsEmbed(self.client, process_bkp),
+                view = BackupsView(self.client, process_bkp))
         else:
+            if back:
+                abs_parent_path = os.path.abspath(os.path.dirname(self.path))
+
+                if abs_parent_path.startswith(self.client.cwd):
+                    self.path = os.path.relpath(abs_parent_path) 
+                else:
+                    self.path = self.client.cwd
+
             await interaction.followup.edit_message(
                 message_id = interaction.message.id,
-                embed = FilesManagerEmbed(self.client, new_path),
-                view = FilesManagerView(self.client, new_path))
+                embed = FilesManagerEmbed(self.client, self.path),
+                view = FilesManagerView(self.client, self.path))
     
 class FileSelect            (discord.ui.Select):
     def __init__(self, client : McDisClient, options: list):
@@ -160,14 +164,7 @@ class BackButton            (discord.ui.Button):
         self.view : FilesManagerView
 
     async def callback(self, interaction: discord.Interaction):
-        parent_path = os.path.abspath(os.path.dirname(self.view.path))
-
-        if parent_path.startswith(self.view.client.cwd):
-            self.view.path = os.path.relpath(parent_path, self.view.client.cwd) 
-        else:
-            self.view.path = self.view.client.cwd
-
-        await self.view._update_interface(interaction)
+        await self.view._update_interface(interaction, back = True)
 
 class UpdateButton          (discord.ui.Button):
     def __init__(self, client: McDisClient):
@@ -187,15 +184,18 @@ class RequestButton         (discord.ui.Button):
             await interaction.response.defer(ephemeral = True, thinking = True)
 
             if get_path_size(self.view.path, string = False) > self.view.max_rqst_size:
-                await interaction.followup.send(self.view.client._('✖ McDis only accepts file requests of up to 5MB.'))
+                await interaction.followup.send(
+                    self.view.client._('✖ McDis only accepts file requests of up to 5MB.'))
             else:
-                await interaction.followup.send(f'> **{mcdis_path(self.view.path)}:**', file = discord.File(self.view.path))
+                await interaction.followup.send(
+                    f'> **{mcdis_path(self.view.path)}:**',
+                    file = discord.File(self.view.path))
         else:
             download_link = self.view.client.flask.download_link(self.view.path, interaction.user.name)
             view = self.view.remove_item(self).add_item(discord.ui.Button(label = 'Download', url = download_link))
             embed = interaction.message.embeds[0]
             embed.description = f'**Download Link:**\n```{download_link}```'
-            await interaction.response.edit_message(embed=embed, view = view)
+            await interaction.response.edit_message(embed = embed, view = view)
 
 class EditButton            (discord.ui.Button):
     def __init__(self, client: McDisClient):
@@ -203,20 +203,27 @@ class EditButton            (discord.ui.Button):
         self.view : FilesManagerView
 
     async def callback(self, interaction: discord.Interaction):
-        file_content = None
-        
-        if not get_path_size(self.view.path, string = False) > self.view.max_rqst_size:
-            try:
-                file_content =  read_file(self.view.path)
+        file_content = ''
 
-                if len(file_content) >= 4000: 
-                    file_content = None
+        if get_path_size(self.view.path, string = False) < self.view.max_rqst_size:
+            try:
+                file_content = read_file(self.view.path)
+                if len(file_content) >= 4000:
+                    file_content = ''
             except:
-                file_content = None
-            
+                pass
+
         class edit_command(discord.ui.Modal, title = self.view.client._('Edit the file')):
-            name = discord.ui.TextInput(label = self.view.client._('File'), style = discord.TextStyle.short, default = os.path.basename(self.view.path))
-            if file_content: content = discord.ui.TextInput(label = os.path.basename(self.view.path), style = discord.TextStyle.paragraph, default = file_content)
+            name = discord.ui.TextInput(
+                label = self.view.client._('File'),
+                style = discord.TextStyle.short,
+                default = os.path.basename(self.view.path))
+            
+            if file_content:
+                content = discord.ui.TextInput(
+                    label = os.path.basename(self.view.path),
+                    style = discord.TextStyle.paragraph,
+                    default = file_content)
 
             async def on_submit(modal, interaction: discord.Interaction):
                 new_path = os.path.join(os.path.dirname(self.view.path), os.path.basename(str(modal.name)))
@@ -227,8 +234,9 @@ class EditButton            (discord.ui.Button):
 
                     os.rename(self.view.path, new_path)
                 except Exception as error:
-                    await interaction.response.send_message(content = self.view.client._('Error: {}').format(error), ephemeral=True)
-                    return
+                    await interaction.response.send_message(
+                        content = self.view.client._('Error: {}').format(error),
+                        ephemeral = True)
                 
                 await interaction.response.edit_message(embed = FilesManagerEmbed(new_path), view = FilesManagerView(new_path))
 
@@ -245,16 +253,20 @@ class DeleteFileButton      (discord.ui.Button):
 
             try: os.remove(self.view.path)
             except Exception as error: 
-                await confirmation_interaction.response.edit_message(content = self.view.client._('Error: {}').format(error), embed = None, view = None)
+                await confirmation_interaction.response.edit_message(
+                    content = self.view.client._('Error: {}').format(error), 
+                    embed = None, 
+                    view = None)
             else:
                 await confirmation_interaction.response.edit_message(delete_after = 0)
-                await interaction.followup.edit_message(message_id=interaction.message.id, 
-                                                        embed = FilesManagerEmbed(new_path), 
-                                                        view = FilesManagerView(new_path))
+                self.view.path = new_path
+
+                await self.view._update_interface(interaction)
             
-        await confirmation_request(self.view.client._('Are you sure about deleting the file `{}`?').format(mcdis_path(self.view.path)), 
-                                    on_confirmation = on_confirmation,
-                                    interaction = interaction)
+        await confirmation_request(
+            self.view.client._('Are you sure about deleting the file `{}`?').format(mcdis_path(self.view.path)), 
+            on_confirmation = on_confirmation,
+            interaction = interaction)
 
 class ProcessesButton       (discord.ui.Button):
     def __init__(self, client: McDisClient):
@@ -262,299 +274,363 @@ class ProcessesButton       (discord.ui.Button):
         self.view : FilesManagerView
 
     async def callback(self, interaction: discord.Interaction):
-        from .views.processes import processes_views
+        from .FilesManagerProcesses import ProcessesView, ProcessesEmbed
         await interaction.response.defer()
 
+        processes = self._get_processes(self.view.path)
+        
+        await interaction.followup.edit_message(
+            message_id = interaction.message.id, 
+            embed = ProcessesEmbed(self.view.client, self.view.path, processes), 
+            view = ProcessesView(self.view.client, self.view.path, processes))
+
+    def _get_processes(path: str) -> list[psutil.Process]:
         processes = []
+
         for process in psutil.process_iter():
             try:
-                if os.path.abspath(self.view.path) in process.cwd():
+                if os.path.abspath(path) in process.cwd():
                     processes.append(process)
             except: pass
             
-        processes = sorted(processes, key=lambda p: p.cwd())
-        
-        await interaction.followup.edit_message(message_id = interaction.message.id, 
-                                                embed = processes_embed(self.view.path, processes), 
-                                                view = processes_views(self.view.path, processes))
+        return sorted(processes, key = lambda p: p.cwd())
 
 class TerminalButton        (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Terminal', style = discord.ButtonStyle.gray)
         self.view : FilesManagerView
 
+        self.names_convention = client._(
+            '✖ The names of directories created with McDis can only contain letters, '
+            'numbers, periods (.), hyphens (-), and underscores (_). Provided name: `{}`')
+
     async def callback(self, interaction: discord.Interaction):
         class message_modal(discord.ui.Modal, title = self.view.client._('Terminal')):
-            command = discord.ui.TextInput(label = truncate('> ' + mcdis_path(self.view.path), 45), style = discord.TextStyle.paragraph)
-            example = discord.ui.TextInput(label = self.view.client._('Commands'), style = discord.TextStyle.paragraph, default = "\n".join(terminal_commands))
+            command = discord.ui.TextInput(
+                label = truncate('> ' + mcdis_path(self.view.path), 45),
+                style = discord.TextStyle.paragraph)
+            example = discord.ui.TextInput(
+                label = self.view.client._('Commands'),
+                style = discord.TextStyle.paragraph,
+                default = "\n".join(terminal_commands))
         
             async def on_submit(modal, interaction: discord.Interaction):
-                await self.cmd_interface(str(modal.command), interaction, self.view.path, self)
+                await self._cmd_interface(str(modal.command), interaction)
+
         await interaction.response.send_modal(message_modal())
 
-    async def cmd_interface(client: McDisClient, command: str, interaction: discord.Interaction, path: str, view: discord.ui.View):
+    async def _cmd_interface(self, command: str, interaction: discord.Interaction):
         args = command.split(' ')
-        names_convention = client._('✖ The names of directories created with McDis can only contain letters, '
-                            'numbers, periods (.), hyphens (-), and underscores (_). Provided name: `{}`')
-        
-        dir_files = os.listdir(path)
-        dir_files.sort()
-        dirs = [file for file in dir_files if os.path.isdir(os.path.join(path,file))]
-        files = [file for file in dir_files if os.path.isfile(os.path.join(path,file))]
+        command_name = args[0].lower()
+        handler = getattr(self, f"_cmd_{command_name}", None)
 
-        
-        async def file_or_dir_selection(arg : str) -> Union[str, None]:
-            if arg.lower().startswith('dir:'):
-                try: index = int(arg[4:])
-                except:
-                    await interaction.response.send_message( client._('✖ The index must be an integer.'), ephemeral=True)
-                    return
-                
-                if index < 1 or index > min(len(dirs),99):
-                    await interaction.response.send_message( client._('✖ No directory exists with that index.'), ephemeral=True)
-                    return
-
-                return dirs[(view.page-1)*99 + index- 1] if path == '.' else os.path.join(path, dirs[(view.page-1)*99 + index- 1])
-
-            elif arg.lower().startswith('file:'):
-                try:
-                    index = int(arg[5:])
-                except: 
-                    await interaction.response.send_message( client._('✖ The index must be an integer.'), ephemeral=True)
-                    return
-                
-                if index < 1 or index > min(len(files),99):
-                    await interaction.response.send_message( client._('✖ No file exists with that index.'), ephemeral=True)
-                    return
-
-                return files[(view.page-1)*99 + index- 1] if path == '.' else os.path.join(path,files[(view.page-1)*99 + index- 1])
-            
-            else:
-                await interaction.response.send_message(
-                    client._('✖ Invalid argument `{}`. It should be `dir:index` or `file:index`.').format(arg),
-                    ephemeral=True)
-                return
-
-        if args[0].lower() == 'mkdir':
-            if len(args) == 1: 
-                await interaction.response.send_message(
-                    client._('✖ You must provide one argument. E.g.: `mkdir <name>`.'), 
-                    ephemeral = True)
-                
-            elif not is_valid_path_name(args[1]):
-                await interaction.response.send_message(names_convention.format(args[1]), ephemeral=True)
-            else:
-                os.makedirs(os.path.join(path, args[1]), exist_ok = True)
-                await update_files_interface(client, interaction, path, path)
-        
-        elif args[0].lower() == 'zip':
-            if len(args) == 1: 
-                await interaction.response.send_message(
-                    client._('✖ You must provide one argument. E.g.: `zip <dir:index>`.'), 
-                    ephemeral=True)
-            else:
-                path_to_zip = await file_or_dir_selection(args[1])
-                if not path_to_zip: return
-
-                elif not os.path.isdir(path_to_zip):
-                    await interaction.response.send_message(client._('✖ The path must be a directory.'), ephemeral=True)
-                    return
-                elif get_path_size(path_to_zip, string = False) > psutil.disk_usage("/").free:
-                    await interaction.response.send_message(client._('✖ There\'s not enough space on the disk to create this `.zip`.'), ephemeral=True)
-                    return
-                
-                await interaction.response.defer(ephemeral = True, thinking = True)
-
-                response = await interaction.followup.send(client._('`[{}]`: Compressing files...').format(path_to_zip + '.zip'))
-                
-                counter = [0,0]
-                task = threading.Thread(target = make_zip, args = (path_to_zip, path_to_zip + '.zip', counter))
-                task.start()
-
-                while task.is_alive():
-                    if counter[1] == 0: 
-                        await asyncio.sleep(0.1)
-                    else:
-                        show = client._('`[{}]`: `[{}/{}]` files have been compressed...').format(path_to_zip + '.zip', counter[0], counter[1])
-                        await response.edit(content = show)
-                        await asyncio.sleep(0.5)
-
-                await update_files_interface(client, interaction, path, path)
-                await response.edit(content = client._('✔ The files have been successfully compressed.'))
-                await interaction.user.send(content = client._('✔ The files have been successfully compressed.'))
-
-        elif args[0].lower() == 'unzip':
-            if len(args) == 1: 
-                await interaction.response.send_message(
-                    client._('✖ You must provide one argument. E.g.: `unzip <file:index>`.'), 
-                    ephemeral=True)
-            else:
-                path_to_unzip = await file_or_dir_selection(args[1])
-                if not path_to_unzip: return
-
-                elif not os.path.isfile(path_to_unzip) or not path_to_unzip.endswith('.zip'):
-                    await interaction.response.send_message(client._('✖ The path must be a `.zip` file.'), ephemeral=True)
-                    return
-                
-                elif os.path.exists(path_to_unzip.removesuffix('.zip')):
-                    await interaction.response.send_message(client._('✖ A folder named `{}` already exists.').format(os.path.basename(path_to_unzip.removesuffix('.zip'))), ephemeral=True)
-                    return
-                
-                await interaction.response.defer()
-                response : discord.Message = await interaction.followup.send(client._('Unpacking Backup...'), ephemeral = True)
-                counter = [0,0]
-                
-                task = threading.Thread(target = unpack_zip, args = (path_to_unzip, path_to_unzip.removesuffix('.zip'), counter))
-                task.start()
-                
-                while task.is_alive():
-                    if counter[1] == 0 or not isinstance(counter[1], int): 
-                        await asyncio.sleep(0.1)
-                    else:
-                        show = client._('`[{}]`: `[{}/{}]` files have been unpacked...').format(path_to_unzip.removesuffix('.zip'), counter[0], counter[1])
-                        await response.edit(content = show)
-                        await asyncio.sleep(0.5)
-                
-                if not isinstance(counter[1], int):
-                    msg = client._('✖ There was an error while unpacking. Error: {}').format(counter[1])
-                    await interaction.user.send(msg)
-                    await response.edit(content = msg)
-                else:
-                    await update_files_interface(client, interaction, path, path)
-                    msg = client._('✔ The files have been successfully unpacked.')
-                    await interaction.user.send(msg)
-                    await response.edit(content = msg)
-
-
-        elif args[0].lower() == 'cd':
-            if len(args) == 1: 
-                await interaction.response.send_message(
-                    client._('✖ You must provide one argument. E.g.: `cd <dir:index | file:index>`.'), 
-                    ephemeral=True)
-            else:
-                new_path = await file_or_dir_selection(args[1])
-
-                if new_path: await update_files_interface(client, interaction, new_path, path)
-
-        elif args[0].lower() == 'del':
-            if len(args) == 1: 
-                await interaction.response.send_message(
-                    client._('✖ You must provide one argument. E.g.: `del <dir:index | file:index>`.'),
-                    ephemeral = True)
-            else:
-                path_to_remove = await file_or_dir_selection(args[1])
-
-                if path_to_remove:
-                    await interaction.response.defer()
-                    response : discord.Message = await interaction.followup.send(client._('This action might take some time...'), ephemeral = True)
-                    await asyncio.sleep(1)
-                    try:
-                        if os.path.isdir(path_to_remove): 
-                            await execute_and_wait(shutil.rmtree, args = (path_to_remove, ))
-                        elif os.path.isfile(path_to_remove): 
-                            await execute_and_wait(os.remove, args = (path_to_remove, ))
-                    except Exception as error:
-                        await response.edit(content = client._('Error: {}').format(error))
-                    else:
-                        await interaction.followup.edit_message(message_id = interaction.message.id,
-                                                                embed = FilesManagerEmbed(path),
-                                                                view = FilesManagerView(path))
-                        await response.edit(content = client._('✔ `{}` has been deleted.').format(mcdis_path(path_to_remove)))
-                        
-        elif args[0].lower() == 'copy':
-            if len(args) < 3: 
-                await interaction.response.send_message(
-                    client._('✖ You must provide two arguments. E.g.: `move <dir:index | file:index> <mcdis_path>`.'),
-                    ephemeral = True)
-            else:    
-                path_to_copy = await file_or_dir_selection(args[1])
-                if not path_to_copy: return
-
-                path_provided = ' '.join(args[2:])
-                new_path = os.path.join(un_mcdis_path(path_provided), os.path.basename(path_to_copy))
-                dummy = client.is_valid_mcdis_path(path_provided)
-
-                if not dummy == True:
-                    await interaction.response.send_message(dummy, ephemeral = True)
-                    return
-                
-                elif os.path.exists(new_path):
-                    if os.path.isdir(new_path): msg = client._('✖ A folder with that name already exists at path.')
-                    elif os.path.exists(new_path): msg = client._('✖ A file with that name already exists at path.')
-                    await interaction.response.send_message(msg, ephemeral = True)
-                    return
-                
-                await interaction.response.defer()
-                response = await interaction.followup.send(client._('This action might take some time...'), ephemeral = True)
-                await asyncio.sleep(1)
-
-                if os.path.isdir(path_to_copy): 
-                    await execute_and_wait(shutil.copytree, args = (path_to_copy, new_path))
-                elif os.path.isfile(path_to_copy): 
-                    await execute_and_wait(shutil.copy2, args = (path_to_copy, new_path))
-                
-                path_to_show = mcdis_path(os.path.relpath(un_mcdis_path(path_provided)))
-                await interaction.followup.edit_message(message_id = interaction.message.id,
-                                                        embed = FilesManagerEmbed(path),
-                                                        view = FilesManagerView(path))
-                await response.edit(content = client._('✔ `{}` has been copied to `{}`.').format(mcdis_path(path_to_copy), path_to_show))
-
-        elif args[0].lower() == 'move':
-            if len(args) < 3: 
-                await interaction.response.send_message(
-                    client._('✖ You must provide two arguments. E.g.: `move <dir:index | file:index> <mcdis_path>`.'),
-                    ephemeral = True)
-            else:
-                path_to_move = await file_or_dir_selection(args[1])
-                if not path_to_move: return
-
-                path_provided = ' '.join(args[2:])
-                new_path = os.path.join(un_mcdis_path(path_provided), os.path.basename(path_to_move))
-                dummy = client.is_valid_mcdis_path(path_provided)
-
-                if not dummy == True:
-                    await interaction.response.send_message(dummy, ephemeral = True)
-                    return
-                
-                elif os.path.exists(new_path):
-                    if os.path.isdir(new_path): msg = client._('✖ A folder with that name already exists at path.')
-                    elif os.path.exists(new_path): msg = client._('✖ A file with that name already exists at path.')
-                    await interaction.response.send_message(msg, ephemeral = True)
-                    return
-                
-                await interaction.response.defer()
-                response : discord.Message = await interaction.followup.send(client._('This action might take some time...'), ephemeral = True)
-                await asyncio.sleep(1)
-
-                await execute_and_wait(shutil.move, args = (path_to_move, os.path.basename(path_provided)))
-                
-                path_to_show = mcdis_path(os.path.relpath(un_mcdis_path(path_provided)))
-                await interaction.followup.edit_message(message_id = interaction.message.id,
-                                                        embed = FilesManagerEmbed(path),
-                                                        view = FilesManagerView(path))
-                await response.edit(content = client._('✔ `{}` has been moved to `{}`.').format(mcdis_path(path_to_move), path_to_show))
-
-        elif args[0].lower() == 'rename':
-            name_provided = ' '.join(args[2:])
-
-            if len(args) < 3: 
-                await interaction.response.send_message(
-                    client._('✖ You must provide two arguments. E.g.: `rename <dir:index | file:index> <new_name>`.'),
-                    ephemeral = True)
-                
-            elif not is_valid_path_name(name_provided):
-                await interaction.response.send_message(names_convention.format(name_provided), ephemeral = True)
-            
-            else:
-                path_to_rename = await file_or_dir_selection(args[1])
-            
-                if path_to_rename:
-                    new_path = os.path.join(path, name_provided[:100])
-                    os.rename(path_to_rename, new_path)
-                    await update_files_interface(client, interaction, path, path)
-
+        if handler:
+            await handler(args[1:], interaction)
         else:
-            await interaction.response.send_message( client._('✖ Invalid command `{}`.').format(args[0]), ephemeral=True)
+            await interaction.response.send_message(
+                self.view.client._('✖ Invalid command `{}`.').format(command_name),
+                ephemeral = True
+            )
+    
+    async def _cmd_mkdir    (self, args: list[str], interaction: discord.Interaction):
+        if not args: 
+            await interaction.response.send_message(
+                self.view.client._('✖ You must provide one argument. E.g.: `mkdir <name>`.'), 
+                ephemeral = True)
+            
+        elif not is_valid_path_name(args[0]):
+            await interaction.response.send_message(
+                self.names_convention.format(args[0]),
+                ephemeral = True)
+        else:
+            dir_path = os.path.join(self.view.path, args[0])
+            os.makedirs(dir_path, exist_ok = True)
+
+            await self.view._update_interface(interaction)
+    
+    async def _cmd_zip      (self, args: list[str], interaction: discord.Interaction):
+        if not args: 
+            await interaction.response.send_message(
+                self.view.client._('✖ You must provide one argument. E.g.: `zip <dir:index>`.'), 
+                ephemeral = True)
+            return
+        
+        path_to_zip = await self._file_or_dir_selection(args[0])
+        if not isinstance(path_to_zip, str): return
+
+        elif not os.path.isdir(path_to_zip):
+            await interaction.response.send_message(
+                self.view.client._('✖ The path must be a directory.'),
+                ephemeral = True)
+            return
+        
+        await interaction.response.defer()
+
+        zip_path = f'{path_to_zip}.zip'
+
+        response : discord.Message = await interaction.followup.send(
+            self.view.client._('`[{}]`: Compressing files...').format(zip_path), 
+            ephemeral = True)
+        
+        counter = [0,0]
+        task = threading.Thread(
+            target = make_zip, 
+            args = (path_to_zip, zip_path, counter))
+        task.start()
+
+        while task.is_alive():
+            if counter[1] == 0: 
+                await asyncio.sleep(0.1)
+            else:
+                show = self.view.client._('`[{}]`: `[{}/{}]` files have been compressed...')\
+                                .format(zip_path, counter[0], counter[1])
+                
+                await response.edit(content = show)
+                await asyncio.sleep(0.5)
+
+        await self.view._update_interface(interaction)
+
+        await response.edit(
+            content = self.view.client._('✔ The files have been successfully compressed.'))
+        
+        await interaction.user.send(
+            content = self.view.client._('✔ The files have been successfully compressed.'))
+
+    async def _cmd_unzip    (self, args: list[str], interaction: discord.Interaction):
+        if not args: 
+            await interaction.response.send_message(
+                self.view.client._('✖ You must provide one argument. E.g.: `unzip <file:index>`.'), 
+                ephemeral = True)
+            return
+        
+        path_to_unzip = await self._file_or_dir_selection(args[0])
+        if not isinstance(path_to_unzip, str): return
+
+        elif not os.path.isfile(path_to_unzip) or not path_to_unzip.endswith('.zip'):
+            await interaction.response.send_message(
+                self.view.client._('✖ The path must be a `.zip` file.'),
+                ephemeral = True)
+            return
+        
+        unzip_path = path_to_unzip.removesuffix('.zip')
+        
+        if os.path.exists(unzip_path):
+            await interaction.response.send_message(
+                self.view.client._('✖ A folder named `{}` already exists.')
+                        .format(os.path.basename(unzip_path)), 
+                ephemeral = True)
+            return
+        
+        await interaction.response.defer()
+        response : discord.Message = await interaction.followup.send(
+            self.view.client._('Unpacking Backup...'), 
+            ephemeral = True)
+        counter = [0,0]
+        
+        task = threading.Thread(
+            target = unpack_zip, 
+            args = (path_to_unzip, unzip_path, counter))
+        task.start()
+        
+        while task.is_alive():
+            if counter[1] == 0: 
+                await asyncio.sleep(0.1)
+            else:
+                show = self.view.client._('`[{}]`: `[{}/{}]` files have been unpacked...')\
+                        .format(unzip_path, counter[0], counter[1])
+                await response.edit(content = show)
+                await asyncio.sleep(0.5)
+        
+        await self.view._update_interface(interaction)
+        msg = self.view.client._('✔ The files have been successfully unpacked.')
+        await interaction.user.send(msg)
+        await response.edit(content = msg)
+
+    async def _cmd_cd       (self, args: list[str], interaction: discord.Interaction):
+        if not args: 
+            await interaction.response.send_message(
+                self.view.client._('✖ You must provide one argument. E.g.: `cd <dir:index | file:index>`.'), 
+                ephemeral = True)
+            return
+        
+        new_path = await self._file_or_dir_selection(args[0])
+        if not isinstance(new_path, str): return
+
+        self.view.path = new_path
+        await self.view._update_interface(interaction)
+
+    async def _cmd_del      (self, args: list[str], interaction: discord.Interaction):
+        if not args: 
+            await interaction.response.send_message(
+                self.view.client._('✖ You must provide one argument. E.g.: `del <dir:index | file:index>`.'),
+                ephemeral = True)
+            return
+        
+        path_to_remove = await self._file_or_dir_selection(args[0])
+        if not isinstance(path_to_remove, str): return
+
+        await interaction.response.defer()
+        response : discord.Message = await interaction.followup.send(
+            self.view.client._('This action might take some time...'),
+            ephemeral = True)
+        await asyncio.sleep(1)
+
+        try:
+            if os.path.isdir(path_to_remove): 
+                await execute_and_wait(shutil.rmtree, args = (path_to_remove, ))
+
+            elif os.path.isfile(path_to_remove): 
+                await execute_and_wait(os.remove, args = (path_to_remove, ))
+
+        except Exception as error:
+            await response.edit(content = self.view.client._('Error: {}').format(error))
+        
+        else:
+            await self.view._update_interface(interaction)
+            
+            await response.edit(
+                content = self.view.client._('✔ `{}` has been deleted.')
+                                    .format(mcdis_path(path_to_remove)))
+
+    async def _cmd_copy     (self, args: list[str], interaction: discord.Interaction):
+        if args < 2: 
+            await interaction.response.send_message(
+                self.view.client._('✖ You must provide two arguments. E.g.: `move <dir:index | file:index> <mcdis_path>`.'),
+                ephemeral = True)
+            return
+        
+        path_to_copy = await self._file_or_dir_selection(args[0])
+        if not isinstance(path_to_copy, str): return
+
+        path_provided = ' '.join(args[1:])
+        response = self.view.client.is_valid_mcdis_path(path_provided, check_if_dir = True)
+        new_path = os.path.join(un_mcdis_path(path_provided), os.path.basename(path_to_copy))
+
+        if not response is True:
+            await interaction.response.send_message(response, ephemeral = True)
+            return
+        
+        elif os.path.exists(new_path):
+            if os.path.isdir(new_path): 
+                msg = self.view.client._('✖ A folder with that name already exists at path.')
+            elif os.path.exists(new_path): 
+                msg = self.view.client._('✖ A file with that name already exists at path.')
+
+            await interaction.response.send_message(msg, ephemeral = True)
+            return
+        
+        await interaction.response.defer()
+        response :discord.Message = await interaction.followup.send(
+            self.view.client._('This action might take some time...'),
+            ephemeral = True)
+        await asyncio.sleep(1)
+
+        if os.path.isdir(path_to_copy): 
+            await execute_and_wait(shutil.copytree, args = (path_to_copy, new_path))
+        elif os.path.isfile(path_to_copy): 
+            await execute_and_wait(shutil.copy2, args = (path_to_copy, new_path))
+        
+        await self.view._update_interface(interaction)
+        await response.edit(
+            content = self.view.client._('✔ `{}` has been copied to `{}`.')
+                                .format(mcdis_path(path_to_copy), path_provided))
+
+    async def _cmd_move     (self, args: list[str], interaction: discord.Interaction):
+        if len(args) < 2: 
+            await interaction.response.send_message(
+                self.view.client._('✖ You must provide two arguments. E.g.: `move <dir:index | file:index> <mcdis_path>`.'),
+                ephemeral = True)
+            return
+        
+        path_to_move = await self._file_or_dir_selection(args[0])
+        if not isinstance(path_to_move, str): return
+
+
+        path_provided = ' '.join(args[1:])
+        response = self.view.client.is_valid_mcdis_path(path_provided, check_if_dir = True)
+        new_path = os.path.join(un_mcdis_path(path_provided), os.path.basename(path_to_move))
+
+        if not response is True:
+            await interaction.response.send_message(response, ephemeral = True)
+            return
+        
+        elif os.path.exists(new_path):
+            if os.path.isdir(new_path): 
+                msg = self.view.client._('✖ A folder with that name already exists at path.')
+            elif os.path.exists(new_path): 
+                msg = self.view.client._('✖ A file with that name already exists at path.')
+
+            await interaction.response.send_message(msg, ephemeral = True)
+            return
+        
+        await interaction.response.defer()
+        response : discord.Message = await interaction.followup.send(
+            self.view.client._('This action might take some time...'),
+            ephemeral = True)
+        await asyncio.sleep(1)
+
+        await execute_and_wait(shutil.move, args = (path_to_move, new_path))
+        
+        await self.view._update_interface(interaction)
+        await response.edit(
+            content = self.view.client._('✔ `{}` has been moved to `{}`.')
+                                    .format(mcdis_path(path_to_move), path_provided))
+
+    async def _cmd_rename   (self, args: list[str], interaction: discord.Interaction):
+        name_provided = ' '.join(args[1:])[:100]
+
+        if len(args) < 2: 
+            await interaction.response.send_message(
+                self.view.client._('✖ You must provide two arguments. E.g.: `rename <dir:index | file:index> <new_name>`.'),
+                ephemeral = True)
+            return
+            
+        elif not is_valid_path_name(name_provided):
+            await interaction.response.send_message(
+                self.names_convention.format(name_provided),
+                ephemeral = True)
+            return
+        
+        path_to_rename = await self._file_or_dir_selection(args[0])
+        if not isinstance(path_to_rename, str): return
+    
+        new_path = os.path.join(self.view.path, name_provided)
+        os.rename(path_to_rename, new_path)
+        await self.view._update_interface(interaction)
+        
+    async def _file_or_dir_selection(self, arg : str, interaction: discord.Interaction) -> Union[str, None]:
+        dir_files = os.listdir(self.view.path)
+        dir_files.sort()
+        dirs  = [file for file in dir_files if os.path.isdir (os.path.join(self.view.path, file))]
+        files = [file for file in dir_files if os.path.isfile(os.path.join(self.view.path, file))]
+
+        if not any([arg.lower().startswith(x) for x in ['dir:', 'item:']]):
+            await interaction.response.send_message(
+                self.view.client._('✖ Invalid argument `{}`. It should be `dir:index` or `file:index`.').format(arg),
+                ephemeral = True)
+            return
+        
+        prefix, index = arg.lower().split(':')
+
+        if not index.isdigit():
+            await interaction.response.send_message(
+                self.view.client._('✖ The index must be an integer.'),
+                ephemeral = True)
+
+        elif int(index) < 1 or int(index) > min(len(dirs), 99):
+            await interaction.response.send_message(
+                self.view.client._(f'✖ No {prefix} exists with that index.'),
+                ephemeral = True)
+
+        elif prefix == 'dir':
+            dir_path = dirs[(self.view.page-1)*99 + int(index) - 1]
+
+            return dir_path if self.view.path == '.' else os.path.join(self.view.path, dir_path)
+
+        elif prefix == 'file':
+            file_path = files[(self.view.page-1)*99 + int(index) - 1]
+                
+            return file_path if self.view.path == '.' else os.path.join(self.view.path, file_path)
 
 class DeleteDirButton       (discord.ui.Button):
     def __init__(self, client: McDisClient):
@@ -567,16 +643,20 @@ class DeleteDirButton       (discord.ui.Button):
 
             try: shutil.rmtree(self.view.path)
             except Exception as error: 
-                await confirmation_interaction.response.edit_message(content = self.view.client._('Error: {}').format(error), embed = None, view = None)
+                await confirmation_interaction.response.edit_message(
+                    content = self.view.client._('Error: {}').format(error),
+                    embed = None,
+                    view = None)
             else:
                 await confirmation_interaction.response.edit_message(delete_after=0)
-                await interaction.followup.edit_message(message_id = interaction.message.id, 
-                                                        embed = FilesManagerEmbed(new_path), 
-                                                        view = FilesManagerView(new_path))
+
+                self.view.path = new_path
+                await self.view._update_interface(interaction)
                 
-        await confirmation_request(self.view.client._('Are you sure about deleting the dir `{}`?').format(mcdis_path(self.view.path)), 
-                                    on_confirmation = on_confirmation,
-                                    interaction = interaction)
+        await confirmation_request(
+            self.view.client._('Are you sure about deleting the dir `{}`?').format(mcdis_path(self.view.path)), 
+            on_confirmation = on_confirmation,
+            interaction = interaction)
 
 class FilesManagerEmbed     (discord.Embed):
     def __init__(self, client : McDisClient, path: str = '.', page : int = 1):
