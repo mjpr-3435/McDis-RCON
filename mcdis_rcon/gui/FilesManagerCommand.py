@@ -9,7 +9,7 @@ class CommandView           (discord.ui.View):
         self.process        = process
         self.command        = command
         self.command_path   = os.path.join(self.process.path_commands, self.command)
-        self.action         = 1
+        self.action         = action
         self.data : dict    = self._load_data()
         self.actions        = self._get_actions()
         self.options        = self._get_options()
@@ -35,14 +35,14 @@ class CommandView           (discord.ui.View):
                 label = action, 
                 value = i + 1))
                 
-        return options
+        return options[:25]
 
     def _get_commands(self) -> list[str]:
         return self.data[self.actions[self.action]]
 
 class ActionSelect          (discord.ui.Select):
     def __init__(self, client: McDisClient, options: list):
-        super().__init__(placeholder = client._('Select an action'), options = options[:25])
+        super().__init__(placeholder = client._('Select an action'), options = options)
         self.view : CommandView
         
     async def callback(self, interaction: discord.Interaction):
@@ -109,8 +109,14 @@ class EditButton            (discord.ui.Button):
         self.view : CommandView
 
     async def callback(self, interaction: discord.Interaction):
-        yml_content = read_file(self.view.command_path)
-
+        try:
+            yml_content = read_file(self.view.command_path)
+        except:
+            self.view.client.error_report(
+                title = 'Reading Command',
+                error = traceback.format_exc())
+            return
+        
         class edit_command(discord.ui.Modal, title = self.view.client._('Edit the command')):
             name = discord.ui.TextInput(
                 label = self.view.client._('Name'),
@@ -125,10 +131,22 @@ class EditButton            (discord.ui.Button):
             async def on_submit(modal, interaction: discord.Interaction):
                 new_name = f'{str(modal.name)[:40]}.yml'
                 new_path_file = os.path.join(self.view.process.path_commands, new_name)
+                
+                try:
+                    write_in_file(self.view.command_path, str(modal.content))
+                except:
+                    self.view.client.error_report(
+                        title = 'Writing command.yml',
+                        error = traceback.format_exc())
+                    return
 
-                write_in_file(self.view.command_path, str(modal.content))
-
-                os.rename(self.view.command_path, new_path_file)
+                try:
+                    os.rename(self.view.command_path, new_path_file)
+                except:
+                    self.view.client.error_report(
+                        title = 'Renaming command.yml',
+                        error = traceback.format_exc())
+                    return
 
                 await interaction.response.edit_message(
                     embed = CommandEmbed(self.view.client, self.view.process, new_name),
@@ -145,13 +163,14 @@ class DeleteButton          (discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         from .FilesManagerCommands import CommandsEmbed, CommandsView
         async def on_confirmation(confirmation_interaction: discord.Interaction):
-            try: 
+            try:
                 os.remove(self.view.command_path)
-            except Exception as error: 
-                await confirmation_interaction.response.edit_message(
-                    content = self.view.client._('Error: {}').format(error), 
-                    embed = None, 
-                    view = None)
+            except: 
+                await self.view.client.error_report(
+                    title = 'Delete command.yml',
+                    error = traceback.format_exc()
+                )
+
             else:
                 await confirmation_interaction.response.edit_message(delete_after = 0)
                 await interaction.followup.edit_message(

@@ -22,7 +22,7 @@ class CommandsView          (discord.ui.View):
         options.append(discord.SelectOption(
             label = self.client._('[New Command]'), 
             emoji = emoji_new_command,
-            value = 'New Command'))
+            value = '__NEW_COMMAND__'))
 
         for file in commands:
             if file.endswith('.yml'):
@@ -30,17 +30,17 @@ class CommandsView          (discord.ui.View):
                     label = file.removesuffix('.yml'), 
                     value = file))
                 
-        return options
+        return options[:25]
 
 class CommandSelect            (discord.ui.Select):
     def __init__(self, client: McDisClient, options: list):
-        super().__init__(placeholder = client._('Select a command'), options = options[:25])
+        super().__init__(placeholder = client._('Select a command'), options = options)
         self.view : CommandsView
         
     async def callback(self, interaction: discord.Interaction):
         from .FilesManagerCommand import CommandEmbed, CommandView
 
-        if self.values[0] != 'New Command':
+        if self.values[0] != '__NEW_COMMAND__':
             await interaction.response.edit_message(
                 embed = CommandEmbed(self.view.client, self.view.process, self.values[0]),
                 view = CommandView(self.view.client, self.view.process, self.values[0]))
