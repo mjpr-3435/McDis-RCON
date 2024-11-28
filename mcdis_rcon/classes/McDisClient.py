@@ -16,6 +16,7 @@ class McDisClient(commands.Bot):
         self._          : Callable[[str], str]                  = None
         self.path_backups                                       = '.mdbackups'
         self.path_addons                                        = '.mdaddons'
+        self.path_addons_config                                 = os.path.join('.mdaddons', 'configs')
         self.addons                                             = []
         self.flask      : FlaskManager                          = None
         self.processes  : list[Union[Network,Server]]           = []
@@ -26,8 +27,9 @@ class McDisClient(commands.Bot):
         
         self.max_processes                                           = 5
 
-        os.makedirs(self.path_backups, exist_ok = True)
-        os.makedirs(self.path_addons , exist_ok = True)
+        os.makedirs(self.path_backups       , exist_ok = True)
+        os.makedirs(self.path_addons        , exist_ok = True)
+        os.makedirs(self.path_addons_config , exist_ok = True)
         
         self._load_config()
 
@@ -102,8 +104,8 @@ class McDisClient(commands.Bot):
                         print(f'{process}: The process name must not exceed 40 characters.')
                         os._exit(0)
 
-                    elif process in [self.path_backups, self.path_addons]:
-                        print(f'{process}:  A process cannot be named \'{self.path_backups}\' or \'{self.path_addons}\'.')
+                    elif process in [self.path_backups, self.path_addons, 'Flask']:
+                        print(f'{process}:  A process cannot be named \'{self.path_backups}\', \'{self.path_addons}\' or Flask.')
                         os._exit(0)
                     
                     elif process.lower() in names:
@@ -285,6 +287,7 @@ class McDisClient(commands.Bot):
 
             if self.config['Flask']['Allow']: 
                 self.flask = FlaskManager(self)
+                await thread('Console Flask', self.panel, public = True)
                 print(self._('   • Flask object created'))
                 
         except Exception as error:
@@ -305,23 +308,58 @@ class McDisClient(commands.Bot):
         if message.author.bot: 
             return
 
-        for process in self.processes: 
-            await process.discord_listener(message)
-
         if message.channel.id == self.panel.id:
-            if   self.is_panel_command(message.content.lower(), f'{ self.prefix}start-all'):
+            if   self.is_panel_command(message.content.lower(), f'start-all'):
                 await message.delete()
+
+                response = await message.channel.send(
+                    self._('✔ Initializing processes.'))
+                await response.delete(delay = 1)
 
                 for process in self.processes: 
                     process.start()
                     
-            elif self.is_panel_command(message.content.lower(), f'{ self.prefix}stop-all'):
+            elif self.is_panel_command(message.content.lower(), f'stop-all'):
                 await message.delete()
+
+                response = await message.channel.send(
+                    self._('✔ Stopping processes.'))
+                await response.delete(delay = 1)
 
                 for process in self.processes: 
                     process.stop()
                                 
-            elif self.is_panel_command(message.content.lower(), f'{ self.prefix}start'):
+            elif self.is_panel_command(message.content.lower(), f'kill-all'):
+                await message.delete()
+
+                response = await message.channel.send(
+                    self._('✔ Forcibly stopped processes.'))
+                await response.delete(delay = 1)
+
+                for process in self.processes: 
+                    process.kill()
+                                
+            elif self.is_panel_command(message.content.lower(), f'restart-all'):
+                await message.delete()
+
+                response = await message.channel.send(
+                    self._('✔ Restarting processes...'))
+                await response.delete(delay = 1)
+
+                for process in self.processes: 
+                    await process.restart()
+                                
+            elif self.is_panel_command(message.content.lower(), f'mdreload-all'):
+                await message.delete()
+
+                response = await message.channel.send(
+                    self._('✔ Reloading mdplugins...'))
+                await response.delete(delay = 1)
+
+                for process in self.processes: 
+                    process.load_plugins(reload = True)
+                                
+            elif self.is_panel_command(message.content.lower(), f'start'):
                 process_name = message.content.removeprefix(f'{ self.prefix}start')
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -329,21 +367,21 @@ class McDisClient(commands.Bot):
                 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}start <name>`.').format( self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}start <name>` or `{}start-all`.').format(self.prefix, self.prefix))
                     await response.delete(delay = 5)
 
                 elif process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was already open.').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Initializing process.').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                     process.start()
 
-            elif self.is_panel_command(message.content.lower(), f'{ self.prefix}stop'):
+            elif self.is_panel_command(message.content.lower(), f'stop'):
                 process_name = message.content.removeprefix(f'{ self.prefix}stop')
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -351,21 +389,21 @@ class McDisClient(commands.Bot):
 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}stop <name>`.').format( self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}stop <name>` or `{}stop-all`.').format(self.prefix, self.prefix))
                     await response.delete(delay = 5)
 
                 elif not process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was not open.').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Stopping process.').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                     process.stop()
             
-            elif self.is_panel_command(message.content.lower(), f'{ self.prefix}kill'):
+            elif self.is_panel_command(message.content.lower(), f'kill'):
                 process_name = message.content.removeprefix(f'{ self.prefix}kill')
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -373,21 +411,21 @@ class McDisClient(commands.Bot):
                 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}kill <name>`.').format( self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}kill <name>` or `{}kill-all`.').format(self.prefix, self.prefix))
                     await response.delete(delay = 5)
 
                 elif not process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was not open.').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Forcibly stopped process.').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                     process.kill()
 
-            elif self.is_panel_command(message.content.lower(), f'{ self.prefix}restart'):
+            elif self.is_panel_command(message.content.lower(), f'restart'):
                 process_name = message.content.removeprefix(f'{ self.prefix}restart')
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -395,21 +433,21 @@ class McDisClient(commands.Bot):
                 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}restart <name>`.').format( self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}restart <name>` or `{}restart-all`.').format(self.prefix, self.prefix))
                     await response.delete(delay = 5)
 
                 elif not process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was not open.').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Restarting process...').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                     await process.restart()
 
-            elif self.is_panel_command(message.content.lower(), f'{ self.prefix}reload mdplugins'):
+            elif self.is_panel_command(message.content.lower(), f'mdreload'):
                 process_name = message.content.removeprefix(f'{ self.prefix}reload mdplugins')
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -417,20 +455,68 @@ class McDisClient(commands.Bot):
                 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}reload_mdplugins <name>`.').format( self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}mdreload <name>` or `{}mdreload-all`.').format(self.prefix, self.prefix))
                     await response.delete(delay = 5)
 
                 elif not process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was not open.').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Reloading mdplugins...').format(process.name))
-                    await response.delete(delay = 5)
+                    await response.delete(delay = 1)
                     process.load_plugins(reload = True)
         
+        for process in self.processes: 
+            await process.discord_listener(message)
+    
+    async def   upload_logic            (self, message: discord.Message):
+        if message.author.bot: 
+            return
+        
+        elif not message.attachments: 
+            return
+        
+        elif not self.uploader.is_running: 
+            return
+        
+        elif self.uploader.overwrite:
+            response = await message.channel.send(self._('Saving files...'))
+            await asyncio.sleep(2)
+
+            i = 1
+            for attachment in message.attachments:
+                path_to_save = os.path.join(self.uploader.path_to_upload, attachment.filename)
+                await attachment.save(path_to_save)
+
+                response = await response.edit(
+                    content = self._('`[{}/{}]` Uploaded files.').format(i, len(message.attachments)))
+                i += 1
+            
+            response = await response.edit(content = self._('✔ Files have been uploaded.'))
+            await response.delete(delay = 2)
+        else:
+            response = await message.channel.send(self._('Processing files...'))
+            await asyncio.sleep(2)
+
+            for attachment in message.attachments:
+                path_to_save = os.path.join(self.uploader.path_to_upload, attachment.filename)
+                path_to_show = mcdis_path(path_to_save)
+            
+                if not os.path.exists(path_to_save):
+                    await attachment.save(path_to_save)
+                    response = await response.edit(content = response.content + self._('\n • `{}` uploaded.').format(attachment.filename))
+            
+                else:
+                    response = await response.edit(content = response.content + self._('\n • McDis will not overwrite the file `{}`.').format(path_to_show))
+                await asyncio.sleep(2)
+
+            response = await response.edit(content = response.content + self._('\n ✔ Files have been processed.'))
+            await response.delete(delay = 2)
+        await message.delete()
+
     async def   restart                 (self, interaction: discord.Interaction):
         await interaction.response.edit_message(
             content = self._('Checking if there are open processes...'),
@@ -547,14 +633,15 @@ class McDisClient(commands.Bot):
     async def   call_addons             (self, function: str, args: tuple, *, exit_on_error: bool = False):
         for addon in self.addons:
             try:
-                try: func = getattr(addon, 'call_behaviours')
-                except AttributeError: continue
-            
-                await func(function, args)
-            except: 
+                func = getattr(addon, 'call_behaviours', None) or getattr(addon, function, None)
+                if func:
+                    await func(function, args) if 'call_behaviours' in locals() else await func(*args)
+                else:
+                    return
+            except Exception:
                 await self.error_report(
-                    title = f'{function}() of {addon.__name__}',
-                    error = traceback.format_exc()
+                    title=f'{function}() of {addon.__name__}',
+                    error=traceback.format_exc()
                 )
 
                 if exit_on_error: os._exit(0)
@@ -567,3 +654,22 @@ class McDisClient(commands.Bot):
         print(f'\n{error_log}')
         
         return error_report.jump_url
+
+    def         error_wrapper           (self, *, error_title: str = '', reports: dict = None):
+        def decorator(function: Callable):
+            def wrapped(*args, **kwargs):
+                try:
+                    return function(*args, **kwargs)
+                except:
+                    asyncio.run_coroutine_threadsafe(
+                        self.error_report(
+                            title = error_title,
+                            error = traceback.format_exc()
+                        ),
+                        self.loop
+                    )
+
+                    if reports:
+                        reports['error'] = True
+            return wrapped
+        return decorator

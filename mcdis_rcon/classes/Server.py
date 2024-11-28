@@ -10,12 +10,12 @@ class Server(Process):
 
     def         send_response       (self, target : str, message : Union[str, list[str]], *, colour : str = 'gray'):
         if isinstance(message, str):
-            message = message.replace("\n","")
+            message = message.replace("\n","").replace('"',"'")
             self.execute(f'tellraw {target} {{"text": "{message}","color":"{colour}"}}')
         
         elif isinstance(message, list) and all(isinstance(i, str) for i in message):
             for msg in message:
-                msg = msg.replace("\n","")
+                msg = msg.replace("\n","").replace('"',"'")
                 self.execute(f'tellraw {target} {{"text": "{msg}","color":"{colour}"}}')
     
     def         is_command          (self, message: str, command: str):
@@ -24,7 +24,7 @@ class Server(Process):
 
     def         show_command        (self, target : str, command : str, description : str):
         signs = [self.prefix, '<', '>', ':', '|']
-        command = f'!!{command}'
+        command = f'{self.prefix}{command}'
         
         for sign in signs: 
             command = command.replace(sign, f'§6{sign}§f')
@@ -33,7 +33,7 @@ class Server(Process):
 
         self.send_response(target, [command, description])
 
-    def         _find_real_process   (self):
+    def         _find_real_process  (self):
         for process in psutil.process_iter():
             try:
                 javas = ['java', 'java.exe']

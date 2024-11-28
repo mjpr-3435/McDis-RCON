@@ -8,10 +8,11 @@ class Process():
         self.name                   = name
         self.path_files             = name
         self.client                 = client
+        self.prefix                 = self.client.prefix
         self.path_bkps              = os.path.join(client.path_backups, self.name)
-        self.path_plugins           = os.path.join(self.path_files,'mdplugins')
+        self.path_plugins           = os.path.join(self.path_files,'.mdplugins')
         self.path_plugins_config    = os.path.join(self.path_plugins,'configs')
-        self.path_commands          = os.path.join(self.path_files,'mdcommands')
+        self.path_commands          = os.path.join(self.path_files,'.mdcommands')
         self.start_cmd              = config['start_cmd']
         self.stop_cmd               = config['stop_cmd']
         self.blacklist              = config['blacklist']
@@ -110,13 +111,19 @@ class Process():
             logs = ['McDis Plugin System is starting up']
 
         valid_extensions = ['.py', '.mcdis']
-        modules = [file for file in os.listdir(self.path_plugins) if os.path.splitext(file)[1] in valid_extensions]
+        files_in_plugins_dir = os.listdir(self.path_plugins)
+        cond = lambda file: os.path.splitext(file)[1] in valid_extensions
 
-        if modules:
+        plugins = [file for file in files_in_plugins_dir if cond(file)]
+
+        if not plugins:
+            logs.append('No plugins to import')
+
+        else:
             logs.append('Importing mdplugins...')
             sys.path.insert(0, temp_path)
 
-            for module in modules:
+            for module in plugins:
                 try:
                     if module.endswith('.py'):
                         module_path = os.path.join(self.path_plugins, module)
@@ -128,7 +135,7 @@ class Process():
                         zip_path = os.path.join(self.path_plugins, module)
                         mod_temp_dir = os.path.join(temp_path, module.removesuffix('.mcdis'))
                         os.makedirs(mod_temp_dir, exist_ok = True) 
-
+                        
                         with zipfile.ZipFile(zip_path, 'r') as zip_file:
                             zip_file.extractall(mod_temp_dir)
                         
@@ -139,17 +146,16 @@ class Process():
 
                     self.plugins.append(mod)
                     logs.append(f'Plugin imported:: {module}')
+                    
                 except:
                     asyncio.create_task(
                         self.error_report(
-                            title = f'unable to import plugin {module}',
+                            title = f'Unable to import plugin {module}',
                             error = traceback.format_exc()
                         )
                     )
             
             sys.path.pop(0)
-        else:
-            logs.append('No plugins to import')
         
         if not reload: logs.append('Initializing process...')
         asyncio.create_task(self.call_plugins('load', (self,)))
@@ -192,55 +198,42 @@ class Process():
 
     ###         Backups Logic       ###
 
-    def         make_bkp                (self, *, counter : list = None, force = False):
-        try:
-            if self.is_running() and not force: return
+    def         make_bkp                (self,          *, counter : list = None):
+        if self.is_running(): return
 
-            os.makedirs(self.path_bkps, exist_ok = True)
+        os.makedirs(self.path_bkps, exist_ok = True)
 
-            bkp_path = os.path.join(self.path_bkps, f'{self.name} 1.zip')
-            pattern = os.path.join(self.path_bkps, f'{self.name} [1-{self.client.config["Backups"]}].zip')
-            bkps = glob.glob(pattern)
-            sorted_bkps = sorted(bkps, key = os.path.getmtime, reverse = True)
+        bkp_path = os.path.join(self.path_bkps, f'{self.name} 1.zip')
+        pattern = os.path.join(self.path_bkps, f'{self.name} [1-{self.client.config["Backups"]}].zip')
+        bkps = glob.glob(pattern)
+        sorted_bkps = sorted(bkps, key = os.path.getmtime, reverse = True)
 
-            for i in range(self.client.config['Backups'] - 1,len(sorted_bkps)): os.remove(sorted_bkps.pop(i))
+        for i in range(self.client.config['Backups'] - 1,len(sorted_bkps)): os.remove(sorted_bkps.pop(i))
 
-            sorted_bkps.reverse()
-        
-            for bkp in sorted_bkps:
-                new_index = (len(sorted_bkps) + 1) - sorted_bkps.index(bkp)
-                os.rename(bkp, os.path.join(self.path_bkps, f"{self.name} {new_index}.zip"))
-
-            if counter:
-                make_zip(self.path_files, bkp_path, counter)
-            else:
-                make_zip(self.path_files, bkp_path)
-        except:
-            asyncio.create_task(
-                self.error_report(
-                    title = 'make_bkp()',
-                    error = traceback.format_exc()
-                )
-            )
+        sorted_bkps.reverse()
     
-    def         unpack_bkp              (self, backup, *, counter : list = None): 
-        try:
-            shutil.rmtree(self.path_files)
-
-            os.makedirs(self.path_files, exist_ok = True)
-            source = os.path.join(self.path_bkps, backup)
-
-            if counter:
-                unpack_zip(source, self.path_files, counter = counter)
-            else:
-                unpack_zip(source, self.path_files)
-        except:
-            asyncio.create_task(
+        for bkp in sorted_bkps:
+            new_index = (len(sorted_bkps) + 1) - sorted_bkps.index(bkp)
+            new_name = os.path.join(self.path_bkps, f"{self.name} {new_index}.zip")
+            
+            try:
+                os.rename(bkp, new_name)
+            except:
                 self.error_report(
-                    title = 'unpack_bkp()',
-                    error = traceback.format_exc()
-                )
-            )
+                    title = 'Renaming in make_bkp()',
+                    error = traceback.format_exc())
+                return
+            
+        make_zip(self.path_files, bkp_path, counter)
+    
+    def         unpack_bkp              (self, backup,  *, counter : list = None):
+        shutil.rmtree(self.path_files)
+
+        os.makedirs(self.path_files, exist_ok = True)
+        source = os.path.join(self.path_bkps, backup)
+
+        unpack_zip(source, self.path_files, counter)
+   
     ###         Behaviours          ###
 
     async def   discord_listener        (self, message: discord.Message):
@@ -369,13 +362,12 @@ class Process():
     async def   call_plugins            (self, function: str, args: tuple):
        for plugin in self.plugins:
             try: 
-                try: func = getattr(plugin, function)
-                except AttributeError: continue
-
-                await func(*args)
+                func = getattr(plugin, function, None)
+                if func:
+                    await func(*args)
             except: 
                 await self.error_report(
-                    title = '{function}() of {plugin}',
+                    title = f'{function}() of {plugin}',
                     error = traceback.format_exc()
                     )
 
