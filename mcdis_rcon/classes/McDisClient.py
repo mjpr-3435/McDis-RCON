@@ -24,8 +24,6 @@ class McDisClient(commands.Bot):
         self.servers    : list[Server]                          = []
         self.uploader                                           = Uploader()
         self.is_running                                         = False
-        
-        self.max_processes                                           = 5
 
         os.makedirs(self.path_backups       , exist_ok = True)
         os.makedirs(self.path_addons        , exist_ok = True)
@@ -162,7 +160,8 @@ class McDisClient(commands.Bot):
     async def   _load_processes        (self):
         from .Network import Network
         from .Server import Server
-        
+        from .Flask import FlaskManager
+
         for name in self.config['Processes']['Servers']:
             server = Server(name, self, self.config['Processes']['Servers'][name])
             self.processes.append(server)
@@ -178,7 +177,8 @@ class McDisClient(commands.Bot):
             
         for process in self.processes:
             await thread(f'Console {process.name}', self.panel, public = True)
-        await thread(f'Error Reports', self.panel, public = True)
+        await thread('Error Reports', self.panel, public = True)
+        await thread('Console Flask', self.panel, public = True)
 
     async def   _load_addons           (self):
         files_in_addons_dir = os.listdir(self.path_addons)
@@ -278,12 +278,8 @@ class McDisClient(commands.Bot):
             print(self._('   • Loaded behaviours'))
             await self.tree.sync()
             print(self._('   • Client commands synchronized to Discord'))
-
-            if self.config['Flask']['Allow']: 
-                self.flask = FlaskManager(self)
-                await thread('Console Flask', self.panel, public = True)
-                print(self._('   • Flask object created'))
-                
+            self.flask = FlaskManager(self)
+  
         except Exception as error:
             print(self._('There was an error while loading McDis-RCON.'))
             print(self._('Error: {}').format(error))

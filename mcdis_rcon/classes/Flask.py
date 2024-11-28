@@ -11,8 +11,8 @@ class FlaskManager (Flask):
         self.is_running             = False
         self.temporary_links        = True
         self.one_time_links         = True
-        self.ip                     = client.config['Flask']['IP']
-        self.port                   = client.config['Flask']['Port']
+        self.ip                     = client.config['Flask']['IP'] if client.config['Flask']['Allow'] else '——'
+        self.port                   = client.config['Flask']['Port'] if client.config['Flask']['Allow'] else '——'
         self.addres                 = f'http://{self.ip}:{self.port}'
         self.client                 = client
         self._log_queue             = None

@@ -10,12 +10,10 @@ class Server(Process):
 
     def         send_response       (self, target : str, message : Union[str, list[str]], *, colour : str = 'gray'):
         if isinstance(message, str):
-            message = message.replace("\n","").replace('"',"'")
             self.execute(f'tellraw {target} {{"text": "{message}","color":"{colour}"}}')
         
         elif isinstance(message, list) and all(isinstance(i, str) for i in message):
             for msg in message:
-                msg = msg.replace("\n","").replace('"',"'")
                 self.execute(f'tellraw {target} {{"text": "{msg}","color":"{colour}"}}')
     
     def         is_command          (self, message: str, command: str):

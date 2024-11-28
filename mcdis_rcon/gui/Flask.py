@@ -27,7 +27,7 @@ class UpdateButton          (discord.ui.Button):
 class StateButton           (discord.ui.Button):
     def __init__(self, client: McDisClient):
         label = 'Close' if client.flask.is_running else 'Run'
-        super().__init__(label = label, style = discord.ButtonStyle.gray)
+        super().__init__(label = label, style = discord.ButtonStyle.gray, disabled = not client.config['Flask']['Allow'])
         self.view: FlaskView
 
     async def callback(self, interaction: discord.Interaction):
@@ -77,7 +77,7 @@ class StateButton           (discord.ui.Button):
 class TemporaryLinksButton   (discord.ui.Button):
     def __init__(self, client : McDisClient):
         label =  'Temporary' if client.flask.temporary_links else 'Persistent'
-        super().__init__(label = label, style=discord.ButtonStyle.gray)
+        super().__init__(label = label, style=discord.ButtonStyle.gray, disabled = not client.config['Flask']['Allow'])
         self.view: FlaskView
 
     async def callback(self, interaction: discord.Interaction):
@@ -91,7 +91,7 @@ class TemporaryLinksButton   (discord.ui.Button):
 class OneTimeLinksButton    (discord.ui.Button):
     def __init__(self, client : McDisClient):
         label = 'Single-Use' if client.flask.one_time_links else 'Multi-Use'
-        super().__init__(label = label, style=discord.ButtonStyle.gray)
+        super().__init__(label = label, style=discord.ButtonStyle.gray, disabled = not client.config['Flask']['Allow'])
         self.view: FlaskView
 
     async def callback(self, interaction: discord.Interaction):
@@ -104,7 +104,7 @@ class OneTimeLinksButton    (discord.ui.Button):
 
 class CleanLinksButton      (discord.ui.Button):
     def __init__(self, client : McDisClient):
-        super().__init__(label = 'Clean Links', style=discord.ButtonStyle.red)
+        super().__init__(label = 'Clean Links', style=discord.ButtonStyle.red, disabled = not client.config['Flask']['Allow'])
         self.view: FlaskView
 
     async def callback(self, interaction: discord.Interaction):
@@ -136,8 +136,8 @@ class FlaskEmbed            (discord.Embed):
         )
 
     def _add_status_field(self):
-        ip = truncate(str(self.client.config['Flask']['IP']), 20)
-        port = str(self.client.config['Flask']['Port'])
+        ip = truncate(str(self.client.flask.ip), 20)
+        port = str(self.client.flask.port)
         state = 'Running' if self.client.flask.is_running else 'Closed'
         state_uses = 'Single-Use' if self.client.flask.one_time_links else 'Multi-Use'
         state_time = 'Temporary' if self.client.flask.temporary_links else 'Persistent'
