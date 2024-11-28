@@ -221,7 +221,8 @@ def show_list(self: Server, player : str):
 def show_bkps(self: Server, player : str):
     reg_bkps_dir = os.path.join(self.path_plugins, 'reg-bkps')
     zips = [x for x in os.listdir(reg_bkps_dir) if x.endswith('.zip')]
-
+    zips.sort()
+    
     if not zips:
         self.send_response(player, 'No se han creado backups.')
         return

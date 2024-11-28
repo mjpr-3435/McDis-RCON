@@ -102,7 +102,8 @@ async def on_player_command(self: Server, player: str, message: str):
 
 def show_bkps(self: Server, player : str):
     zips = [x for x in os.listdir(self.path_bkps) if x.endswith('.zip')]
-
+    zips.sort()
+    
     if not zips:
         self.send_response(player, 'No se han creado backups.')
         return
