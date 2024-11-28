@@ -2,14 +2,18 @@
 #         McDis-RCON Configuration
 # =========================================
 
-### Application designed to stream the Minecraft console to Discord. This has been tested on Ubuntu 22.04.3 LTS.
-### To apply the changes, you must restart McDis!!!
+### Application designed to stream the Minecraft console to Discord.
+### This application is intended to work on Linux systems. (Tested on Ubuntu 22.04.3 LTS)
+### While it may run on Windows, some features may not work as expected.
+### To apply any changes, you must restart McDis!
 
-### Description   : The bot token that will be used to initialize McDis
+
+### Description   : The bot token that will be used to initialize McDis.
+### Advice        : Use a dedicated bot for McDis.
 Bot Token:
 
-### Description   : The ID of the channel where the McDis panel will be created
-### Advice        : Use a clean channel for the McDis panel
+### Description   : The ID of the channel where the McDis panel will be created.
+### Advice        : Use a clean channel for the McDis panel.
 Panel ID:
 
 ### Description   : Language that McDis will use.
@@ -22,7 +26,7 @@ Language: en
 ### Default Value : 3
 Backups: 3
 
-### Description   : Flask configuration
+### Description   : Flask configuration.
 Flask:
   Allow : false
   IP    : '0.0.0.0'

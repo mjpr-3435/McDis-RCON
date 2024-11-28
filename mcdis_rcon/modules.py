@@ -13,6 +13,7 @@ import asyncio
 import zipfile
 import logging
 import gettext
+import socket
 import random
 import psutil
 import shutil
@@ -32,7 +33,7 @@ import hashlib
 import uuid
 
 from werkzeug.serving import make_server, WSGIRequestHandler
-from flask import Flask, send_file, abort, request, send_from_directory
+from flask import Flask, send_file, abort, request, send_from_directory, redirect
 from abc import abstractmethod
 from discord.ext import commands
 from datetime import datetime
@@ -57,8 +58,8 @@ check               = '✔'
 uncheck             = '✖'
 
 allowed_languages   = [ 'en', 'es']
-panel_commands      = [ 'start-all', 'stop-all', 'start', 'stop', 'kill', 'restart', 'reload mdplugins']
-console_commands    = [ 'start', 'stop', 'kill', 'restart', 'reload mdplugins']
+panel_commands      = [ 'start', 'stop', 'kill', 'restart', 'mdreload']
+console_commands    = [ 'start', 'stop', 'kill', 'restart', 'mdreload']
 terminal_commands   = [ 'mkdir <name>', 
                         'zip <dir:index>', 
                         'unzip <file:index>', 
@@ -68,5 +69,5 @@ terminal_commands   = [ 'mkdir <name>',
                         'move <dir:index | file:index> <mcdis_path>',
                         'rename <dir:index | file:index> <new_name>']
 
-# logging.getLogger('werkzeug').setLevel(logging.ERROR)
-# WSGIRequestHandler.log_request = lambda *args, **kwargs: None
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+WSGIRequestHandler.log_request = lambda *args, **kwargs: None

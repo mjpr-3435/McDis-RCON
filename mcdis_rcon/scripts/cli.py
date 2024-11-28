@@ -9,7 +9,7 @@ def init():
     for filename in files_to_copy:
         src_path = os.path.join(templates, filename)
         if not os.path.exists(filename):
-            shutil.copy2(src_path, filename)
+            shutil.copy(src_path, filename)
 
 def run():
     from ..main import run

@@ -157,7 +157,7 @@ class PanelEmbed            (discord.Embed):
             disk_usage = server.disk_usage()
 
             server_id = next(
-                filter(lambda thread: server.name in thread.name, self.client.panel.threads),
+                filter(lambda thread: thread.name.endswith(server.name), self.client.panel.threads),
                 None
             ).id
 
@@ -179,7 +179,7 @@ class PanelEmbed            (discord.Embed):
         for i, network in enumerate(self.client.networks):
             ram_usage = network.ram_usage()
             network_id = next(
-                filter(lambda thread: network.name in thread.name, self.client.panel.threads),
+                filter(lambda thread: thread.name.endswith(network.name), self.client.panel.threads),
                 None
             ).id
 
