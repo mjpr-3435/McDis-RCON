@@ -129,7 +129,7 @@ class McDisClient(commands.Bot):
                     names.append(process.lower())
                         
         except KeyError as error:
-            print(f'Key not found: {error}.\n'
+            print(f'\n\nKey not found: {error}.\n\n'
                   f'Your \'md_config.yml\' file is incomplete.\n'
                   f'Please try requesting another one using \'mcdis init\'.')
             os._exit(0)
@@ -208,7 +208,7 @@ class McDisClient(commands.Bot):
     async def   _load_behaviours       (self):
         behaviours_dir = os.path.join(package_path, 'behaviours')
 
-        scripts = [filename for filename in os.listdir(behaviours_dir)]
+        scripts = [filename for filename in os.listdir(behaviours_dir) if filename.endswith('.py')]
 
         for script in scripts:
             await self.load_extension(f'mcdis_rcon.behaviours.{script.removesuffix(".py")}')
