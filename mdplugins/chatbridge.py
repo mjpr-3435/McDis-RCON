@@ -4,7 +4,10 @@ import os
 
 from mcdis_rcon.classes import Server
 
-send_to = lambda server, x: server.send_response('@a', x)
+def send_to(server: Server, msg: str):
+    msg = msg.replace("\n","").replace('"',"'")
+    server.send_response('@a', msg)
+    
 webhook = None
 
 async def load(self: Server):

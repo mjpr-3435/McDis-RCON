@@ -14,36 +14,38 @@ class FilesManagerView      (discord.ui.View):
         self.file_count     = elements_on(path, include_dirs = False, recursive = False)
         self.dir_count      = elements_on(path, include_files = False, recursive = False)
         self.up_to_99       = self.file_count > 99 or self.dir_count > 99
-        self.max_page       = max(self.file_count // 99 + 1, self.dir_count // 99 + 1)
+        self.max_file_page  = math.ceil(self.file_count / 99)
+        self.max_dir_page   = math.ceil(self.dir_count / 99)
+
+        self.max_page       = max(self.max_file_page, self.max_dir_page)
 
         if self.options:
             self.add_item(FileSelect(self.client, self.options))
-
+            
         self.add_item(BackButton(self.client))
         self.add_item(UpdateButton(self.client))
+        self.add_item(PathButton(self.client))
 
         if os.path.isdir(self.path):
-            self.add_item(ProcessesButton(self.client))
             self.add_item(TerminalButton(self.client))
-
-            if path != '.': 
-                self.add_item(DeleteDirButton(self.client))
+            self.add_item(ProcessesButton(self.client))
+            # if path != '.': self.add_item(DeleteDirButton(self.client))
         else:
             self.add_item(RequestButton(self.client))
             self.add_item(EditButton(self.client))
-            self.add_item(DeleteFileButton(self.client))
+            # self.add_item(DeleteFileButton(self.client))
 
         if self.up_to_99:
             self._add_pagination_buttons()
     
     def         _add_pagination_buttons     (self):
-        if self.max_page > 3:
+        if self.max_page > 2:
             self.add_item(FirstPageButton(self.client))
         
         self.add_item(PreviousPageButton(self.client))
         self.add_item(NextPageButton(self.client))
 
-        if self.max_page > 3:
+        if self.max_page > 2:
             self.add_item(LastPageButton(self.client))
     
     def         _get_options                (self):
@@ -65,7 +67,11 @@ class FilesManagerView      (discord.ui.View):
                     label = f'{emoji_file} {truncate(file,90)}', 
                     value = file))
                 
-        return options
+            #options.insert(0, discord.SelectOption(
+            #        label = f'{emoji_pin} Go to', 
+            #        value = '__GO_TO__'))
+            
+        return options[:25]
 
     async def   _update_embed               (self, interaction : discord.Interaction):
         if not interaction.response.is_done():
@@ -84,12 +90,15 @@ class FilesManagerView      (discord.ui.View):
         
         if process_cmd:
             from .FilesManagerCommands import CommandsEmbed, CommandsView
+
             await interaction.followup.edit_message(
                 message_id = interaction.message.id,
                 embed = CommandsEmbed(self.client, process_cmd),
                 view = CommandsView(self.client, process_cmd))
             
-        elif process_bkp and False:
+        elif process_bkp:
+            from .FilesManagerBackups import BackupsEmbed, BackupsView
+
             await interaction.followup.edit_message(
                 message_id = interaction.message.id,
                 embed = BackupsEmbed(self.client, process_bkp),
@@ -108,15 +117,46 @@ class FilesManagerView      (discord.ui.View):
                 embed = FilesManagerEmbed(self.client, self.path),
                 view = FilesManagerView(self.client, self.path))
     
+    async def   _edit_path                  (self, interaction : discord.Interaction):
+        class EditPath(discord.ui.Modal, title = self.client._('Go to path')):
+            name = discord.ui.TextInput(
+                label = self.client._('Path'),
+                style = discord.TextStyle.short,
+                default = mcdis_path(self.path)
+            )
+
+            async def on_submit(modal, interaction: discord.Interaction):
+                response = self.client.is_valid_mcdis_path(modal.name.value)
+
+                if response is True:
+                    self.path = un_mcdis_path(modal.name.value)
+                    await self._update_interface(interaction)
+                else:
+                    await interaction.response.send_message(response, ephemeral = True)
+
+        await interaction.response.send_modal(EditPath())
+
 class FileSelect            (discord.ui.Select):
     def __init__(self, client : McDisClient, options: list):
-        super().__init__(placeholder = client._('Select a file'), options = options[:25])
+        super().__init__(placeholder = client._('Select a file'), options = options)
         self.view : FilesManagerView
     
     async def callback(self, interaction: discord.Interaction):
-        self.view.path = os.path.join(self.view.path, self.values[0]) if self.view.path != '.' else self.values[0]
-        
-        await self.view._update_interface(interaction)
+        if self.values[0] == '__GO_TO__':
+            await self.view._edit_path(interaction)
+
+        else:
+            self.view.path = os.path.join(self.view.path, self.values[0]) if self.view.path != '.' else self.values[0]
+
+            await self.view._update_interface(interaction)
+
+class PathButton            (discord.ui.Button):
+    def __init__(self, client : McDisClient):
+        super().__init__(label = emoji_pin, style = discord.ButtonStyle.gray)
+        self.view : FilesManagerView
+
+    async def callback(self, interaction: discord.Interaction):
+        await self.view._edit_path(interaction)
 
 class FirstPageButton       (discord.ui.Button):
     def __init__(self, client: McDisClient):
@@ -191,11 +231,34 @@ class RequestButton         (discord.ui.Button):
                     f'> **{mcdis_path(self.view.path)}:**',
                     file = discord.File(self.view.path))
         else:
-            download_link = self.view.client.flask.download_link(self.view.path, interaction.user.name)
-            view = self.view.remove_item(self).add_item(discord.ui.Button(label = 'Download', url = download_link))
-            embed = interaction.message.embeds[0]
-            embed.description = f'**Download Link:**\n```{download_link}```'
-            await interaction.response.edit_message(embed = embed, view = view)
+            if not self.view.client.flask.is_running:
+                async def on_confirmation(confirmation_interaction: discord.Interaction):
+                    await confirmation_interaction.response.edit_message(delete_after = 0)
+                    await self.view.client.flask.start()
+                    if not self.view.client.flask.is_running: return
+
+                    download_link = self.view.client.flask.download_link(self.view.path, interaction.user.name)
+                    view = self.view.remove_item(self).add_item(discord.ui.Button(label = 'Download', url = download_link))
+                    embed = interaction.message.embeds[0]
+                    embed.description = f'**Download Link:**\n```{download_link}```'
+
+                    await interaction.followup.edit_message(
+                        message_id = interaction.message.id,
+                        embed = embed,
+                        view = view
+                    )
+
+                await confirmation_request(
+                    self.view.client._('Flask is currently close, do you want to run it?'),
+                    on_confirmation = on_confirmation,
+                    interaction = interaction
+                )
+            else:
+                download_link = self.view.client.flask.download_link(self.view.path, interaction.user.name)
+                view = self.view.remove_item(self).add_item(discord.ui.Button(label = 'Download', url = download_link))
+                embed = interaction.message.embeds[0]
+                embed.description = f'**Download Link:**\n```{download_link}```'
+                await interaction.response.edit_message(embed = embed, view = view)
 
 class EditButton            (discord.ui.Button):
     def __init__(self, client: McDisClient):
@@ -228,17 +291,26 @@ class EditButton            (discord.ui.Button):
             async def on_submit(modal, interaction: discord.Interaction):
                 new_path = os.path.join(os.path.dirname(self.view.path), os.path.basename(str(modal.name)))
 
-                try:
-                    if file_content:
+                if file_content:
+                    try:
                         write_in_file(self.view.path, str(modal.content))
+                    except:
+                        self.view.client.error_report(
+                            title = 'Writing File in Files Manager',
+                            error = traceback.format_exc())
+                        return
 
+                try:
                     os.rename(self.view.path, new_path)
-                except Exception as error:
-                    await interaction.response.send_message(
-                        content = self.view.client._('Error: {}').format(error),
-                        ephemeral = True)
+                except:
+                    self.view.client.error_report(
+                        title = 'Renaming File in Files Manager',
+                        error = traceback.format_exc())
+                    return
                 
-                await interaction.response.edit_message(embed = FilesManagerEmbed(new_path), view = FilesManagerView(new_path))
+                await interaction.response.edit_message(
+                    embed = FilesManagerEmbed(self.view.client, new_path),
+                    view = FilesManagerView(self.view.client, new_path))
 
         await interaction.response.send_modal(edit_command())
 
@@ -251,12 +323,14 @@ class DeleteFileButton      (discord.ui.Button):
         async def on_confirmation(confirmation_interaction: discord.Interaction): 
             new_path = os.path.relpath(os.path.abspath(os.path.dirname(self.view.path)))
 
-            try: os.remove(self.view.path)
-            except Exception as error: 
-                await confirmation_interaction.response.edit_message(
-                    content = self.view.client._('Error: {}').format(error), 
-                    embed = None, 
-                    view = None)
+            try:
+                os.remove(self.view.path)
+            except: 
+                await self.view.client.error_report(
+                    title = 'Delete File in Files Manager',
+                    error = traceback.format_exc()
+                )
+
             else:
                 await confirmation_interaction.response.edit_message(delete_after = 0)
                 self.view.path = new_path
@@ -276,24 +350,24 @@ class ProcessesButton       (discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         from .FilesManagerProcesses import ProcessesView, ProcessesEmbed
         await interaction.response.defer()
-
-        processes = self._get_processes(self.view.path)
         
+        processes = self._get_processes()
+
         await interaction.followup.edit_message(
             message_id = interaction.message.id, 
             embed = ProcessesEmbed(self.view.client, self.view.path, processes), 
             view = ProcessesView(self.view.client, self.view.path, processes))
 
-    def _get_processes(path: str) -> list[psutil.Process]:
+    def _get_processes(self):
         processes = []
-
         for process in psutil.process_iter():
             try:
-                if os.path.abspath(path) in process.cwd():
+                if os.path.abspath(self.view.path) in process.cwd():
                     processes.append(process)
-            except: pass
-            
-        return sorted(processes, key = lambda p: p.cwd())
+            except:
+                pass
+
+        return sorted(processes, key=lambda p: p.cwd())
 
 class TerminalButton        (discord.ui.Button):
     def __init__(self, client: McDisClient):
@@ -337,13 +411,16 @@ class TerminalButton        (discord.ui.Button):
             await interaction.response.send_message(
                 self.view.client._('✖ You must provide one argument. E.g.: `mkdir <name>`.'), 
                 ephemeral = True)
+            return
             
-        elif not is_valid_path_name(args[0]):
+        name_provided = ' '.join(args)[:100]
+
+        if not is_valid_path_name(name_provided):
             await interaction.response.send_message(
-                self.names_convention.format(args[0]),
+                self.names_convention.format(name_provided),
                 ephemeral = True)
         else:
-            dir_path = os.path.join(self.view.path, args[0])
+            dir_path = os.path.join(self.view.path, name_provided)
             os.makedirs(dir_path, exist_ok = True)
 
             await self.view._update_interface(interaction)
@@ -355,7 +432,7 @@ class TerminalButton        (discord.ui.Button):
                 ephemeral = True)
             return
         
-        path_to_zip = await self._file_or_dir_selection(args[0])
+        path_to_zip = await self._file_or_dir_selection(args[0], interaction)
         if not isinstance(path_to_zip, str): return
 
         elif not os.path.isdir(path_to_zip):
@@ -373,8 +450,15 @@ class TerminalButton        (discord.ui.Button):
             ephemeral = True)
         
         counter = [0,0]
+        reports = {'error' : None}
+
+        make_zip_error = self.view.client.error_wrapper(
+            error_title = 'make_zip() in Terminal',
+            reports = reports
+            )(make_zip)
+        
         task = threading.Thread(
-            target = make_zip, 
+            target = make_zip_error, 
             args = (path_to_zip, zip_path, counter))
         task.start()
 
@@ -390,11 +474,14 @@ class TerminalButton        (discord.ui.Button):
 
         await self.view._update_interface(interaction)
 
-        await response.edit(
-            content = self.view.client._('✔ The files have been successfully compressed.'))
+        if reports['error']:
+            msg = self.view.client._('✖ An error occurred while compressing files.')
+        else:
+            msg = self.view.client._('✔ The files have been successfully compressed.')
+
+        await response.edit(content = msg)
         
-        await interaction.user.send(
-            content = self.view.client._('✔ The files have been successfully compressed.'))
+        await interaction.user.send(content = msg)
 
     async def _cmd_unzip    (self, args: list[str], interaction: discord.Interaction):
         if not args: 
@@ -403,7 +490,7 @@ class TerminalButton        (discord.ui.Button):
                 ephemeral = True)
             return
         
-        path_to_unzip = await self._file_or_dir_selection(args[0])
+        path_to_unzip = await self._file_or_dir_selection(args[0], interaction)
         if not isinstance(path_to_unzip, str): return
 
         elif not os.path.isfile(path_to_unzip) or not path_to_unzip.endswith('.zip'):
@@ -426,9 +513,15 @@ class TerminalButton        (discord.ui.Button):
             self.view.client._('Unpacking Backup...'), 
             ephemeral = True)
         counter = [0,0]
+        reports = {'error': False}
         
+        unpack_zip_error = self.view.client.error_wrapper(
+            error_title = 'unpack_zip() in Terminal',
+            reports = reports
+            )(unpack_zip)
+
         task = threading.Thread(
-            target = unpack_zip, 
+            target = unpack_zip_error, 
             args = (path_to_unzip, unzip_path, counter))
         task.start()
         
@@ -442,7 +535,12 @@ class TerminalButton        (discord.ui.Button):
                 await asyncio.sleep(0.5)
         
         await self.view._update_interface(interaction)
-        msg = self.view.client._('✔ The files have been successfully unpacked.')
+
+        if reports['error']:
+            msg = self.view.client._('✖ An error occurred while unpacking files.')
+        else:
+            msg = self.view.client._('✔ The files have been successfully unpacked.')
+
         await interaction.user.send(msg)
         await response.edit(content = msg)
 
@@ -453,7 +551,7 @@ class TerminalButton        (discord.ui.Button):
                 ephemeral = True)
             return
         
-        new_path = await self._file_or_dir_selection(args[0])
+        new_path = await self._file_or_dir_selection(args[0], interaction)
         if not isinstance(new_path, str): return
 
         self.view.path = new_path
@@ -466,7 +564,7 @@ class TerminalButton        (discord.ui.Button):
                 ephemeral = True)
             return
         
-        path_to_remove = await self._file_or_dir_selection(args[0])
+        path_to_remove = await self._file_or_dir_selection(args[0], interaction)
         if not isinstance(path_to_remove, str): return
 
         await interaction.response.defer()
@@ -475,31 +573,36 @@ class TerminalButton        (discord.ui.Button):
             ephemeral = True)
         await asyncio.sleep(1)
 
-        try:
-            if os.path.isdir(path_to_remove): 
-                await execute_and_wait(shutil.rmtree, args = (path_to_remove, ))
+        if os.path.isdir(path_to_remove): 
+            function = shutil.rmtree
+        else: 
+            function = os.remove
 
-            elif os.path.isfile(path_to_remove): 
-                await execute_and_wait(os.remove, args = (path_to_remove, ))
-
-        except Exception as error:
-            await response.edit(content = self.view.client._('Error: {}').format(error))
+        reports = {'error': False}
+        function_error = self.view.client.error_wrapper(
+            error_title = 'del() in Terminal',
+            reports = reports
+        )(function)
         
+        await execute_and_wait(function_error, args = (path_to_remove, ))
+        
+        await self.view._update_interface(interaction)
+
+        if reports['error']:
+            msg = self.view.client._('✖ An error occurred while deleting {}.').format(mcdis_path(path_to_remove))
         else:
-            await self.view._update_interface(interaction)
-            
-            await response.edit(
-                content = self.view.client._('✔ `{}` has been deleted.')
-                                    .format(mcdis_path(path_to_remove)))
+            msg = self.view.client._('✔ `{}` has been deleted.').format(mcdis_path(path_to_remove))
+
+        await response.edit(content = msg)
 
     async def _cmd_copy     (self, args: list[str], interaction: discord.Interaction):
-        if args < 2: 
+        if not args[1:]: 
             await interaction.response.send_message(
-                self.view.client._('✖ You must provide two arguments. E.g.: `move <dir:index | file:index> <mcdis_path>`.'),
+                self.view.client._('✖ You must provide two arguments. E.g.: `copy <dir:index | file:index> <mcdis_path>`.'),
                 ephemeral = True)
             return
         
-        path_to_copy = await self._file_or_dir_selection(args[0])
+        path_to_copy = await self._file_or_dir_selection(args[0], interaction)
         if not isinstance(path_to_copy, str): return
 
         path_provided = ' '.join(args[1:])
@@ -526,23 +629,36 @@ class TerminalButton        (discord.ui.Button):
         await asyncio.sleep(1)
 
         if os.path.isdir(path_to_copy): 
-            await execute_and_wait(shutil.copytree, args = (path_to_copy, new_path))
-        elif os.path.isfile(path_to_copy): 
-            await execute_and_wait(shutil.copy2, args = (path_to_copy, new_path))
+            function = shutil.copytree
+        else: 
+            function = shutil.copy2
+
+        reports = {'error': False}
+        function_error = self.view.client.error_wrapper(
+            error_title = 'copy() in Terminal',
+            reports = reports
+        )(function)
+
+        await execute_and_wait(function_error, args = (path_to_copy, new_path))
         
         await self.view._update_interface(interaction)
+
+        if reports['error']:
+            msg = self.view.client._('✖ An error occurred while copying {} to {}.').format(mcdis_path(path_to_copy), path_provided)
+        else:
+            msg = self.view.client._('✔ `{}` has been copied to `{}`.').format(mcdis_path(path_to_copy), path_provided)
+
         await response.edit(
-            content = self.view.client._('✔ `{}` has been copied to `{}`.')
-                                .format(mcdis_path(path_to_copy), path_provided))
+            content = msg)
 
     async def _cmd_move     (self, args: list[str], interaction: discord.Interaction):
-        if len(args) < 2: 
+        if not args[1:]: 
             await interaction.response.send_message(
                 self.view.client._('✖ You must provide two arguments. E.g.: `move <dir:index | file:index> <mcdis_path>`.'),
                 ephemeral = True)
             return
         
-        path_to_move = await self._file_or_dir_selection(args[0])
+        path_to_move = await self._file_or_dir_selection(args[0], interaction)
         if not isinstance(path_to_move, str): return
 
 
@@ -569,33 +685,50 @@ class TerminalButton        (discord.ui.Button):
             ephemeral = True)
         await asyncio.sleep(1)
 
-        await execute_and_wait(shutil.move, args = (path_to_move, new_path))
+        reports = {'error': False}
+        move_error = self.view.client.error_wrapper(
+            error_title = 'move() in Terminal',
+            reports = reports
+        )(shutil.move)
+
+        await execute_and_wait(move_error, args = (path_to_move, new_path))
         
         await self.view._update_interface(interaction)
-        await response.edit(
-            content = self.view.client._('✔ `{}` has been moved to `{}`.')
-                                    .format(mcdis_path(path_to_move), path_provided))
+        if reports['error']:
+            msg = self.view.client._('✖ An error occurred while moving {} to {}.').format(mcdis_path(path_to_move), path_provided)
+        else:
+            msg = self.view.client._('✔ `{}` has been moved to `{}`.').format(mcdis_path(path_to_move), path_provided)
+
+        await response.edit(content = msg)
 
     async def _cmd_rename   (self, args: list[str], interaction: discord.Interaction):
-        name_provided = ' '.join(args[1:])[:100]
-
-        if len(args) < 2: 
+        if not args[1:]: 
             await interaction.response.send_message(
                 self.view.client._('✖ You must provide two arguments. E.g.: `rename <dir:index | file:index> <new_name>`.'),
                 ephemeral = True)
             return
-            
-        elif not is_valid_path_name(name_provided):
+        
+        name_provided = ' '.join(args[1:])[:100]
+
+        if not is_valid_path_name(name_provided):
             await interaction.response.send_message(
                 self.names_convention.format(name_provided),
                 ephemeral = True)
             return
         
-        path_to_rename = await self._file_or_dir_selection(args[0])
+        path_to_rename = await self._file_or_dir_selection(args[0], interaction)
         if not isinstance(path_to_rename, str): return
     
         new_path = os.path.join(self.view.path, name_provided)
-        os.rename(path_to_rename, new_path)
+
+        try:
+            os.rename(path_to_rename, new_path)
+        except:
+            self.view.client.error_report(
+                title = 'rename() in Terminal',
+                error = traceback.format_exc())
+            return
+            
         await self.view._update_interface(interaction)
         
     async def _file_or_dir_selection(self, arg : str, interaction: discord.Interaction) -> Union[str, None]:
@@ -604,7 +737,7 @@ class TerminalButton        (discord.ui.Button):
         dirs  = [file for file in dir_files if os.path.isdir (os.path.join(self.view.path, file))]
         files = [file for file in dir_files if os.path.isfile(os.path.join(self.view.path, file))]
 
-        if not any([arg.lower().startswith(x) for x in ['dir:', 'item:']]):
+        if not any([arg.lower().startswith(x) for x in ['dir:', 'file:']]):
             await interaction.response.send_message(
                 self.view.client._('✖ Invalid argument `{}`. It should be `dir:index` or `file:index`.').format(arg),
                 ephemeral = True)
@@ -618,6 +751,8 @@ class TerminalButton        (discord.ui.Button):
                 ephemeral = True)
 
         elif int(index) < 1 or int(index) > min(len(dirs), 99):
+            if prefix == 'dir': prefix = 'directory'
+            
             await interaction.response.send_message(
                 self.view.client._(f'✖ No {prefix} exists with that index.'),
                 ephemeral = True)
@@ -640,13 +775,15 @@ class DeleteDirButton       (discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         async def on_confirmation(confirmation_interaction: discord.Interaction): 
             new_path = os.path.relpath(os.path.abspath(os.path.dirname(self.view.path)))
+            
+            try: 
+                shutil.rmtree(self.view.path)
+            except: 
+                await self.view.client.error_report(
+                    title = 'Delete Dir in Files Manager',
+                    error = traceback.format_exc()
+                )
 
-            try: shutil.rmtree(self.view.path)
-            except Exception as error: 
-                await confirmation_interaction.response.edit_message(
-                    content = self.view.client._('Error: {}').format(error),
-                    embed = None,
-                    view = None)
             else:
                 await confirmation_interaction.response.edit_message(delete_after=0)
 
