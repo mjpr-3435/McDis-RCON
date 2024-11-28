@@ -57,19 +57,23 @@ class StateButton           (discord.ui.Button):
         self.view.client.uploader.is_running = not self.view.client.uploader.is_running
 
         self.label = 'Close' if self.view.client.uploader.is_running else 'Run'
-        await interaction.response.edit_message(embed = UploaderEmbed(self.view.client), view = self.view)
+        await interaction.response.edit_message(
+            embed = UploaderEmbed(self.view.client),
+            view = self.view)
 
 class OverwriteButton       (discord.ui.Button):
     def __init__(self, client : McDisClient):
-        label = 'Do Not Overwrite' if client.uploader.overwrite else 'Overwrite'
+        label = 'Overwrite' if client.uploader.overwrite else 'Do Not Overwrite'
         super().__init__(label = label, style=discord.ButtonStyle.gray)
         self.view : UploaderView
 
     async def callback(self, interaction: discord.Interaction):
         self.view.client.uploader.overwrite = not self.view.client.uploader.overwrite
 
-        self.label = 'Do Not Overwrite' if self.view.client.uploader.overwrite else 'Overwrite'
-        await interaction.response.edit_message(embed = UploaderEmbed(self.view.client), view = self.view)
+        self.label = 'Overwrite' if self.view.client.uploader.overwrite else 'Do Not Overwrite'
+        await interaction.response.edit_message(
+            embed = UploaderEmbed(self.view.client),
+            view = self.view)
 
 class UploaderEmbed         (discord.Embed):
     def __init__(self, client : McDisClient):
@@ -87,13 +91,11 @@ class UploaderEmbed         (discord.Embed):
 
     def _add_status_field(self):
         state = 'Running' if self.client.uploader.is_running else 'Closed'
-        overwrite = str(self.client.uploader.overwrite)
+        overwrite = 'Overwrite' if self.client.uploader.overwrite else 'Do Not Overwrite'
         
         self.add_field(inline = True, name = '', value =
-            f'`'
-            f'• Overwrite:              '[:-len(overwrite)] + overwrite + '\n'
-            f'• State:                  '[:-len(state)] + state + '\n'
-            f'`'
+            '`• State:                  '[:-len(state)] + state + '`\n'
+            '`• Upload:                 '[:-len(overwrite)] + overwrite + '`\n'
         )
 
     def _add_path_field(self):
