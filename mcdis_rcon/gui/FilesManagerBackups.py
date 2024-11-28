@@ -79,9 +79,8 @@ class BackupSelect      (discord.ui.Select):
                 task.start()
                 
                 while task.is_alive():
-                    if counter[1] == 0 or not isinstance(counter[1], int): 
+                    if counter[1] == 0: 
                         await asyncio.sleep(0.1)
-                        break
                     else:
                         show = self.view.client._('`[{}]`: `[{}/{}]` files have been compressed...')\
                             .format(self.view.process.name, counter[0], counter[1])
@@ -135,7 +134,7 @@ class BackupSelect      (discord.ui.Select):
                 task.start()
             
                 while task.is_alive():
-                    if counter[1] == 0 or not isinstance(counter[1], int): 
+                    if counter[1] == 0: 
                         await asyncio.sleep(0.1)
                     else:
                         show = self.view.client._('`[{}]`: `[{}/{}]` files have been unpacked...')\
