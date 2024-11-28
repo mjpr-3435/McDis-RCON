@@ -121,36 +121,29 @@ class Process():
 
         else:
             logs.append('Importing mdplugins...')
-            sys.path.insert(0, temp_path)
 
-            for module in plugins:
+            for plugin in plugins:
                 try:
-                    if module.endswith('.py'):
-                        module_path = os.path.join(self.path_plugins, module)
-                        spec = importlib.util.spec_from_file_location(module.removesuffix('.py'), module_path)
+                    if plugin.endswith('.py'):
+                        module_path = os.path.join(self.path_plugins, plugin)
+                        spec = importlib.util.spec_from_file_location(plugin.removesuffix('.py'), module_path)
                         mod = importlib.util.module_from_spec(spec)
                         spec.loader.exec_module(mod)
                         
-                    elif module.endswith('.mcdis'):
-                        zip_path = os.path.join(self.path_plugins, module)
-                        mod_temp_dir = os.path.join(temp_path, module.removesuffix('.mcdis'))
-                        os.makedirs(mod_temp_dir, exist_ok = True) 
+                    elif plugin.endswith('.mcdis'):
+                        addon_path = os.path.join(self.path_plugins, plugin)
+                        sys.path.insert(0, addon_path)
                         
-                        with zipfile.ZipFile(zip_path, 'r') as zip_file:
-                            zip_file.extractall(mod_temp_dir)
-                        
-                        init_path = os.path.join(mod_temp_dir, '__init__.py')
-                        pkg_spec = importlib.util.spec_from_file_location(module.removesuffix('.mcdis'), init_path)
-                        mod = importlib.util.module_from_spec(pkg_spec)
-                        pkg_spec.loader.exec_module(mod)
+                        mod = importlib.import_module('mdplugin.__init__')
+                        sys.path.pop(0)
 
                     self.plugins.append(mod)
-                    logs.append(f'Plugin imported:: {module}')
+                    logs.append(f'Plugin imported:: {plugin}')
                     
                 except:
                     asyncio.create_task(
                         self.error_report(
-                            title = f'Unable to import plugin {module}',
+                            title = f'Unable to import plugin {plugin}',
                             error = traceback.format_exc()
                         )
                     )
@@ -161,8 +154,6 @@ class Process():
         asyncio.create_task(self.call_plugins('load', (self,)))
 
         for log in logs: self.add_log(log)
-
-        if os.path.exists(temp_path): shutil.rmtree(temp_path)
 
     def         unload_plugins          (self):
         for module in self.plugins:

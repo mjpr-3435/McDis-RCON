@@ -183,31 +183,25 @@ class McDisClient(commands.Bot):
     async def   _load_addons           (self):
         files_in_addons_dir = os.listdir(self.path_addons)
         
-        def condition(file):
-            path = os.path.join(self.path_addons, file)
-            path_init = os.path.join(path, '__init__.py')
-
-            return os.path.isdir(path) and os.path.exists(path_init)
-        
-        addons = [file for file in files_in_addons_dir if condition(file)]
+        addons = [file.removesuffix('.mcdis') for file in files_in_addons_dir if file.endswith('.mcdis')]
         if not addons: return
         
         print(self._('   • Importing addons:'))
-        sys.path.insert(0, self.path_addons)
         
         for addon in addons:
+            addon_path = os.path.join(self.path_addons, addon + '.mcdis')
+            sys.path.insert(0, addon_path)
+            
             try:
-                path_init = os.path.join(self.path_addons, addon, '__init__.py')
-                pkg = importlib.util.spec_from_file_location(addon, path_init)
-                mod = importlib.util.module_from_spec(pkg)
-                pkg.loader.exec_module(mod)
+                mod = importlib.import_module('mdaddon.__init__')
                 self.addons.append(mod)
-                print(self._('     -> Imported \t{}').format(os.path.basename(addon)))
+
+                print(self._('     -> Imported {}').format(addon))
             except:
-                print(self._('     -> Unable to import {}\n{}').format(os.path.basename(addon), traceback.format_exc()))
+                print(self._('     -> Unable to import {}\n{}').format(addon, traceback.format_exc()))
                 os._exit(0)
         
-        sys.path.pop(0)
+            sys.path.pop(0)
 
         await self.call_addons('load', (self,), exit_on_error = True)
 

@@ -12,6 +12,7 @@ import inspect
 import asyncio
 import zipfile
 import logging
+import zipimport
 import gettext
 import socket
 import random
