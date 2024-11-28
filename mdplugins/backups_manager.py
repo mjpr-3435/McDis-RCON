@@ -48,7 +48,7 @@ async def on_player_command(self: Server, player: str, message: str):
     elif self.is_command(message, 'mk-bkp'):
         self.stop()
 
-        while self.state() != 'Closed':
+        while self.is_running():
             await asyncio.sleep(0.1)
 
         await self.send_to_console('Creating backup...')
@@ -69,7 +69,7 @@ async def on_player_command(self: Server, player: str, message: str):
         if zip in zips:
             self.stop()
 
-            while self.state() != 'Closed':
+            while self.is_running():
                 await asyncio.sleep(0.1)
 
             await self.send_to_console(f'Unpacking the backup {zip}...')

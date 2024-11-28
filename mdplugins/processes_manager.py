@@ -28,8 +28,7 @@ async def on_player_command(self: Server, player: str, message: str):
     if not player in admins:
         return
     
-
-    if self.is_command(message, 'help'):
+    elif self.is_command(message, 'help'):
         self.show_command(player, f"pm help", "Muestra los comandos del processes manager.")
 
     elif self.is_command(message, 'pm help'):
@@ -37,12 +36,12 @@ async def on_player_command(self: Server, player: str, message: str):
         self.show_command(player, f"start <process>", "Abrir el proceso.")
         self.show_command(player, f"stop <process | default : {self.name}>", "Detener el proceso.")
         self.show_command(player, f"restart <process | default : {self.name}>", "Reiniciar el proceso.")
-        self.show_command(player, f"reload mdplugins <process | default : {self.name}>", "Recargar los mdplugins del proceso.")
+        self.show_command(player, f"mdreload <process | default : {self.name}>", "Recargar los mdplugins del proceso.")
 
     elif self.is_command(message, 'status'):
         msgs = []
-        for process in self.processes:
-            msgs.append(f'[{process.name}]: {process.state()}')
+        for process in self.client.processes:
+            msgs.append(f'[{process.name}]: {"Abierto" if process.is_running() else "Cerrado"}')
 
         self.send_response(player, msgs)
 
@@ -52,14 +51,14 @@ async def on_player_command(self: Server, player: str, message: str):
         if not arg:
             self.send_response(player, "✖ Debes proveer un argumento.")
         else:
-            if arg in [ x.name.lower() for x in self.servers]:
-                process = next(filter(lambda x: arg == x.name.lower(), self.servers), None)
+            if arg in [ x.name.lower() for x in self.client.processes]:
+                process = next(filter(lambda x: arg == x.name.lower(), self.client.processes), None)
 
-                if process.state() != 'Closed':
-                    self.send_response(player, f"✖ El servidor ya estaba abierto...")
+                if process.is_running():
+                    self.send_response(player, f"✖ El proceso ya estaba abierto...")
                     return
                 
-                self.send_response(player, f"[{process.name}] Abriendo servidor...")
+                self.send_response(player, f"[{process.name}] Abriendo proceso...")
                 process.start()
             else:
                 self.send_response(player, "✖ No hay un proceso con ese nombre.")
@@ -68,34 +67,34 @@ async def on_player_command(self: Server, player: str, message: str):
         arg = message.removeprefix(self.prefix + 'stop').strip().lower()
 
         if not arg:
-            self.send_response(player, "✔ Cerrando servidor...")
+            self.send_response(player, "✔ Cerrando proceso...")
             self.stop()
         else:
-            if arg in [ x.name.lower() for x in self.servers]:
-                process = next(filter(lambda x: arg == x.name.lower(), self.servers), None)
+            if arg in [ x.name.lower() for x in self.client.processes]:
+                process = next(filter(lambda x: arg == x.name.lower(), self.client.processes), None)
 
-                if process.state() == 'Closed':
-                    self.send_response(player, f"✖ El servidor no estaba abierto...")
+                if not process.is_running():
+                    self.send_response(player, f"✖ El proceso no estaba abierto...")
                     return
                 
-                self.send_response(player, f"[{process.name}] Cerrando servidor...")
+                self.send_response(player, f"[{process.name}] Cerrando proceso...")
                 process.stop()
             else:
                 self.send_response(player, "✖ No hay un proceso con ese nombre.")
 
-    elif self.is_command(message, 'reload mdplugins'):
-        arg = message.removeprefix(self.prefix + 'reload mdplugins').strip().lower()
+    elif self.is_command(message, 'mdreload'):
+        arg = message.removeprefix(self.prefix + 'mdreload').strip().lower()
 
         if not arg:
             self.send_response(player, "✔ mdplugins recargados. Importados:")
             self.load_plugins(reload = True)
             self.send_response(player, [f'   • {os.path.basename(str(x.__file__))}' for x in self.plugins])
         else:
-            if arg in [ x.name.lower() for x in self.servers]:
-                process = next(filter(lambda x: arg == x.name.lower(), self.servers), None)
+            if arg in [ x.name.lower() for x in self.client.processes]:
+                process = next(filter(lambda x: arg == x.name.lower(), self.client.processes), None)
                 
-                if process.state() == 'Closed':
-                    self.send_response(player, f"✖ El servidor no estaba abierto...")
+                if not process.is_running():
+                    self.send_response(player, f"✖ El proceso no estaba abierto...")
                     return
                 
                 self.send_response(player, f"[{process.name}] mdplugins recargados.")
@@ -108,16 +107,16 @@ async def on_player_command(self: Server, player: str, message: str):
         arg = message.removeprefix(self.prefix + 'restart').strip().lower()
 
         if not arg:
-            self.send_response(player, "✔ Reiniciando servidor...")
+            self.send_response(player, "✔ Reiniciando proceso...")
             await self.restart()
         else:
-            if arg in [ x.name.lower() for x in self.servers]:
-                process = next(filter(lambda x: arg == x.name.lower(), self.servers), None)
-                if process.state() == 'Closed':
-                    self.send_response(player, f"✖ El servidor no estaba abierto...")
+            if arg in [ x.name.lower() for x in self.client.processes]:
+                process = next(filter(lambda x: arg == x.name.lower(), self.client.processes), None)
+                if not process.is_running():
+                    self.send_response(player, f"✖ El proceso no estaba abierto...")
                     return
                 
-                self.send_response(player, f"[{process.name}] Reiniciando servidor...")
+                self.send_response(player, f"[{process.name}] Reiniciando proceso...")
                 await process.restart()
             else:
                 self.send_response(player, "✖ No hay un proceso con ese nombre.")

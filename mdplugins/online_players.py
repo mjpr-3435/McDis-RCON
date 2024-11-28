@@ -9,7 +9,7 @@ async def on_player_message(self: Server, player: str, message: str):
         
     elif self.is_command(message, 'online'):
         msgs = []
-        for server in self.servers:
+        for server in self.client.servers:
             if hasattr(server, 'online_players') and hasattr(server, 'bots'):
                 players = ", ".join(server.online_players + server.bots)
                 msgs.append(hover(f'[{server.name}] ', color = 'gray', hoover = players))

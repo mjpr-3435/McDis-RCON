@@ -100,9 +100,6 @@ class Process():
     def         load_plugins            (self, *, reload = False):
         if self.is_running() == 'Closed': return
         
-        temp_path = os.path.join(self.path_plugins, 'tmp')
-        os.makedirs(temp_path, exist_ok = True)
-
         if reload:
             self.unload_plugins()
             logs = ['Reloading McDis Plugin System...',
@@ -147,8 +144,6 @@ class Process():
                             error = traceback.format_exc()
                         )
                     )
-            
-            sys.path.pop(0)
         
         if not reload: logs.append('Initializing process...')
         asyncio.create_task(self.call_plugins('load', (self,)))

@@ -82,13 +82,13 @@ async def on_player_command(self: Server, player: str, message: str):
         if zip in zips:
             self.stop()
 
-            while self.state() != 'Closed':
+            while self.is_running():
                 await asyncio.sleep(0.1)
 
             await self.send_to_console(f'Unpacking reg-bkp {zip}...')
 
             source = os.path.join(self.path_plugins, 'reg-bkps', zip)
-            destination = os.path.join(self.path_server, 'world')
+            destination = os.path.join(self.path_files, 'world')
 
             with zipfile.ZipFile(source, 'r') as zip_ref:
                 for file in zip_ref.namelist():
@@ -158,11 +158,11 @@ async def on_player_command(self: Server, player: str, message: str):
                     entities, region, poi = os.path.join('DIM1','entities'), os.path.join('DIM1','region'), os.path.join('DIM1','poi')
                 
                 for reg in files_to_zip[player][dim]:
-                    file_path = os.path.join(self.path_server, 'world', region, reg)
+                    file_path = os.path.join(self.path_files, 'world', region, reg)
                     zipf.write(file_path, os.path.join(region, reg))
-                    file_path = os.path.join(self.path_server, 'world', poi, reg)
+                    file_path = os.path.join(self.path_files, 'world', poi, reg)
                     zipf.write(file_path, os.path.join(poi, reg))
-                    file_path = os.path.join(self.path_server, 'world', entities, reg)
+                    file_path = os.path.join(self.path_files, 'world', entities, reg)
                     zipf.write(file_path, os.path.join(entities, reg))
 
         self.execute('save-on')
