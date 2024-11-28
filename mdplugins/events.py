@@ -65,7 +65,6 @@ async def listener_events(self: Server, log : str):
             await self.call_plugins('on_started', (self,))
 
         elif log.endswith('For help, type "help"'):
-            self.already_started = True
             await self.call_plugins('on_already_started', (self,))
             
         elif log.endswith('Stopping server'):

@@ -358,7 +358,7 @@ class Process():
                     await func(*args)
             except: 
                 await self.error_report(
-                    title = f'{function}() of {plugin}',
+                    title = f'{function}() of {plugin.__name__}',
                     error = traceback.format_exc()
                     )
 

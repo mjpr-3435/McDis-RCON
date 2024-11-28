@@ -49,7 +49,7 @@ async def on_player_message(self: Server, player: str, message: str):
 
     if webhook == None: return
 
-    for server in self.servers: 
+    for server in self.client.servers: 
         if server.name != self.name: 
             send_to(server, f'[{self.name}] <{player}> {message}')
         
@@ -60,7 +60,7 @@ async def on_player_join(self: Server, player: str):
 
     if webhook == None: return
 
-    for server in self.servers:
+    for server in self.client.servers:
         if server.name != self.name:
             send_to(server, f'[{self.name}] {player} ha entrado al servidor')
         
@@ -71,7 +71,7 @@ async def on_player_left(self: Server, player: str):
 
     if webhook == None: return
 
-    for server in self.servers:
+    for server in self.client.servers:
         if server.name != self.name:
             send_to(server, f'[{self.name}] {player} ha salido del servidor')
         
@@ -82,7 +82,7 @@ async def on_already_started(self: Server):
 
     if webhook == None: return
 
-    for server in self.servers:
+    for server in self.client.servers:
         if server.name != self.name:
             send_to(server, f'[{self.name}] Servidor abierto!')
         
@@ -93,7 +93,7 @@ async def on_stopped(self: Server):
 
     if webhook == None: return
 
-    for server in self.servers:
+    for server in self.client.servers:
         if server.name != self.name:
             send_to(server, f'[{self.name}] Servidor detenido')
         
@@ -104,7 +104,7 @@ async def on_crash(self: Server):
 
     if webhook == None: return
 
-    for server in self.servers:
+    for server in self.client.servers:
         if server.name != self.name:
             send_to(server, f'[{self.name}] El servidor crasheó')
         

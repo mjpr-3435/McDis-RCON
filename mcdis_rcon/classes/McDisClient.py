@@ -350,7 +350,7 @@ class McDisClient(commands.Bot):
                     process.load_plugins(reload = True)
                                 
             elif self.is_panel_command(message.content.lower(), f'start'):
-                process_name = message.content.removeprefix(f'{ self.prefix}start')
+                process_name = message.content.removeprefix(f'{ self.prefix}start').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
                 await message.delete()
@@ -372,7 +372,7 @@ class McDisClient(commands.Bot):
                     process.start()
 
             elif self.is_panel_command(message.content.lower(), f'stop'):
-                process_name = message.content.removeprefix(f'{ self.prefix}stop')
+                process_name = message.content.removeprefix(f'{ self.prefix}stop').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
                 await message.delete()
@@ -394,7 +394,7 @@ class McDisClient(commands.Bot):
                     process.stop()
             
             elif self.is_panel_command(message.content.lower(), f'kill'):
-                process_name = message.content.removeprefix(f'{ self.prefix}kill')
+                process_name = message.content.removeprefix(f'{ self.prefix}kill').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
                 await message.delete()
@@ -416,7 +416,7 @@ class McDisClient(commands.Bot):
                     process.kill()
 
             elif self.is_panel_command(message.content.lower(), f'restart'):
-                process_name = message.content.removeprefix(f'{ self.prefix}restart')
+                process_name = message.content.removeprefix(f'{ self.prefix}restart').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
                 await message.delete()
@@ -438,7 +438,7 @@ class McDisClient(commands.Bot):
                     await process.restart()
 
             elif self.is_panel_command(message.content.lower(), f'mdreload'):
-                process_name = message.content.removeprefix(f'{ self.prefix}reload mdplugins')
+                process_name = message.content.removeprefix(f'{ self.prefix}mdreload').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
                 await message.delete()
