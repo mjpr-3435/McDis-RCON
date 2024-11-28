@@ -131,8 +131,8 @@ class Process():
                         spec.loader.exec_module(mod)
                         
                     elif plugin.endswith('.mcdis'):
-                        addon_path = os.path.join(self.path_plugins, plugin)
-                        sys.path.insert(0, addon_path)
+                        plugin_path = os.path.join(self.path_plugins, plugin)
+                        sys.path.insert(0, plugin_path)
                         
                         mod = importlib.import_module('mdplugin.__init__')
                         sys.path.pop(0)
