@@ -33,7 +33,9 @@ class StateButton           (discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         if not self.view.client.flask.is_running:
             await interaction.response.defer()
-            await self.view.client.flask.start()
+            self.view.client.flask.start()
+            await asyncio.sleep(1)
+            
             if not self.view.client.flask.is_running: return
 
             self.label = 'Close' if self.view.client.flask.is_running else 'Run'
@@ -48,7 +50,7 @@ class StateButton           (discord.ui.Button):
                 shutdown_link = self.view.client.flask.shutdown_link(interaction.user)
 
                 await confirmation_interaction.response.edit_message(
-                    content = f'[Click on here to stop Flask.]({shutdown_link})',
+                    content = f'[Click on here to stop Flask]({shutdown_link})',
                     embed = None,
                     view = None)
                 
@@ -68,8 +70,8 @@ class StateButton           (discord.ui.Button):
                 )
 
             await confirmation_request(
-                self.view.client._('Are you sure you want to close Flask? Closing it while a file is being downloaded will block McDis\'s thread. '
-                                    'Please ensure no files are being downloaded before proceeding.'), 
+                self.view.client._("Flask will delay responding to the shutdown request until all "
+                                   "ongoing file downloads are complete. Do you want to proceed?"), 
                 on_confirmation = on_confirmation, 
                 interaction = interaction
             )
@@ -136,7 +138,7 @@ class FlaskEmbed            (discord.Embed):
         )
 
     def _add_status_field(self):
-        ip = truncate(str(self.client.flask.ip), 20)
+        ip = truncate(str(self.client.flask.ip), 15)
         port = str(self.client.flask.port)
         state = 'Running' if self.client.flask.is_running else 'Closed'
         state_uses = 'Single-Use' if self.client.flask.one_time_links else 'Multi-Use'

@@ -27,7 +27,7 @@ class FlaskManager (Flask):
         if exception.code == 404:
             log = f'Unusual connection attempt to: {request.path} with args: {request.args}'
             self._log_queue.put(self.log_format(log))
-        return super().handle_http_exception(exception)
+        return
     
     def         _favicon                (self):
         return send_from_directory(
@@ -83,6 +83,8 @@ class FlaskManager (Flask):
         try:
             sock = socket.create_connection((self.ip, self.port), timeout=5)
             sock.close()
+        except ConnectionRefusedError:
+            return True
         except:
             asyncio.create_task(self.client.error_report(
                 title = 'Flask: Invalid Adress',
@@ -94,7 +96,7 @@ class FlaskManager (Flask):
 
     ###         Manager Logic       ###
 
-    async def   start                   (self):
+    def         start                   (self):
         if self.is_running or not self._is_valid_addres(): return
 
         threading.Thread(target = self._run_app).start()

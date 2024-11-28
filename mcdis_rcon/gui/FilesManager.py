@@ -142,7 +142,7 @@ class FileSelect            (discord.ui.Select):
         self.view : FilesManagerView
     
     async def callback(self, interaction: discord.Interaction):
-        if self.values[0] == '__GO_TO__':
+        if self.values[0] == '__GO_TO__' and False:
             await self.view._edit_path(interaction)
 
         else:
@@ -234,7 +234,8 @@ class RequestButton         (discord.ui.Button):
             if not self.view.client.flask.is_running:
                 async def on_confirmation(confirmation_interaction: discord.Interaction):
                     await confirmation_interaction.response.edit_message(delete_after = 0)
-                    await self.view.client.flask.start()
+                    self.view.client.flask.start()
+                    await asyncio.sleep(1)
                     if not self.view.client.flask.is_running: return
 
                     download_link = self.view.client.flask.download_link(self.view.path, interaction.user.name)
