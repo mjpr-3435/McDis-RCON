@@ -83,7 +83,7 @@ class ExecuteButton         (discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         if self.view.process.is_running() != 'Open':
             await interaction.response.send_message(
-                self.view.client._('✖ The server isn\'t open.'), 
+                self.view.client._('✖ The process isn\'t open.'), 
                 ephemeral = True)
             return
 
@@ -179,7 +179,7 @@ class DeleteButton          (discord.ui.Button):
                     view = CommandsView(self.view.client, self.view.process))
 
         await confirmation_request(
-            self.view.client._('Are you sure about deleting the `{}` command?')
+            self.view.client._('Are you sure you want to delete the `{}` command?')
                             .format(self.view.command.removesuffix('.yml')),
             on_confirmation = on_confirmation,
             interaction = interaction)

@@ -1,4 +1,4 @@
-from .mrkd_functions import (
+from .mrkd import (
     truncate,
     sct,
     hover,

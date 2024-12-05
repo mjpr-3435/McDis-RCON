@@ -4,9 +4,12 @@ import os
 
 from mcdis_rcon.classes import Server
 
-def send_to(server: Server, msg: str):
+def send_to_servers(self: Server, msg: str):
     msg = msg.replace("\n","").replace('"',"'")
-    server.send_response('@a', msg)
+
+    for server in self.client.servers:
+        if server.name != self.name and server.online_players:
+            server.send_response('@a', msg)  
     
 webhook = None
 
@@ -39,19 +42,15 @@ async def on_discord_message(self: Server, message: discord.Message):
     elif message.author.bot : return
 
     elif message.channel.id == webhook.channel.id:
-
-        msg = message.content.replace('\n', ' ')
-
-        send_to(self, f'[DIS] <{message.author.display_name}> {msg}')
+        msg = message.content.replace('\n', ' ').replace('"',"'")
+        self.send_response('@a', f'[DIS] <{message.author.display_name}> {msg}')
 
 async def on_player_message(self: Server, player: str, message: str):
     global webhook
 
     if webhook == None: return
-
-    for server in self.client.servers: 
-        if server.name != self.name: 
-            send_to(server, f'[{self.name}] <{player}> {message}')
+  
+    send_to_servers(self, f'[{self.name}] <{player}> {message}')
         
     await webhook.send(f'{message}', username = f'[{self.name}] {player}', avatar_url = f'https://mc-heads.net/head/{player.lower()}.png')
 
@@ -60,9 +59,7 @@ async def on_player_join(self: Server, player: str):
 
     if webhook == None: return
 
-    for server in self.client.servers:
-        if server.name != self.name:
-            send_to(server, f'[{self.name}] {player} ha entrado al servidor')
+    send_to_servers(self, f'[{self.name}] {player} ha entrado al servidor')
         
     await webhook.send(f'[{self.name}] {player} ha entrado al servidor')
         
@@ -71,9 +68,7 @@ async def on_player_left(self: Server, player: str):
 
     if webhook == None: return
 
-    for server in self.client.servers:
-        if server.name != self.name:
-            send_to(server, f'[{self.name}] {player} ha salido del servidor')
+    send_to_servers(self, f'[{self.name}] {player} ha salido del servidor')
         
     await webhook.send(f'[{self.name}] {player} ha salido del servidor')
 
@@ -82,9 +77,7 @@ async def on_already_started(self: Server):
 
     if webhook == None: return
 
-    for server in self.client.servers:
-        if server.name != self.name:
-            send_to(server, f'[{self.name}] Servidor abierto!')
+    send_to_servers(self, f'[{self.name}] Servidor abierto!')
         
     await webhook.send(f'[{self.name}] Servidor abierto!')
 
@@ -93,9 +86,7 @@ async def on_stopped(self: Server):
 
     if webhook == None: return
 
-    for server in self.client.servers:
-        if server.name != self.name:
-            send_to(server, f'[{self.name}] Servidor detenido')
+    send_to_servers(self, f'[{self.name}] Servidor detenido')
         
     await webhook.send(f'[{self.name}] Servidor detenido')
 
@@ -104,8 +95,6 @@ async def on_crash(self: Server):
 
     if webhook == None: return
 
-    for server in self.client.servers:
-        if server.name != self.name:
-            send_to(server, f'[{self.name}] El servidor crasheó')
+    send_to_servers(self, f'[{self.name}] El servidor crasheó')
         
     await webhook.send(f'[{self.name}] El servidor crasheó')

@@ -4,7 +4,10 @@ msgstr ""
 "Language: es\n"
 
 ### ———————————————————————————————————————
-### mcdis_rcon.bot.loader
+### classes.McDisClient
+
+msgid   "Error while running discord client: {}"
+msgstr  "Error al inicializar el cliente de discord: {}"
 
 msgid   "Your configuration has been loaded successfully."
 msgstr  "La configuración se ha cargado exitosamente."
@@ -15,11 +18,32 @@ msgstr  "Error: No se encontró el canal con id {}."
 msgid   "Error: The panel channel must be a text channel."
 msgstr  "Error: El canal del panel debe ser un canal de texto."
 
-
-### mcdis_rcon.bot.client
-
 msgid   "Logged in as {}!"
 msgstr  "Sesión iniciada como {}!"
+
+msgid   "   • Creating objects\n{}"
+msgstr  "   • Creando objetos\n{}"
+
+msgid   "   • Importing addons:"
+msgstr  "   • Importando addons:"
+
+msgid   "     -> Imported {}"
+msgstr  "     -> Se importó {}"
+
+msgid   "     -> Unable to import {}\n{}"
+msgstr  "     -> No se pudo importar {}\n{}"
+
+msgid   "   • Loaded Discord events"
+msgstr  "   • Eventos de Discord cargados"
+
+msgid   "   • Client commands synchronized to Discord"
+msgstr  "   • Comandos del cliente sincronizados con Discord"
+
+msgid   "   • Loaded server panel"
+msgstr  "   • Panel cargado"
+
+msgid   "Loading Complete"
+msgstr  "Carga completa"
 
 msgid   "There was an error while loading McDis-RCON."
 msgstr  "Hubo un error al cargar McDis-RCON."
@@ -27,72 +51,74 @@ msgstr  "Hubo un error al cargar McDis-RCON."
 msgid   "Error: {}"
 msgstr  "Error: {}"
 
-msgid   "Error while running discord client: {}"
-msgstr  "Error al inicializar el cliente de discord: {}"
+msgid   "✔ Initializing processes."
+msgstr  "✔ Inicializando procesos."
 
-### mcdis_rcon.bot.pm_loader
+msgid   "✔ Stopping processes."
+msgstr  "✔ Deteniendo procesos."
 
-msgid   "Loading Processes Manager:"
-msgstr  "Cargando Administrador de Procesos:"
+msgid   "✔ Forcibly stopped processes."
+msgstr  "✔ Deteniendo procesos forzosamente."
 
-msgid   "   • Creating objects:\n{}"
-msgstr  "   • Creando objetos:\n{}"
+msgid   "✔ Restarting processes..."
+msgstr  "✔ Reiniciando procesos..."
 
-msgid   "   • Loaded Server Panel"
-msgstr  "   • Panel cargado"
+msgid   "✔ Reloading mdplugins..."
+msgstr  "✔ Recargando mdplugins..."
 
-msgid   "Loading Complete\n"
-msgstr  "Carga completa\n"
+msgid   "✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`."
+msgstr  "✖ Specifica el proceso. E.g.: `{}{} <name>` or `{}{}-all`."
 
+msgid   "✖ `[{}]`: The process was already open."
+msgstr  "✖ `[{}]`: El proceso ya estaba abierto."
 
+msgid   "✔ `[{}]`: Initializing process."
+msgstr  "✔ `[{}]`: Inicializando proceso."
 
-### ———————————————————————————————————————
-### mcdis_rcon.bot.pm_functions
+msgid   "✖ `[{}]`: The process was not open."
+msgstr  "✖ `[{}]`: El proceso no estab abierto."
 
+msgid   "✔ `[{}]`: Stopping process."
+msgstr  "✔ `[{}]`: Deteniendo proceso."
 
+msgid   "✔ `[{}]`: Forcibly stopped process."
+msgstr  "✔ `[{}]`: Proceso detenido forzosamente."
 
+msgid   "✔ `[{}]`: Restarting process..."
+msgstr  "✔ `[{}]`: Reiniciando proceso..."
 
+msgid   "✔ `[{}]`: Reloading mdplugins..."
+msgstr  "✔ `[{}]`: Recargando mdplugins..."
 
-### ———————————————————————————————————————
-### mcdis_rcon.bot.pm_classes.server
+msgid   "Saving files..."
+msgstr  "Guardando archivos..."
 
-msgid   "It was not possible to open the file '{}'."
-msgstr  "No fue posible abrir el archivo '{}'."
+msgid   "`[{}/{}]` Uploaded files."
+msgstr  "`[{}/{}]` Archivos subidos."
 
-msgid   "Error in the function listener_events().\n\n{}"
-msgstr  "Error en la función listener_events().\n\n{}"
+msgid   "✔ Files have been uploaded."
+msgstr  "✔ Archivos subidos."
 
+msgid   "Processing files..."
+msgstr  "Procesando archivos..."
 
-### mcdis_rcon.bot.pm_classes.process
+msgid   "\n • `{}` uploaded."
+msgstr  "\n • `{}` subido."
 
-msgid   "Error in the function start().\n\n{}"
-msgstr  "Error en la función start().\n\n{}"
+msgid   "\n • McDis will not overwrite the file `{}`."
+msgstr  "\n • McDis no sobreescribirá el archivo `{}`."
 
-msgid   "Error in the function relay_console().\n\n{}"
-msgstr  "Error en la función relay_console().\n\n{}"
+msgid   "\n ✔ Files have been processed."
+msgstr  "\n ✔ Archivos procesados."
 
-msgid   "Error while trying to load the plugin {}.\n\n{}"
-msgstr  "Error al tratar de cargar el plugin {}.\n\n{}"
-
-msgid   "Error in {}() of {}.\n\n{}"
-msgstr  "Error en {}() de {}.\n\n{}"
-
-msgid   "Closing Process.\nError in the function listener_console().\n\n{}"
-msgstr  "Cerrando Proceso.\nError en la función listener_console().\n\n{}"
-
-### mcdis_rcon.bot.pm_classes.flask
-msgid   "Error while loading app flask: {}"
-msgstr  "Error al cargar la app Flask: {}"
-
-
-### ———————————————————————————————————————
-### mcdis_rcon.bot.pm_behaviours.on_stop
+msgid   "Checking if there are open processes..."
+msgstr  "Verificando si hay procesos abiertos..."
 
 msgid   "Closing processes..."
 msgstr  "Cerrando procesos..."
 
 msgid   "Processes will be forcibly closed in {} seconds..."
-msgstr  "Los procesos se cerrarán forzosamente en {} segundos..."
+msgstr  "Los procesos será cerrados forzosamente en {} segundos..."
 
 msgid   "Processes forcibly closed."
 msgstr  "Procesos cerrados forzosamente."
@@ -100,86 +126,32 @@ msgstr  "Procesos cerrados forzosamente."
 msgid   "Processes closed."
 msgstr  "Procesos cerrados."
 
-
-### mcdis_rcon.bot.pm_behaviours.on_message
-
-msgid   "✖ Specify the process. E.g.: `{}mk-bkp <name>`."
-msgstr  "✖ Especifíca el proceso. Ej.: `{}mk-bkp <name>`."
-
-msgid   "✖ There's not enough space on the disk to create the backup."
-msgstr  "✖ No hay suficiente espacio en el disco para crear el backup"
-
-msgid   "✖ The process must be closed to create the `.zip`."
-msgstr  "✖ El proceso debe estar cerrado para hacer el `.zip`."
-
-msgid   "`[{}]`: Compressing files..."
-msgstr  "`[{}]`: Comprimiendo archivos..."
-
-msgid   "`[{}]`: `[{}/{}]` files have been compressed..."
-msgstr  "`[{}]`: `[{}/{}]` archivos ya fueron comprimidos..."
-
-msgid   "✔ The files have been successfully compressed."
-msgstr  "✔ Se terminaron de comprimir los archivos."
-
-msgid   "✖ Specify the dir path to upload the files. E.g.: `{}upload <mcdis_path>`."
-msgstr  "✖ Especifica la ruta del directorio para cargar los archivos. Ej.: `{}upload <mcdis_path>`."
-
-msgid   "✖ The path must be a McDis path. E.g.: `McDis/Backups`."
-msgstr  "✖ La ruta debe ser una ruta de McDis. Ej.: `McDis/Backups`."
-
-msgid   "✖ You must add the files to upload."
-msgstr  "✖ Debes agregar los archivos que deseas subir."
-
-msgid   "✖ The path must be a directory."
-msgstr  "✖ La ruta debe ser un directorio."
-
-msgid   "✖ The path must be a `.zip` file."
-msgstr  "✖ La ruta debe ser un archivo `.zip`."
-
-msgid   "Saving files..."
-msgstr  "Guardando archivos..."
-
-msgid   "Processing files..."
-msgstr  "Procesando archivos..."
-
-msgid   "\n • McDis will not overwrite the file `{}`."
-msgstr  "\n • McDis no sobreescribirá el archivo `{}`."
-
-msgid   "\n • `{}` uploaded."
-msgstr  "\n • `{}` subido."
-
-msgid   "`[{}/{}]` Uploaded files."
-msgstr  "`[{}/{}]` Archivos subidos."
-
-msgid   "✔ Files have been uploaded."
-msgstr  "✔ Los archivos han sido subidos."
-
-msgid   "\n ✔ Files have been processed."
-msgstr  "\n ✔ Los archivos han sido procesados."
-
-msgid   "Checking if there are open processes..."
-msgstr  "Verificando si hay procesos abiertos..."
-
 msgid   "Restarting..."
 msgstr  "Reiniciando..."
 
+msgid   "Error in {} of {}: {}"
+msgstr  "Error en {} de {}: {}"
+
+msgid   "✖ The path must be a McDis path. E.g.: `McDis/Backups`."
+msgstr  "✖ La dirección debe ser un McDis path. E.g.: `McDis/Backups`."
+
+msgid   "✖ You must work within the directory where McDis is running."
+msgstr  "✖ Solo puedes trabajar dentro del directorio donde corre McDis."
+
+msgid   "✖ The path must exist."
+msgstr  "✖ La dirección debe existir."
+
+msgid   "✖ The path must be a directory."
+msgstr  "✖ La dirección debe ser un directorio."
+
+msgid   "✖ The path must be a file."
+msgstr  "✖ La dirección debe ser un archivo."
+
 ### ———————————————————————————————————————
-### mcdis_rcon.bot.pm_banner.embeds.backups
+### gui.Panel
 
-msgid   "No backups were found."
-msgstr  "No se encontraron backups."
-
-msgid   "If you want to load or delete a backup, select it from the dropdown below."
-msgstr  "Si deseas cargar o eliminar un backup, selecciónalo en el desplegable de abajo."
-
-
-### mcdis_rcon.bot.pm_banner.embeds.banner
-
-msgid   "[Disk Usage]: Disk usage is over 90%."
-msgstr  "[Uso de Disco]: El uso de disco supera el 90%."
-
-msgid   "[Flask App]: Flask app is running."
-msgstr  "[Flask App]: La app Flask está abierta."
+msgid   "Are you sure you want to restart McDis?"
+msgstr  "Estás seguro de que quieres reiniciar McDis?"
 
 msgid   "Server Panel"
 msgstr  "Panel del servidor"
@@ -193,23 +165,160 @@ msgstr  "Consola"
 msgid   "Panel"
 msgstr  "Panel"
 
+msgid   "[Disk Usage]: Disk usage is over 90%."
+msgstr  "[Uso de Disco]: El uso de disco supera el 90%."
+
+msgid   "[Uploader]: Uploader is currently running."
+msgstr  "[Uploader]: El Uploader está abierto actualmente."
+
+msgid   "[Flask]: Flask is currently running."
+msgstr  "[Flask]: Flask está abierto actualmente."
+
 msgid   "> Server Resources"
 msgstr  "> Recursos del servidor"
 
 msgid   "> Warnings"
 msgstr  "> Precauciones"
 
+### ———————————————————————————————————————
+### gui.Uploader
 
-### mcdis_rcon.bot.pm_banner.embeds.command
+msgid   "Edit the path to upload"
+msgstr  "Editar la dirección de subida"
+
+msgid   "Path to upload"
+msgstr  "Dirección de subida"
+
+msgid   "Uploader Manager"
+msgstr  "Administrador del Uploader"
+
+msgid   "If the Uploader is active, all files uploaded to this channel will be sent to the specified destination."
+msgstr  "Si el Uploader está abierto, todos los archivos que se suban a este canal serán enviados a la dirección específicadas."
+
+### ———————————————————————————————————————
+### gui.Flask
+
+msgid   "Click on here to stop Flask"
+msgstr  "Presiona aquí para detener Flask"
+
+msgid   "✔ Flask was succesfully closed."
+msgstr  "✔ Flask se cerró correctamente."
+
+msgid   ""
+"Flask will delay responding to the shutdown request until all "
+"ongoing file downloads are complete. Do you want to proceed?"
+msgstr  ""
+"Flask no responderá a la solicitud de cierre hasta que halla terminado "
+"de procesar todas las descargas en curso. Deseas proceder?"
+
+msgid   ""
+"Flask allows you to download files larger than 5 MB. "
+"When you request a file, Flask generates a link that allows you to download it."
+msgstr  ""
+"Flask te permite descargar archivos con un tamaño mayor a 5 MB. "
+"Cuando solites un archivo, Flask generará un link que te permitirá descargarlo."
+
+msgid   "**Active Links:**"
+msgstr  "**Links Activos:**"
+
+### ———————————————————————————————————————
+### gui.McDisManager
+
+msgid   "Are you sure you want to kill the `{}` process?"
+msgstr  "Estás seguro que deseas cerrar forzosamente el proceso `{}`?"
+
+### ———————————————————————————————————————
+### gui.FilesManagerBackups
+
+msgid   "[Make Backup]"
+msgstr  "[Crear Backup]"
+
+msgid   "Select a backup"
+msgstr  "Selecciona un backup"
+
+msgid   "✖ The process must be closed."
+msgstr  "✖ El proceso debe estar cerrado."
+
+msgid   "Compressing files..."
+msgstr  "Comprimiendo archivos..."
+
+msgid   "`[{}]`: `[{}/{}]` files have been compressed..."
+msgstr  "`[{}]`: `[{}/{}]` archivos han sido comprimidos..."
+
+msgid   "✖ An error occurred while compressing files."
+msgstr  "✖ Ocurrió un error mientras se comprimían los archivos."
+
+msgid   "✔ The files have been successfully compressed."
+msgstr  "✔ Los archivos fueron comprimidos satisfactoriamente."
+
+msgid   "Are you sure you want to make a backup?"
+msgstr  "Estás seguro que deseas crear un backup?"
+
+msgid   "Unpacking backup..."
+msgstr  "Descomprimiendo backup..."
+
+msgid   "`[{}]`: `[{}/{}]` files have been unpacked..."
+msgstr  "`[{}]`: `[{}/{}]` archivos han sido descomprimidos..."
+
+msgid   "✖ An error occurred while unpacking files."
+msgstr  "✖ Ocurrió un error mientras se descomprimían los archivos."
+
+msgid   "✔ The files have been successfully unpacked."
+msgstr  "✔ Los archivos fueron descomprimidos satisfactoriamente."
+
+msgid   "Are you sure you want to load the backup `{}`?"
+msgstr  "Estás seguro que deseas cargar el backup `{}`?"
+
+msgid   "No backups were found."
+msgstr  "No se encontraron backups."
+
+msgid   "If you want to load a backup or make one, select it from the dropdown below."
+msgstr  "Si deseas cargar un backup o crear uno, selecciónalo en el desplegable de abajo."
+
+### ———————————————————————————————————————
+### gui.FilesManagerCommand
+
+msgid   "[New Command]"
+msgstr  "[Nuevo Comando]"
+
+msgid   "Select an action"
+msgstr  "Selecciona una acción"
+
+msgid   "✖ The proceso isn't open."
+msgstr  "✖ El proceso no está abierto."
+
+msgid   "✔ Executing commands..."
+msgstr  "✔ Ejecutando comandos..."
+
+msgid   "Edit the command"
+msgstr  "Edita el comando"
+
+msgid   "Name"
+msgstr  "Nombre"
+
+msgid   "Are you sure you want to delete the `{}` command?"
+msgstr  "Estás seguro que deseas eliminar el comando `{}`"
 
 msgid   "Description"
 msgstr  "Descripción"
 
-msgid   "Use {} to iterate over the options."
-msgstr  "Utiliza {} para iterar sobre las opciones."
+### ———————————————————————————————————————
+### gui.FilesManagerCommands
 
+msgid   "Select a command"
+msgstr  "Selecciona un comando"
 
-### mcdis_rcon.bot.pm_banner.embeds.commands
+msgid   "✖ At the moment, only up to 24 commands are allowed."
+msgstr  "✖ De momento, solo se pueden tener hasta 24 comandos."
+
+msgid   "New command"
+msgstr  "Nuevo comando"
+
+msgid   "Command name"
+msgstr  "Nombre del comando"
+
+msgid   "✖ There is already a command with that name."
+msgstr  "✖ Ya hay un comando con ese nombre."
 
 msgid   ""
 "In the dropdown below, you will find various predefined commands.\n"
@@ -221,8 +330,14 @@ msgstr  ""
 msgid   "Dropdown:"
 msgstr  "Desplegable:"
 
+### ———————————————————————————————————————
+### gui.FilesManagerProcesses
 
-### mcdis_rcon.bot.pm_banner.embeds.processes
+msgid   "Processes"
+msgstr  "Procesos"
+
+msgid   "Are you sure you want to kill the `{}` process?"
+msgstr  "Estás seguro que deseas cerrar forzosamente el proceso `{}`?"
 
 msgid   "> Processes in `{}`"
 msgstr  "> Procesos en `{}`"
@@ -233,118 +348,8 @@ msgstr  "No hay procesos dentro de esta carpeta."
 msgid   "If you want to close a process, select it from the dropdown below."
 msgstr  "Si desees cerrar un proceso, selecciónalo en el desplegable de abajo."
 
-
-
 ### ———————————————————————————————————————
-### mcdis_rcon.bot.pm_banner.views.backups
-
-msgid   "Select a backup"
-msgstr  "Selecciona un backup"
-
-msgid   "Type 'unpack' or 'delete' here"
-msgstr  "Escribe 'descomprimir' o 'borrar' acá"
-
-msgid   "unpack"
-msgstr  "descomprimir"
-
-msgid   "✖ The process must be closed."
-msgstr  "✖ El proceso debe estar cerrado."
-
-msgid   "Unpacking Backup..."
-msgstr  "Descomprimiendo Backup..."
-
-msgid   "`[{}]`: `[{}/{}]` files have been unpacked..."
-msgstr  "`[{}]`: `[{}/{}]` archivos ya fueron descomprimidos..."
-
-msgid   "delete"
-msgstr  "borrar"
-
-msgid   "✖ There was an error while unpacking. Error: {}"
-msgstr  "✖ Hubo un error mientras se descomprimía. Error: {}"
-
-msgid   "✖ There was an error while unpacking..."
-msgstr  "✖ Hubo un error mientras se descomprimía..."
-
-msgid   "✔ The files have been successfully unpacked."
-msgstr  "✔ Se terminaron de descomprimir los archivos."
-
-msgid   "✔ File deleted."
-msgstr  "✔ Archivo eliminado."
-
-msgid   "✖ Action `{}` not recognized."
-msgstr  "✖ Acción `{}` no reconocida."
-
-
-### mcdis_rcon.bot.pm_banner.views.banner
-
-msgid   "✖ `[{}]`: The process was already open."
-msgstr  "✖ `[{}]`: El proceso ya estaba abierto."
-
-msgid   "✔ `[{}]`: Initializing process."
-msgstr  "✔ `[{}]`: Inicializando proceso."
-
-msgid   "✖ `[{}]`: The process was not open."
-msgstr  "✖ `[{}]`: El proceso no estaba abierto."
-
-msgid   "✔ `[{}]`: Stopping process."
-msgstr  "✔ `[{}]`: Deteniendo proceso."
-
-msgid   "✔ `[{}]`: Forcibly stopped process."
-msgstr  "✔ `[{}]`: Proceso detenido forzosamente."
-
-msgid   "Are you sure about killing the `{}` process?"
-msgstr  "Estás seguro de que quieres cerrar forzosamente el proceso `{}`?"
-
-
-### mcdis_rcon.bot.pm_banner.views.command
-
-msgid   "✖ The server isn't open."
-msgstr  "✖ El servidor no está abierto."
-
-msgid   "✔ Executing commands..."
-msgstr  "✔ Ejecutando comandos..."
-
-msgid   "Edit the command"
-msgstr  "Edita el comando"
-
-msgid   "Name"
-msgstr  "Nombre"
-
-msgid   "Are you sure about deleting the `{}` command?"
-msgstr  "Estás seguro de que quieres eliminar el comando `{}`?"
-
-
-### mcdis_rcon.bot.pm_banner.views.commands
-
-msgid   "[New Command]"
-msgstr  "[Comando nuevo]"
-
-msgid   "Select a command"
-msgstr  "Selecciona un comando"
-
-msgid   "✖ At the moment, only up to 24 commands are allowed."
-msgstr  "✖ De momento solo se pueden tener hasta 24 comandos."
-
-msgid   "New command"
-msgstr  "Comando nuevo"
-
-msgid   "Command name"
-msgstr  "Nombre del comando"
-
-msgid   "✖ There is already a command with that name."
-msgstr  "✖ Ya hay un comando con ese nombre."
-
-
-### mcdis_rcon.bot.pm_banner.views.processes
-
-msgid   "Processes"
-msgstr  "Procesos"
-
-
-### mcdis_rcon.bot.pm_banner.views.files_manager
-
-msgid   "E.g."
-msgstr  "Ej."
+### gui.FilesManager
 
 msgid   "Select a file"
 msgstr  "Selecciona un archivo"
@@ -352,29 +357,17 @@ msgstr  "Selecciona un archivo"
 msgid   "✖ McDis only accepts file requests of up to 5MB."
 msgstr  "✖ McDis solo acepta solicitudes de archivos de hasta 5MB."
 
-msgid   "The Flask app is currently closed. Would you like to open it?"
-msgstr  "La aplicación Flask está actualmente cerrada. Deseas abrirla?"
+msgid   "Download Link"
+msgstr  "Link de Descarga"
 
-msgid   "✖ The file `{}` doesn't exist."
-msgstr  "✖ El archivo `{}` no existe."
+msgid   "Flask is currently close, do you want to run it?"
+msgstr  "Flask está cerrado actualmente, deseas abrirlo?"
 
 msgid   "Edit the file"
 msgstr  "Edita el archivo"
 
 msgid   "File"
 msgstr  "Archivo"
-
-msgid   "Are you sure about deleting the file `{}`?"
-msgstr  "Estás seguro de que quieres eliminar el archivo `{}`?"
-
-msgid   "Commands"
-msgstr  "Comandos"
-
-msgid   "Terminal"
-msgstr  "Terminal"
-
-msgid   "Are you sure about deleting the dir `{}`?"
-msgstr  "Estás seguro de que quieres eliminar el directorio `{}`?"
 
 msgid   ""
 "✖ The name of directories or files renamed with McDis can only contain letters, " 
@@ -383,8 +376,29 @@ msgstr  ""
 "✖ El nombre de directorios o archivos renombrados con McDis solo pueden contener letras, "
 "números, puntos (.), guiones (-) o guiones bajos (_). Nombre proporcionado: `{}`"
 
+msgid   "Terminal"
+msgstr  "Terminal"
+
+msgid   "Commands"
+msgstr  "Comandos"
+
+msgid   "✖ Invalid command `{}`."
+msgstr  "✖ Comando invalido `{}`."
+
 msgid   "✖ You must provide one argument. E.g.: `mkdir <name>`."
 msgstr  "✖ Debes proporcionar un argumento. Ej.: `mkdir <name>`."
+
+msgid   "✖ You must provide one argument. E.g.: `zip <dir:index>`."
+msgstr  "✖ Debes proporcionar un argumento. Ej.: `zip <dir:index>`."
+
+msgid   "✖ You must provide one argument. E.g.: `unzip <file:index>`."
+msgstr  "✖ Debes proporcionar un argumento. Ej.: `unzip <dir:index>`."
+
+msgid   "✖ The path must be a `.zip` file."
+msgid   "✖ La dirección debe ser un archivo `zip`."
+
+msgid   "✖ A folder named `{}` already exists."
+msgstr  "✖ Ya existe un directorio llamado `{}`."
 
 msgid   "✖ You must provide one argument. E.g.: `cd <dir:index | file:index>`."
 msgstr  "✖ Debes proporcionar un argumento. Ej.: `cd <dir:index | file:index>`."
@@ -392,35 +406,17 @@ msgstr  "✖ Debes proporcionar un argumento. Ej.: `cd <dir:index | file:index>`
 msgid   "✖ You must provide one argument. E.g.: `del <dir:index | file:index>`."
 msgstr  "✖ Debes proporcionar un argumento. Ej.: `del <dir:index | file:index>`."
 
+msgid   "This action might take some time..."
+msgstr  "Esta acción puede tomar un momento..."
+
+msgid   "✖ An error occurred while deleting `{}`."
+msgstr  "✖ Ocurrió un error mientras se borraba `{}`."
+
+msgid   "✔ `{}` has been deleted."
+msgstr  "✔ `{}` ha sido eliminado."
+
 msgid   "✖ You must provide two arguments. E.g.: `copy <dir:index | file:index> <mcdis_path>`."
 msgstr  "✖ Debes proporcionar dos argumentos. Ej.: `copy <dir:index | file:index> <mcdis_path>`."
-
-msgid   "✖ You must provide two arguments. E.g.: `move <dir:index | file:index> <mcdis_path>`."
-msgstr  "✖ Debes proporcionar dos argumentos. Ej.: `move <dir:index | file:index> <mcdis_path>`."
-
-msgid   "✖ You must provide two arguments. E.g.: `rename <dir:index | file:index> <new_name>`."
-msgstr  "✖ Debes proporcionar dos argumentos. Ej.: `rename <dir:index | file:index> <new_name>`."
-
-msgid   "✖ Invalid command `{}`."
-msgstr  "✖ Comando no reconocido `{}`."
-
-msgid   "✖ Invalid argument `{}`. It should be `dir:index` or `file:index`."
-msgstr  "✖ Argumento no reconocido `{}`. Este debe ser `dir:index` o `ìndex:index`."
-
-msgid   "✖ The index must be an integer."
-msgstr  "✖ El índice debe ser un número entero."
-
-msgid   "✖ No file exists with that index."
-msgstr  "✖ No hay un archivo con ese indice."
-
-msgid   "✖ No directory exists with that index."
-msgstr  "✖ No hay una carpeta con ese indice."
-
-msgid   "✖ The path must exist."
-msgstr  "✖ La ruta debe existir."
-
-msgid   "You must work within the directory where McDis is running."
-msgstr  "Solo puedes editar el interior del directorio donde corre McDis."
 
 msgid   "✖ A folder with that name already exists at path."
 msgstr  "✖ Ya existe un directorio con ese nombre en esa dirección."
@@ -428,20 +424,38 @@ msgstr  "✖ Ya existe un directorio con ese nombre en esa dirección."
 msgid   "✖ A file with that name already exists at path."
 msgstr  "✖ Ya existe un archivo con ese nombre en esa dirección."
 
-msgid   "This action might take some time..."
-msgstr  "Esta acción puede tomar unos minutos..."
-
-msgid   "✔ `{}` has been deleted."
-msgstr  "✔ `{}` ha sido eliminado."
+msgid   "✖ An error occurred while copying `{}` to `{}`."
+msgstr  "✖ Ocurrió un error mientras se copiaba `{}` a `{}`."
 
 msgid   "✔ `{}` has been copied to `{}`."
 msgstr  "✔ `{}` fue copiado a `{}`."
 
+msgid   "✖ You must provide two arguments. E.g.: `move <dir:index | file:index> <mcdis_path>`."
+msgstr  "✖ Debes proporcionar dos argumentos. Ej.: `move <dir:index | file:index> <mcdis_path>`."
+
+msgid   "✖ An error occurred while moving `{}` to `{}`."
+msgstr  "✖ Ocurrió un error mientras se movia `{}` a `{}`."
+
 msgid   "✔ `{}` has been moved to `{}`."
 msgstr  "✔ `{}` fue movido a `{}`."
 
-msgid   "✖ There's not enough space on the disk to create this `.zip`."
-msgstr  "✖ No hay suficiente espacio en el disco para crear este `.zip`."
+msgid   "✖ You must provide two arguments. E.g.: `rename <dir:index | file:index> <new_name>`."
+msgstr  "✖ Debes proporcionar dos argumentos. Ej.: `rename <dir:index | file:index> <new_name>`."
 
-msgid   "✖ A folder named `{}` already exists."
-msgstr  "✖ Ya existe un directorio llamado `{}`."
+msgid   "✖ Invalid argument `{}`. It should be `dir:index` or `file:index`."
+msgstr  "✖ Argumento no reconocido `{}`. Este debe ser `dir:index` o `ìndex:index`."
+
+msgid   "✖ No {} exists with that index."
+msgstr  "✖ No existe un {} con ese indice."
+
+msgid   "directory"
+msgstr  "directorio"
+
+msgid   "file"
+msgstr  "archivo"
+
+msgid   "Are you sure you want to delete the dir `{}`?"
+msgstr  "Estás seguro de que deseas eliminar el directorio `{}`?"
+
+msgid   "Are you sure you want to delete the file `{}`?"
+msgstr  "Estás seguro de que deseas eliminar el archivo `{}`?"

@@ -21,6 +21,8 @@ class FlaskManager (Flask):
         self.add_url_rule('/favicon.ico'    , view_func = self._favicon)
         self.add_url_rule('/file_request'   , view_func = self._download_file   , methods = ['GET'])
         self.add_url_rule('/shutdown'       , view_func = self._shutdown        , methods = ['GET'])
+    #   self.add_url_rule('/upload'         , view_func = self._upload_file     , methods = ['POST'])
+    #   self.add_url_rule('/selection'      , view_func = self._upload_form)
         self.handle_http_exception = self._handler
 
     def         _handler                (self, exception):
@@ -78,6 +80,32 @@ class FlaskManager (Flask):
         self.is_running = False
         self._log_queue = None
         self.active_downloads = {}
+
+    def         _upload_form            (self):
+        if self.client.uploader.is_running:
+            return '''
+                    <!doctype html>
+                    <title>Subir Archivo</title>
+                    <h1>Sube tu archivo aquí</h1>
+                    <form method="POST" action="/upload" enctype="multipart/form-data">
+                        <input type="file" name="file">
+                        <button type="submit">Subir</button>
+                    </form>
+                    '''
+        else:
+            return 'Uploader isn\'t running', 400
+    
+    def         _upload_file            (self):
+        if 'file' not in request.files:
+            return abort(404)
+        file = request.files['file']
+        if file.filename == '':
+            return "No file was selected", 400
+        if file:
+            dirpath = self.client.uploader.path_to_upload
+            filepath = os.path.join(dirpath, file.filename)
+            file.save(filepath)
+            return f"File {file.filename} uploaded to {mcdis_path(dirpath)}"
 
     def         _is_valid_addres        (self):
         try:

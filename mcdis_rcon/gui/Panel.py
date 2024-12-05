@@ -121,13 +121,13 @@ class PanelEmbed            (discord.Embed):
         disk_load = f'{disk_info.percent:.1f} %'
 
         if disk_info.percent > 90:
-            self._add_warning('[Disk Usage]: Disk usage is over 90%.')
+            self._add_warning(self.client._('[Disk Usage]: Disk usage is over 90%.'))
         
         if self.client.uploader.is_running: 
-            self._add_warning('[Uploader]: Uploader is currently running.')
+            self._add_warning(self.client._('[Uploader]: Uploader is currently running.'))
 
         if self.client.config['Flask']['Allow'] and self.client.flask.is_running == True: 
-            self._add_warning('[Flask]: Flask is currently running.')
+            self._add_warning(self.client._('[Flask]: Flask is currently running.'))
 
         self.add_field(inline = True, name = self.client._('> Server Resources'), value =
             f'```asciidoc\n'

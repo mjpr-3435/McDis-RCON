@@ -107,7 +107,7 @@ class ProcessSelection      (discord.ui.Select):
         label = f'{process_path} | {selected_process.name()}'
 
         await confirmation_request(
-            self.view.client._('Are you sure about killing the `{}` process?').format(label),
+            self.view.client._('Are you sure you want to kill the `{}` process?').format(label),
             on_confirmation = on_confirmation,
             interaction = interaction
         )

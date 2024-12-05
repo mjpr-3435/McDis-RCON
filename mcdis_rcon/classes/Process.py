@@ -76,8 +76,8 @@ class Process():
             while self.is_running(poll_based = True) or self._relaying: 
                 await asyncio.sleep(0.1)
 
-            self.process                = None
-            self.real_process           = None
+            self.process               = None
+            self.real_process          = None
             self._stop_relay           = False
             self._stop_relay_reason    = None
             self._console_log          = None

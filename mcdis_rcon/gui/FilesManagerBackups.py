@@ -37,7 +37,7 @@ class BackupsView       (discord.ui.View):
             for i, backup in enumerate(self.backups[:24])
         ]
         options.insert(0, discord.SelectOption(
-                label = '[Make Backup]',
+                label = self.client._('[Make Backup]'),
                 emoji = emoji_dir,
                 value = '__MAKE_BACKUP__',
             ))
@@ -115,7 +115,7 @@ class BackupSelect      (discord.ui.Select):
                 await confirmation_interaction.response.defer()
                 await confirmation_interaction.followup.edit_message(
                     message_id = confirmation_interaction.message.id,
-                    content = self.view.client._('Unpacking Backup...'),
+                    content = self.view.client._('Unpacking backup...'),
                     embed = None,
                     view = None)
                 
@@ -156,7 +156,7 @@ class BackupSelect      (discord.ui.Select):
                 content = msg)
 
             await confirmation_request(
-                self.view.client._('Are you sure you want to load the backup {}?')
+                self.view.client._('Are you sure you want to load the backup `{}`?')
                         .format(selected_backup),
                 on_confirmation = on_confirmation,
                 interaction = interaction
@@ -233,7 +233,7 @@ class BackupsEmbed      (discord.Embed):
     def _set_footer(self):
         footer_text = (
             f'{184 * blank_space}\n'
-            f'{self.client._("If you want to load a backup, select it from the dropdown below.")}'
+            f'{self.client._("If you want to load a backup or make one, select it from the dropdown below.")}'
             if self.backups
             else f'{185 * blank_space}'
         )

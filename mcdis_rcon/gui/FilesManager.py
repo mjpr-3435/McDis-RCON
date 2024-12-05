@@ -339,7 +339,7 @@ class DeleteFileButton      (discord.ui.Button):
                 await self.view._update_interface(interaction)
             
         await confirmation_request(
-            self.view.client._('Are you sure about deleting the file `{}`?').format(mcdis_path(self.view.path)), 
+            self.view.client._('Are you sure you want to delete the file `{}`?').format(mcdis_path(self.view.path)), 
             on_confirmation = on_confirmation,
             interaction = interaction)
 
@@ -376,7 +376,7 @@ class TerminalButton        (discord.ui.Button):
         self.view : FilesManagerView
 
         self.names_convention = client._(
-            '✖ The names of directories created with McDis can only contain letters, '
+            '✖ The name of directories or files renamed with McDis can only contain letters, '
             'numbers, periods (.), hyphens (-), and underscores (_). Provided name: `{}`')
 
     async def callback(self, interaction: discord.Interaction):
@@ -590,7 +590,7 @@ class TerminalButton        (discord.ui.Button):
         await self.view._update_interface(interaction)
 
         if reports['error']:
-            msg = self.view.client._('✖ An error occurred while deleting {}.').format(mcdis_path(path_to_remove))
+            msg = self.view.client._('✖ An error occurred while deleting `{}`.').format(mcdis_path(path_to_remove))
         else:
             msg = self.view.client._('✔ `{}` has been deleted.').format(mcdis_path(path_to_remove))
 
@@ -645,7 +645,7 @@ class TerminalButton        (discord.ui.Button):
         await self.view._update_interface(interaction)
 
         if reports['error']:
-            msg = self.view.client._('✖ An error occurred while copying {} to {}.').format(mcdis_path(path_to_copy), path_provided)
+            msg = self.view.client._('✖ An error occurred while copying `{}` to `{}`.').format(mcdis_path(path_to_copy), path_provided)
         else:
             msg = self.view.client._('✔ `{}` has been copied to `{}`.').format(mcdis_path(path_to_copy), path_provided)
 
@@ -696,7 +696,7 @@ class TerminalButton        (discord.ui.Button):
         
         await self.view._update_interface(interaction)
         if reports['error']:
-            msg = self.view.client._('✖ An error occurred while moving {} to {}.').format(mcdis_path(path_to_move), path_provided)
+            msg = self.view.client._('✖ An error occurred while moving `{}` to `{}`.').format(mcdis_path(path_to_move), path_provided)
         else:
             msg = self.view.client._('✔ `{}` has been moved to `{}`.').format(mcdis_path(path_to_move), path_provided)
 
@@ -755,7 +755,7 @@ class TerminalButton        (discord.ui.Button):
             if prefix == 'dir': prefix = 'directory'
             
             await interaction.response.send_message(
-                self.view.client._(f'✖ No {prefix} exists with that index.'),
+                self.view.client._('✖ No {} exists with that index.').format(self.view.client._(prefix)),
                 ephemeral = True)
 
         elif prefix == 'dir':
@@ -792,7 +792,7 @@ class DeleteDirButton       (discord.ui.Button):
                 await self.view._update_interface(interaction)
                 
         await confirmation_request(
-            self.view.client._('Are you sure about deleting the dir `{}`?').format(mcdis_path(self.view.path)), 
+            self.view.client._('Are you sure you want to delete the dir `{}`?').format(mcdis_path(self.view.path)), 
             on_confirmation = on_confirmation,
             interaction = interaction)
 

@@ -160,7 +160,6 @@ class McDisClient(commands.Bot):
     async def   _load_processes        (self):
         from .Network import Network
         from .Server import Server
-        from .Flask import FlaskManager
 
         for name in self.config['Processes']['Servers']:
             server = Server(name, self, self.config['Processes']['Servers'][name])
@@ -173,7 +172,7 @@ class McDisClient(commands.Bot):
             self.networks.append(network)
 
         processes_objects = "\n".join([f'     -> {process.name}' for process in self.processes])
-        print(self._('   • Creating processes objects\n{}').format(processes_objects))
+        print(self._('   • Creating objects\n{}').format(processes_objects))
             
         for process in self.processes:
             await thread(f'Console {process.name}', self.panel, public = True)
@@ -267,27 +266,29 @@ class McDisClient(commands.Bot):
     
     async def   on_ready                (self):
         from .Flask import FlaskManager
+        if self.is_running: return
+        
         self._load_panel()
-
+        
         print(self._('Logged in as {}!').format(self.user))
 
         try:
             await self._load_processes()
             await self._load_addons()
             await self._load_behaviours()
-            print(self._('   • Loaded behaviours'))
+            print(self._('   • Loaded Discord events'))
             await self.tree.sync()
             print(self._('   • Client commands synchronized to Discord'))
             self.flask = FlaskManager(self)
+
+            asyncio.create_task(self._load_banner())
+            print(self._('   • Loaded server panel'))
+            print(self._('Loading Complete'))
   
         except Exception as error:
             print(self._('There was an error while loading McDis-RCON.'))
             print(self._('Error: {}').format(error))
             os._exit(0)
-
-        asyncio.create_task(self._load_banner())
-        print(self._('   • Loaded server panel'))
-        print(self._('Loading Complete'))
 
         signal_handler = lambda sig, frame: threading.Thread(target = self.on_stop).start()
         
@@ -304,7 +305,7 @@ class McDisClient(commands.Bot):
 
                 response = await message.channel.send(
                     self._('✔ Initializing processes.'))
-                await response.delete(delay = 1)
+                await response.delete(delay = 2)
 
                 for process in self.processes: 
                     process.start()
@@ -314,7 +315,7 @@ class McDisClient(commands.Bot):
 
                 response = await message.channel.send(
                     self._('✔ Stopping processes.'))
-                await response.delete(delay = 1)
+                await response.delete(delay = 2)
 
                 for process in self.processes: 
                     process.stop()
@@ -324,7 +325,7 @@ class McDisClient(commands.Bot):
 
                 response = await message.channel.send(
                     self._('✔ Forcibly stopped processes.'))
-                await response.delete(delay = 1)
+                await response.delete(delay = 2)
 
                 for process in self.processes: 
                     process.kill()
@@ -334,7 +335,7 @@ class McDisClient(commands.Bot):
 
                 response = await message.channel.send(
                     self._('✔ Restarting processes...'))
-                await response.delete(delay = 1)
+                await response.delete(delay = 2)
 
                 for process in self.processes: 
                     await process.restart()
@@ -344,7 +345,7 @@ class McDisClient(commands.Bot):
 
                 response = await message.channel.send(
                     self._('✔ Reloading mdplugins...'))
-                await response.delete(delay = 1)
+                await response.delete(delay = 2)
 
                 for process in self.processes: 
                     process.load_plugins(reload = True)
@@ -357,18 +358,19 @@ class McDisClient(commands.Bot):
                 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}start <name>` or `{}start-all`.').format(self.prefix, self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                            .format(self.prefix, 'start', self.prefix, 'start'))
                     await response.delete(delay = 5)
 
                 elif process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was already open.').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Initializing process.').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                     process.start()
 
             elif self.is_panel_command(message.content.lower(), f'stop'):
@@ -379,18 +381,19 @@ class McDisClient(commands.Bot):
 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}stop <name>` or `{}stop-all`.').format(self.prefix, self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                            .format(self.prefix, 'stop', self.prefix, 'stop'))
                     await response.delete(delay = 5)
 
                 elif not process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was not open.').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Stopping process.').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                     process.stop()
             
             elif self.is_panel_command(message.content.lower(), f'kill'):
@@ -401,18 +404,19 @@ class McDisClient(commands.Bot):
                 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}kill <name>` or `{}kill-all`.').format(self.prefix, self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                            .format(self.prefix, 'kill', self.prefix, 'kill'))
                     await response.delete(delay = 5)
 
                 elif not process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was not open.').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Forcibly stopped process.').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                     process.kill()
 
             elif self.is_panel_command(message.content.lower(), f'restart'):
@@ -423,18 +427,19 @@ class McDisClient(commands.Bot):
                 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}restart <name>` or `{}restart-all`.').format(self.prefix, self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                            .format(self.prefix, 'restart', self.prefix, 'restart'))
                     await response.delete(delay = 5)
 
                 elif not process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was not open.').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Restarting process...').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                     await process.restart()
 
             elif self.is_panel_command(message.content.lower(), f'mdreload'):
@@ -445,18 +450,19 @@ class McDisClient(commands.Bot):
                 
                 if not process:
                     response = await message.channel.send(
-                        self._('✖ Specify the process. E.g.: `{}mdreload <name>` or `{}mdreload-all`.').format(self.prefix, self.prefix))
+                        self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                            .format(self.prefix, 'mdreload', self.prefix, 'mdreload'))
                     await response.delete(delay = 5)
 
                 elif not process.is_running():
                     response = await message.channel.send(
                         self._('✖ `[{}]`: The process was not open.').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                 
                 else:
                     response = await message.channel.send(
                         self._('✔ `[{}]`: Reloading mdplugins...').format(process.name))
-                    await response.delete(delay = 1)
+                    await response.delete(delay = 2)
                     process.load_plugins(reload = True)
         
         for process in self.processes: 

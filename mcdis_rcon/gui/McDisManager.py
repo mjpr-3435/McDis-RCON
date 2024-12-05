@@ -94,7 +94,7 @@ class KillButton            (discord.ui.Button):
             self.view.client.processes[self.view.index].kill()
 
         await confirmation_request(
-            self.view.client._('Are you sure about killing the `{}` process?')
+            self.view.client._('Are you sure you want to kill the `{}` process?')
                             .format(self.view.client.processes[self.view.index].name),
             on_confirmation = on_confirmation,
             interaction = interaction)

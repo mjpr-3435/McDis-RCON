@@ -86,7 +86,7 @@ class UploaderEmbed         (discord.Embed):
 
     def _add_description(self):
         self.add_field(inline = True, name = '', value = 
-            self.client._('If the uploader is active, all files uploaded to this channel will be sent to the specified destination.')
+            self.client._('If the Uploader is active, all files uploaded to this channel will be sent to the specified destination.')
         )
 
     def _add_status_field(self):

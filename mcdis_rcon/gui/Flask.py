@@ -50,7 +50,7 @@ class StateButton           (discord.ui.Button):
                 shutdown_link = self.view.client.flask.shutdown_link(interaction.user)
 
                 await confirmation_interaction.response.edit_message(
-                    content = f'[Click on here to stop Flask]({shutdown_link})',
+                    content = f'[{self.view.client._("Click on here to stop Flask")}]({shutdown_link})',
                     embed = None,
                     view = None)
                 
@@ -66,12 +66,12 @@ class StateButton           (discord.ui.Button):
 
                 await confirmation_interaction.followup.edit_message(
                     message_id = confirmation_interaction.message.id,
-                    content = '✔ Flask was succesfully closed.'
+                    content = self.view.client._('✔ Flask was succesfully closed.')
                 )
 
             await confirmation_request(
-                self.view.client._("Flask will delay responding to the shutdown request until all "
-                                   "ongoing file downloads are complete. Do you want to proceed?"), 
+                self.view.client._('Flask will delay responding to the shutdown request until all '
+                                   'ongoing file downloads are complete. Do you want to proceed?'), 
                 on_confirmation = on_confirmation, 
                 interaction = interaction
             )
@@ -157,7 +157,7 @@ class FlaskEmbed            (discord.Embed):
         links = self.client.flask.active_downloads
         for id, data in links.items():
             user = data['user']
-            file = truncate(data['file'], 48)
+            file = truncate(mcdis_path(data['file']), 48)
             link = f'http://{self.client.config["Flask"]["IP"]}:{self.client.config["Flask"]["Port"]}/file_request?id={id}'
             dummy = f'User :: {user}\nFile :: {file}\n{link}\n\n'
             if len(content + dummy) > 1000: break
