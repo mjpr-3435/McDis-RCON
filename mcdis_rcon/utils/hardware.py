@@ -3,11 +3,12 @@ from ..modules import *
 def get_cpu_temp() -> str:
     try:
         temps = psutil.sensors_temperatures()
-
-        if 'coretemp' in temps:
-            for temp in temps['coretemp']:
-                if 'package id' in temp.label.lower():
-                    return f'{int(temp.current)} °C'
+        for sensor in ['coretemp', 'k10temp']:
+            if sensor in temps:
+                for temp in temps[sensor]:
+                    if 'package id' in temp.label.lower() or 'tdie' in temp.label.lower() or 'tctl' in temp.label.lower():
+                        return f'{int(temp.current)} °C'
+        return f'—— °C'
     except:
         return f'—— °C'
     
