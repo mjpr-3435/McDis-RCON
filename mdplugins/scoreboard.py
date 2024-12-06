@@ -6,10 +6,10 @@ from mcdis_rcon.utils import read_dat_files
 from mcdis_rcon.classes import Server
 
 
-async def on_discord_message(self: Server, message: discord.Message):
+async def on_discord_message(server: Server, message: discord.Message):
     if message.author.bot: return
     elif message.content.lower().strip() == '!!digs':
-        await message.channel.send(embed = digs_embed(self))
+        await message.channel.send(embed = digs_embed(server))
 
 def format_value(value : int):
     magnitude = [ '', '🥝', '🍈', ]
@@ -20,8 +20,8 @@ def format_value(value : int):
     return f'{f"{value/1000**i:.2f}":>8} {magnitude[i]}'
 
         
-def digs_embed(self: Server):
-    path = os.path.join(self.path_server, 'world', 'data', 'scoreboard.dat')
+def digs_embed(server: Server):
+    path = os.path.join(server.path_server, 'world', 'data', 'scoreboard.dat')
     data = read_dat_files(path)
 
     scores = []

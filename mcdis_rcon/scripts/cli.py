@@ -2,10 +2,12 @@ import argparse
 import shutil
 import os
 
+os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
+
 def init():
     """Initialize the project."""
     templates = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')
-    files_to_copy = ['md_config.yml', 'md_how_to_use.pdf']
+    files_to_copy = ['md_config.yml']
     for filename in files_to_copy:
         src_path = os.path.join(templates, filename)
         if not os.path.exists(filename):

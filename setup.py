@@ -27,6 +27,7 @@ setup(
         'flask',
         'requests',
         'nbtlib',
+        'requests'
     ],
     cmdclass={
         'install': CustomInstall,

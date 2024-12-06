@@ -73,7 +73,7 @@ class RestartButton         (discord.ui.Button):
             await self.view.client.restart(confirmation_interaction)
 
         await confirmation_request(
-            self.view.client._('Are you sure about restarting McDis?'), 
+            self.view.client._('Are you sure you want to restart McDis?'), 
             on_confirmation = on_confirmation, 
             interaction = interaction)
 

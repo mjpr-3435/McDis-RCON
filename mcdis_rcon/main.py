@@ -8,5 +8,5 @@ def run():
         po.save_as_mofile(os.path.join(po_dir_path, 'app.mo'))
     
     print('Initializing McDis RCON...')
-    from .classes import McDisClient
+    from .classes.McDisClient import McDisClient
     McDisClient()

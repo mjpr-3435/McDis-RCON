@@ -154,6 +154,11 @@ class BackupSelect      (discord.ui.Select):
                 await confirmation_interaction.followup.edit_message(
                 message_id = confirmation_interaction.message.id,
                 content = msg)
+                
+                await confirmation_interaction.followup.edit_message(
+                message_id = interaction.message.id,
+                embed = BackupsEmbed(self.view.client, self.view.process),
+                view = BackupsView(self.view.client, self.view.process))
 
             await confirmation_request(
                 self.view.client._('Are you sure you want to load the backup `{}`?')

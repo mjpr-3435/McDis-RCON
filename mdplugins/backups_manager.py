@@ -12,16 +12,16 @@ from mcdis_rcon.classes import Server
 
 admins = []
 
-async def load(self: Server):
+async def load(server: Server):
     global admins
 
-    path_file = os.path.join(self.path_plugins_config, 'backups_manager.json')
+    path_file = os.path.join(server.path_plugins_configs, 'backups_manager.json')
     dictionary = {
         'Admins' : []
         }
 
     if not os.path.exists(path_file):
-        os.makedirs(self.path_plugins_config, exist_ok = True)
+        os.makedirs(server.path_plugins_configs, exist_ok = True)
         with open(path_file, 'w', encoding = 'utf-8') as file:
             json.dump(dictionary, file, ensure_ascii = False, indent = 4)
     
@@ -30,88 +30,88 @@ async def load(self: Server):
 
     admins = config['Admins']
 
-async def on_player_command(self: Server, player: str, message: str):
-    zips = [x for x in os.listdir(self.path_bkps) if x.endswith('.zip')]
+async def on_player_command(server: Server, player: str, message: str):
+    zips = [x for x in os.listdir(server.path_bkps) if x.endswith('.zip')]
 
     if not player in admins:
         return
     
-    elif self.is_command(message, 'help'):
-        self.show_command(player, 'gb help'          , 'Muestra los comandos del backups manager.')
+    elif server.is_command(message, 'help'):
+        server.show_command(player, 'gb help'          , 'Muestra los comandos del backups manager.')
 
-    elif self.is_command(message, 'gb help'):
-        self.show_command(player, 'bkps'             , 'Lista los backups del servidor.')
-        self.show_command(player, 'mk-bkp'           , 'Crea un backup con la lógica de McDis.')
-        self.show_command(player, 'del-bkp <name>'   , 'Elimina el backup <name>.zip.')
-        self.show_command(player, 'load-bkp <name>'  , 'Carga el backup <name>.zip.')
+    elif server.is_command(message, 'gb help'):
+        server.show_command(player, 'bkps'             , 'Lista los backups del servidor.')
+        server.show_command(player, 'mk-bkp'           , 'Crea un backup con la lógica de McDis.')
+        server.show_command(player, 'del-bkp <name>'   , 'Elimina el backup <name>.zip.')
+        server.show_command(player, 'load-bkp <name>'  , 'Carga el backup <name>.zip.')
     
-    elif self.is_command(message, 'mk-bkp'):
-        self.stop()
+    elif server.is_command(message, 'mk-bkp'):
+        server.stop()
 
-        while self.is_running():
+        while server.is_running():
             await asyncio.sleep(0.1)
 
-        await self.send_to_console('Creating backup...')
+        await server.send_to_console('Creating backup...')
 
-        task = threading.Thread(target = self.make_bkp)
+        task = threading.Thread(target = server.make_bkp)
         task.start()
             
         while task.is_alive():
             await asyncio.sleep(0.5)
 
-        await self.send_to_console('Backup created.')
+        await server.send_to_console('Backup created.')
 
-        self.start()
+        server.start()
 
-    elif self.is_command(message, 'load-bkp'):
-        zip = message.removeprefix(f'{self.prefix}load-bkp').strip() + '.zip'
+    elif server.is_command(message, 'load-bkp'):
+        zip = message.removeprefix(f'{server.prefix}load-bkp').strip() + '.zip'
 
         if zip in zips:
-            self.stop()
+            server.stop()
 
-            while self.is_running():
+            while server.is_running():
                 await asyncio.sleep(0.1)
 
-            await self.send_to_console(f'Unpacking the backup {zip}...')
+            await server.send_to_console(f'Unpacking the backup {zip}...')
 
-            task = threading.Thread(target = self.unpack_bkp, args = (zip,))
+            task = threading.Thread(target = server.unpack_bkp, args = (zip,))
             task.start()
                 
             while task.is_alive():
                 await asyncio.sleep(0.5)
 
-            await self.send_to_console(f'Backup {zip} unpacked.')
+            await server.send_to_console(f'Backup {zip} unpacked.')
 
-            self.start()
+            server.start()
 
         else:
-            self.send_response(player, '✖ No hay un backup con ese nombre.')
+            server.send_response(player, '✖ No hay un backup con ese nombre.')
 
-    elif self.is_command(message, 'del-bkp'):
-        zip = message.removeprefix(f'{self.prefix}del-bkp').strip() + '.zip'
+    elif server.is_command(message, 'del-bkp'):
+        zip = message.removeprefix(f'{server.prefix}del-bkp').strip() + '.zip'
 
         if zip in zips:
-            os.remove(os.path.join(self.path_bkps, zip))
-            show_bkps(self, player)
-            self.send_response(player, f'✔ Backup {zip} eliminado.')
+            os.remove(os.path.join(server.path_bkps, zip))
+            show_bkps(server, player)
+            server.send_response(player, f'✔ Backup {zip} eliminado.')
         else:
-            self.send_response(player, '✖ No hay un backup con ese nombre.')
+            server.send_response(player, '✖ No hay un backup con ese nombre.')
     
-    elif self.is_command(message, 'bkps'):
-        show_bkps(self, player)
+    elif server.is_command(message, 'bkps'):
+        show_bkps(server, player)
 
-def show_bkps(self: Server, player : str):
-    zips = [x for x in os.listdir(self.path_bkps) if x.endswith('.zip')]
+def show_bkps(server: Server, player : str):
+    zips = [x for x in os.listdir(server.path_bkps) if x.endswith('.zip')]
     zips.sort()
     
     if not zips:
-        self.send_response(player, 'No se han creado backups.')
+        server.send_response(player, 'No se han creado backups.')
         return
     
-    self.send_response(player, 'Backups disponibles:')
+    server.send_response(player, 'Backups disponibles:')
 
     for zip in zips:
-        date = datetime.fromtimestamp(os.path.getctime(os.path.join(self.path_bkps, zip))).strftime("%Y-%m-%d %H:%M:%S")
+        date = datetime.fromtimestamp(os.path.getctime(os.path.join(server.path_bkps, zip))).strftime("%Y-%m-%d %H:%M:%S")
 
         dummy = [
         hover_and_suggest('[>] ' , color = 'green', suggest = f'!!load-bkp {zip.removesuffix(".zip")}', hoover = 'Load backup'),
@@ -119,4 +119,4 @@ def show_bkps(self: Server, player : str):
         f'{{"text":"{zip} [{date}]"}}'
         ]
 
-        self.execute(f'tellraw {player} {extras(dummy)}')
+        server.execute(f'tellraw {player} {extras(dummy)}')

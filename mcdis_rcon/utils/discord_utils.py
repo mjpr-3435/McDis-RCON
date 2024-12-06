@@ -1,5 +1,8 @@
 from ..modules import *
 
+def isAdmin(member: discord.Member) -> bool:
+    return member.guild_permissions.administrator
+
 async def thread(name: str, channel: discord.TextChannel, *, public: bool = False) -> discord.Thread:
     async for thread in channel.archived_threads():
         await thread.edit(archived = False)

@@ -67,7 +67,7 @@ msgid   "✔ Reloading mdplugins..."
 msgstr  "✔ Recargando mdplugins..."
 
 msgid   "✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`."
-msgstr  "✖ Specifica el proceso. E.g.: `{}{} <name>` or `{}{}-all`."
+msgstr  "✖ Especifica el proceso. Ej.: `{}{} <name>` or `{}{}-all`."
 
 msgid   "✖ `[{}]`: The process was already open."
 msgstr  "✖ `[{}]`: El proceso ya estaba abierto."
@@ -193,7 +193,7 @@ msgid   "Uploader Manager"
 msgstr  "Administrador del Uploader"
 
 msgid   "If the Uploader is active, all files uploaded to this channel will be sent to the specified destination."
-msgstr  "Si el Uploader está abierto, todos los archivos que se suban a este canal serán enviados a la dirección específicadas."
+msgstr  "Si el Uploader está abierto, todos los archivos que se suban a este canal serán enviados a la dirección específicada."
 
 ### ———————————————————————————————————————
 ### gui.Flask
@@ -395,7 +395,7 @@ msgid   "✖ You must provide one argument. E.g.: `unzip <file:index>`."
 msgstr  "✖ Debes proporcionar un argumento. Ej.: `unzip <dir:index>`."
 
 msgid   "✖ The path must be a `.zip` file."
-msgid   "✖ La dirección debe ser un archivo `zip`."
+msgstr   "✖ La dirección debe ser un archivo `zip`."
 
 msgid   "✖ A folder named `{}` already exists."
 msgstr  "✖ Ya existe un directorio llamado `{}`."

@@ -9,23 +9,23 @@ from mcdis_rcon.classes import Server
 
 target = ''
 
-async def on_player_command(self: Server, player: str, message: str):
+async def on_player_command(server: Server, player: str, message: str):
     global target
     
-    if self.is_command(message, 'help'):
-        self.show_command(player, 'finder pos1', 'Establece la posición 1.')
-        self.show_command(player, 'finder pos2', 'Establece la posición 2.')
+    if server.is_command(message, 'help'):
+        server.show_command(player, 'finder pos1', 'Establece la posición 1.')
+        server.show_command(player, 'finder pos2', 'Establece la posición 2.')
 
-    elif self.is_command(message, 'finder pos1'):
+    elif server.is_command(message, 'finder pos1'):
         target = player
-        self.execute(f'data get entity {player}')
+        server.execute(f'data get entity {player}')
 
-    elif self.is_command(message, 'finder pos2'):
+    elif server.is_command(message, 'finder pos2'):
         target = player
-        self.execute(f'data get entity {player}')
+        server.execute(f'data get entity {player}')
 
 
-async def listener_events(self: Server, log : str):
+async def listener_events(server: Server, log : str):
     global target
 
     if not 'INFO]:' in log: 
@@ -45,8 +45,8 @@ async def listener_events(self: Server, log : str):
 
         nbt = f'{{BlockState:{{Name:"minecraft:gray_stained_glass"}}, Glowing:1b, Invisible:1b,Invulnerable:1b,PersistenceRequired:1b,Silent:1b,NoGravity:1b,Time:1,DropItem:0b,HurtEntities:0b, Tags:["{target}p1"]}}'
 
-        self.execute(f'summon minecraft:falling_block {x} {y} {z} {nbt}')
+        server.execute(f'summon minecraft:falling_block {x} {y} {z} {nbt}')
         await asyncio.sleep(10)
-        self.execute(f'kill @e[tag={target}p1]')
+        server.execute(f'kill @e[tag={target}p1]')
 
         target = ''

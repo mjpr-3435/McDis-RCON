@@ -4,23 +4,23 @@ import os
 
 from mcdis_rcon.classes import Server
 
-def send_to_servers(self: Server, msg: str):
+def send_to_servers(server: Server, msg: str):
     msg = msg.replace("\n","").replace('"',"'")
 
-    for server in self.client.servers:
-        if server.name != self.name and server.online_players:
+    for server in server.client.servers:
+        if server.name != server.name and server.online_players:
             server.send_response('@a', msg)  
     
 webhook = None
 
-async def load(self: Server):
+async def load(server: Server):
     global webhook
     
-    path_file = os.path.join(self.path_plugins_config,'chatbridge.json')
+    path_file = os.path.join(server.path_plugins_configs,'chatbridge.json')
     dictionary = {'Webhook URL' : ''}
     
     if not os.path.exists(path_file):
-        os.makedirs(self.path_plugins_config, exist_ok = True)
+        os.makedirs(server.path_plugins_configs, exist_ok = True)
         with open(path_file, 'w', encoding = 'utf-8') as file:
             json.dump(dictionary, file, ensure_ascii = False, indent = 4)
     
@@ -30,11 +30,11 @@ async def load(self: Server):
     webhook_url = config['Webhook URL']
 
     try:
-        webhook = await discord.Webhook.from_url(url = webhook_url, client = self.client).fetch()
+        webhook = await discord.Webhook.from_url(url = webhook_url, client = server.client).fetch()
     except:
-        self.add_log('Error en la configuración del Chatbridge. No se ha encontrado el webhook.')
+        server.add_log('Error en la configuración del Chatbridge. No se ha encontrado el webhook.')
 
-async def on_discord_message(self: Server, message: discord.Message):
+async def on_discord_message(server: Server, message: discord.Message):
     global webhook
 
     if webhook == None: return
@@ -43,58 +43,58 @@ async def on_discord_message(self: Server, message: discord.Message):
 
     elif message.channel.id == webhook.channel.id:
         msg = message.content.replace('\n', ' ').replace('"',"'")
-        self.send_response('@a', f'[DIS] <{message.author.display_name}> {msg}')
+        server.send_response('@a', f'[DIS] <{message.author.display_name}> {msg}')
 
-async def on_player_message(self: Server, player: str, message: str):
+async def on_player_message(server: Server, player: str, message: str):
     global webhook
 
     if webhook == None: return
   
-    send_to_servers(self, f'[{self.name}] <{player}> {message}')
+    send_to_servers(server, f'[{server.name}] <{player}> {message}')
         
-    await webhook.send(f'{message}', username = f'[{self.name}] {player}', avatar_url = f'https://mc-heads.net/head/{player.lower()}.png')
+    await webhook.send(f'{message}', username = f'[{server.name}] {player}', avatar_url = f'https://mc-heads.net/head/{player.lower()}.png')
 
-async def on_player_join(self: Server, player: str):
+async def on_player_join(server: Server, player: str):
     global webhook
 
     if webhook == None: return
 
-    send_to_servers(self, f'[{self.name}] {player} ha entrado al servidor')
+    send_to_servers(server, f'[{server.name}] {player} ha entrado al servidor')
         
-    await webhook.send(f'[{self.name}] {player} ha entrado al servidor')
+    await webhook.send(f'[{server.name}] {player} ha entrado al servidor')
         
-async def on_player_left(self: Server, player: str):
+async def on_player_left(server: Server, player: str):
     global webhook
 
     if webhook == None: return
 
-    send_to_servers(self, f'[{self.name}] {player} ha salido del servidor')
+    send_to_servers(server, f'[{server.name}] {player} ha salido del servidor')
         
-    await webhook.send(f'[{self.name}] {player} ha salido del servidor')
+    await webhook.send(f'[{server.name}] {player} ha salido del servidor')
 
-async def on_already_started(self: Server):
+async def on_already_started(server: Server):
     global webhook
 
     if webhook == None: return
 
-    send_to_servers(self, f'[{self.name}] Servidor abierto!')
+    send_to_servers(server, f'[{server.name}] Servidor abierto!')
         
-    await webhook.send(f'[{self.name}] Servidor abierto!')
+    await webhook.send(f'[{server.name}] Servidor abierto!')
 
-async def on_stopped(self: Server):
+async def on_stopped(server: Server):
     global webhook
 
     if webhook == None: return
 
-    send_to_servers(self, f'[{self.name}] Servidor detenido')
+    send_to_servers(server, f'[{server.name}] Servidor detenido')
         
-    await webhook.send(f'[{self.name}] Servidor detenido')
+    await webhook.send(f'[{server.name}] Servidor detenido')
 
-async def on_crash(self: Server):
+async def on_crash(server: Server):
     global webhook
 
     if webhook == None: return
 
-    send_to_servers(self, f'[{self.name}] El servidor crasheó')
+    send_to_servers(server, f'[{server.name}] El servidor crasheó')
         
-    await webhook.send(f'[{self.name}] El servidor crasheó')
+    await webhook.send(f'[{server.name}] El servidor crasheó')

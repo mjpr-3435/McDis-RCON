@@ -5,16 +5,16 @@ from datetime import datetime
 from mcdis_rcon.classes import Server
 foundation_date = ''
 
-async def load(self: Server):
+async def load(server: Server):
     global foundation_date
 
-    path_file = os.path.join(self.path_plugins_config, 'join_motd.json')
+    path_file = os.path.join(server.path_plugins_configs, 'join_motd.json')
     dictionary = {
         'Foundation Date' : '0-0-0'
         }
     
     if not os.path.exists(path_file):
-        os.makedirs(self.path_plugins_config, exist_ok = True)
+        os.makedirs(server.path_plugins_configs, exist_ok = True)
         with open(path_file, 'w', encoding = 'utf-8') as file:
             json.dump(dictionary, file, ensure_ascii = False, indent = 4)
     
@@ -23,24 +23,24 @@ async def load(self: Server):
 
     foundation_date = config['Foundation Date']
 
-async def on_player_join(self: Server, player: str):
+async def on_player_join(server: Server, player: str):
     join_messages = join_message()
 
     for message in join_messages:
         message = message.replace('\n','')
-        self.execute(f'tellraw {player} {message}')
+        server.execute(f'tellraw {player} {message}')
 
-async def on_player_command(self: Server, player: str, message: str):
+async def on_player_command(server: Server, player: str, message: str):
     
-    if self.is_command(message, 'help'):
-        self.show_command(player, "join-motd", "Muestra el banner de entrada.")
+    if server.is_command(message, 'help'):
+        server.show_command(player, "join-motd", "Muestra el banner de entrada.")
         
-    elif self.is_command(message, 'join-motd'):
+    elif server.is_command(message, 'join-motd'):
         join_messages = join_message()
 
         for message in join_messages:
             message = message.replace('\n','')
-            self.execute(f'tellraw {player} {message}')
+            server.execute(f'tellraw {player} {message}')
 
 def join_message():
     years = int(((datetime.today()-datetime.strptime(foundation_date, "%Y-%m-%d")).days)//365.25)

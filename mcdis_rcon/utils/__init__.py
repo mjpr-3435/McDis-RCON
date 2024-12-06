@@ -28,7 +28,8 @@ from .mc import (
 )
 from .discord_utils import (
     thread, 
-    confirmation_request
+    confirmation_request,
+    isAdmin
 )
 from .hardware import (
     get_cpu_temp, 

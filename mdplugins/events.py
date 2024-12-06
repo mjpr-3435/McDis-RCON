@@ -6,36 +6,36 @@ from mcdis_rcon.classes import Server
 
 config = dict()
 
-async def load(self: Server):
+async def load(server: Server):
     global config
     
-    path_file = os.path.join(self.path_plugins_config,'events.json')
+    path_file = os.path.join(server.path_plugins_configs,'events.json')
     dictionary = {"omit crash report relay" : False}
     
     if not os.path.exists(path_file):
-        os.makedirs(self.path_plugins_config, exist_ok = True)
+        os.makedirs(server.path_plugins_configs, exist_ok = True)
         with open(path_file, 'w', encoding = 'utf-8') as file:
             json.dump(dictionary, file, ensure_ascii = False, indent = 4)
     
     with open(path_file, 'r', encoding='utf-8') as file:
         config = json.load(file)
 
-    if not hasattr(self, 'bots'): self.bots = []
-    if not hasattr(self, 'online_players'): self.online_players = []
+    if not hasattr(server, 'bots'): server.bots = []
+    if not hasattr(server, 'online_players'): server.online_players = []
 
-async def listener_events(self: Server, log : str):
+async def listener_events(server: Server, log : str):
     global config
 
-    if 'INFO]' in log:
-        if any([f'<{player}>' in log for player in self.online_players]):
+    if 'INFO]: ' in log:
+        if any([f'<{player}>' in log for player in server.online_players]):
             player = log[log.index('<') + 1:log.index('>')]
             message = log[log.index('>') + 1:].strip()
 
-            await self.call_plugins('on_player_message', (self, player, message))
+            await server.call_plugins('on_player_message', (server, player, message))
             
-            if not message.startswith(f'{self.prefix}'): return
+            if not message.startswith(f'{server.prefix}'): return
             
-            await self.call_plugins('on_player_command', (self, player, message))
+            await server.call_plugins('on_player_command', (server, player, message))
 
         elif 'logged in with entity id' in log:
             match = re.search(r"(.*?) logged in with entity id", log)
@@ -44,38 +44,38 @@ async def listener_events(self: Server, log : str):
             local = player_and_ip.removeprefix(player) == '[local]'
             
             if local:
-                self.bots.append(player)
+                server.bots.append(player)
             else:
-                self.online_players.append(player)
+                server.online_players.append(player)
 
-            await self.call_plugins('on_player_join', (self, player))
+            await server.call_plugins('on_player_join', (server, player))
 
         elif log.endswith('left the game'):
             match = re.search(r"(.*?) left the game", log)
             player = match.group(1).strip().split(' ')[-1]
             
-            if player in self.bots: self.bots.remove(player)
-            elif player in self.online_players: self.online_players.remove(player)
+            if player in server.bots: server.bots.remove(player)
+            elif player in server.online_players: server.online_players.remove(player)
 
-            await self.call_plugins('on_player_left', (self, player))
+            await server.call_plugins('on_player_left', (server, player))
 
         elif 'Starting minecraft server' in log:
-            self.bots = []
-            self.online_players = []
-            await self.call_plugins('on_started', (self,))
+            server.bots = []
+            server.online_players = []
+            await server.call_plugins('on_started', (server,))
 
         elif log.endswith('For help, type "help"'):
-            await self.call_plugins('on_already_started', (self,))
+            await server.call_plugins('on_already_started', (server,))
             
         elif log.endswith('Stopping server'):
-            await self.call_plugins('on_stopped', (self,))
+            await server.call_plugins('on_stopped', (server,))
         
         elif log.endswith('ThreadedAnvilChunkStorage: All dimensions are saved'):
-            await self.call_plugins('on_already_stopped', (self,))
+            await server.call_plugins('on_already_stopped', (server,))
 
     elif 'ERROR]: ' in log:
         if  log.endswith('Considering it to be crashed, server will forcibly shutdown.'): 
             if config['omit crash report relay']:
-                self.stop_relaying(self.log_format('Crash detected. Finalizing relay...'))
+                server.stop_relaying(server.log_format('Crash detected. Finalizing relay...'))
             
-            await self.call_plugins('on_crash', (self,))
+            await server.call_plugins('on_crash', (server,))
