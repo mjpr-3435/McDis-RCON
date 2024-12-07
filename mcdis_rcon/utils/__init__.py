@@ -21,6 +21,8 @@ from .files import (
     read_yml,
     read_file,
     write_in_file,
+    dict_to_json,
+    json_to_dict
 )
 from .mc import (
     mc_uuid,

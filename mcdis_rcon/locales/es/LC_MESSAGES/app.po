@@ -129,6 +129,9 @@ msgstr  "Procesos cerrados."
 msgid   "Restarting..."
 msgstr  "Reiniciando..."
 
+msgid   "✔ Addons reloaded."
+msgstr  "✔ Addons recargados."
+
 msgid   "Error in {} of {}: {}"
 msgstr  "Error en {} de {}: {}"
 
@@ -335,9 +338,6 @@ msgstr  "Desplegable:"
 
 msgid   "Processes"
 msgstr  "Procesos"
-
-msgid   "Are you sure you want to kill the `{}` process?"
-msgstr  "Estás seguro que deseas cerrar forzosamente el proceso `{}`?"
 
 msgid   "> Processes in `{}`"
 msgstr  "> Procesos en `{}`"

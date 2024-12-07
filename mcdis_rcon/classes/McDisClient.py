@@ -179,13 +179,14 @@ class McDisClient(commands.Bot):
         await thread('Error Reports', self.panel, public = True)
         await thread('Console Flask', self.panel, public = True)
 
-    async def   _load_addons           (self):
+    async def   _load_addons           (self, *, reload: bool = False):
+
         files_in_addons_dir = os.listdir(self.path_addons)
         
         addons = [file.removesuffix('.mcdis') for file in files_in_addons_dir if file.endswith('.mcdis')]
         if not addons: return
-        
-        print(self._('   • Importing addons:'))
+
+        if not reload: print(self._('   • Importing addons:'))
         
         for addon in addons:
             addon_path = os.path.join(self.path_addons, addon + '.mcdis')
@@ -195,10 +196,9 @@ class McDisClient(commands.Bot):
                 mod = importlib.import_module('mdaddon.__init__')
                 self.addons.append(mod)
 
-                print(self._('     -> Imported {}').format(addon))
+                if not reload: print(self._('     -> Imported {}').format(addon))
             except:
-                print(self._('     -> Unable to import {}\n{}').format(addon, traceback.format_exc()))
-                os._exit(0)
+                if not reload: print(self._('     -> Unable to import {}\n{}').format(addon, traceback.format_exc()))
         
             sys.path.pop(0)
 
@@ -215,13 +215,13 @@ class McDisClient(commands.Bot):
     async def   _load_banner           (self, *, loop: bool = True, view: bool = True):
         from ..gui.Panel import PanelView, PanelEmbed
         first_iteration = True
-        file = None
-
-        if os.path.exists('banner.png'): 
-            file = discord.File('banner.png')
 
         while loop or first_iteration:
             first_iteration = False
+            file = None
+
+            if os.path.exists('banner.png'): 
+                file = discord.File('banner.png')
             
             try:
                 messages =  [msg async for msg in self.panel.history(limit = None, oldest_first = True)]
@@ -300,7 +300,7 @@ class McDisClient(commands.Bot):
             return
 
         if message.channel.id == self.panel.id:
-            if   self.is_panel_command(message.content.lower(), f'start-all'):
+            if   self.is_command(message.content.lower(), f'start-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -310,7 +310,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     process.start()
                     
-            elif self.is_panel_command(message.content.lower(), f'stop-all'):
+            elif self.is_command(message.content.lower(), f'stop-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -320,7 +320,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     process.stop()
                                 
-            elif self.is_panel_command(message.content.lower(), f'kill-all'):
+            elif self.is_command(message.content.lower(), f'kill-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -330,7 +330,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     process.kill()
                                 
-            elif self.is_panel_command(message.content.lower(), f'restart-all'):
+            elif self.is_command(message.content.lower(), f'restart-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -340,7 +340,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     await process.restart()
                                 
-            elif self.is_panel_command(message.content.lower(), f'mdreload-all'):
+            elif self.is_command(message.content.lower(), f'mdreload-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -350,7 +350,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     process.load_plugins(reload = True)
                                 
-            elif self.is_panel_command(message.content.lower(), f'start'):
+            elif self.is_command(message.content.lower(), f'start'):
                 process_name = message.content.removeprefix(f'{ self.prefix}start').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -373,7 +373,7 @@ class McDisClient(commands.Bot):
                     await response.delete(delay = 2)
                     process.start()
 
-            elif self.is_panel_command(message.content.lower(), f'stop'):
+            elif self.is_command(message.content.lower(), f'stop'):
                 process_name = message.content.removeprefix(f'{ self.prefix}stop').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -396,7 +396,7 @@ class McDisClient(commands.Bot):
                     await response.delete(delay = 2)
                     process.stop()
             
-            elif self.is_panel_command(message.content.lower(), f'kill'):
+            elif self.is_command(message.content.lower(), f'kill'):
                 process_name = message.content.removeprefix(f'{ self.prefix}kill').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -419,7 +419,7 @@ class McDisClient(commands.Bot):
                     await response.delete(delay = 2)
                     process.kill()
 
-            elif self.is_panel_command(message.content.lower(), f'restart'):
+            elif self.is_command(message.content.lower(), f'restart'):
                 process_name = message.content.removeprefix(f'{ self.prefix}restart').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -442,7 +442,7 @@ class McDisClient(commands.Bot):
                     await response.delete(delay = 2)
                     await process.restart()
 
-            elif self.is_panel_command(message.content.lower(), f'mdreload'):
+            elif self.is_command(message.content.lower(), f'mdreload'):
                 process_name = message.content.removeprefix(f'{ self.prefix}mdreload').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -464,7 +464,7 @@ class McDisClient(commands.Bot):
                         self._('✔ `[{}]`: Reloading mdplugins...').format(process.name))
                     await response.delete(delay = 2)
                     process.load_plugins(reload = True)
-        
+            
         for process in self.processes: 
             await process.discord_listener(message)
     
@@ -601,7 +601,7 @@ class McDisClient(commands.Bot):
     
     ###         Utils               ###
     
-    def         is_panel_command        (self, message: str, command: str):
+    def         is_command              (self, message: str, command: str):
             dummy = message + ' '
             return dummy.startswith(f'{self.prefix}{command} ')
         
@@ -669,3 +669,10 @@ class McDisClient(commands.Bot):
                         reports['error'] = True
             return wrapped
         return decorator
+
+    def         unload_addons           (self):
+        for module in self.addons:
+            if module in sys.modules.values():
+                sys.modules.pop(module.__name__, None)
+                
+        self.addons = []

@@ -136,3 +136,11 @@ def elements_on(path: str, *, include_files: bool = True, include_dirs: bool = T
                     total += 1
 
     return total
+
+def dict_to_json(path_file: str, dictionary: dict):
+    with open(path_file, 'w', encoding = 'utf-8') as file:
+        json.dump(dictionary, file, ensure_ascii = False, indent = 4)
+
+def json_to_dict(path_file: str):
+    with open(path_file, 'r', encoding = 'utf-8') as file:
+        return json.load(file)

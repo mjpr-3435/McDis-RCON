@@ -21,7 +21,6 @@ async def load(server: Server):
         }
 
     if not os.path.exists(path_file):
-        os.makedirs(server.path_plugins_configs, exist_ok = True)
         with open(path_file, 'w', encoding = 'utf-8') as file:
             json.dump(dictionary, file, ensure_ascii = False, indent = 4)
     
