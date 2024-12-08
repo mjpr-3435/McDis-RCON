@@ -633,7 +633,7 @@ class McDisClient(commands.Bot):
                 if func:
                     await func(function, args) if 'call_behaviours' in locals() else await func(*args)
                 else:
-                    return
+                    pass
             except Exception:
                 await self.error_report(
                     title=f'{function}() of {addon.__name__}',
