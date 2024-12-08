@@ -737,7 +737,6 @@ class TerminalButton        (discord.ui.Button):
         dir_files.sort()
         dirs  = [file for file in dir_files if os.path.isdir (os.path.join(self.view.path, file))]
         files = [file for file in dir_files if os.path.isfile(os.path.join(self.view.path, file))]
-
         if not any([arg.lower().startswith(x) for x in ['dir:', 'file:']]):
             await interaction.response.send_message(
                 self.view.client._('✖ Invalid argument `{}`. It should be `dir:index` or `file:index`.').format(arg),
@@ -751,11 +750,14 @@ class TerminalButton        (discord.ui.Button):
                 self.view.client._('✖ The index must be an integer.'),
                 ephemeral = True)
 
-        elif int(index) < 1 or int(index) > min(len(dirs), 99):
-            if prefix == 'dir': prefix = 'directory'
-            
+        elif prefix == 'dir' and (int(index) < 1 or int(index) > min(len(dirs), 99)):
             await interaction.response.send_message(
-                self.view.client._('✖ No {} exists with that index.').format(self.view.client._(prefix)),
+                self.view.client._('✖ No {} exists with that index.').format(self.view.client._('directory')),
+                ephemeral = True)
+
+        elif prefix == 'file' and (int(index) < 1 or int(index) > min(len(files), 99)):
+            await interaction.response.send_message(
+                self.view.client._('✖ No {} exists with that index.').format(self.view.client._('file')),
                 ephemeral = True)
 
         elif prefix == 'dir':
