@@ -193,7 +193,7 @@ class McDisClient(commands.Bot):
             sys.path.insert(0, addon_path)
             
             try:
-                mod = importlib.import_module('mdaddon.__init__')
+                mod = importlib.import_module(f'{addon}.__init__')
                 self.addons.append(mod)
 
                 if not reload: print(self._('     -> Imported {}').format(addon))
@@ -202,7 +202,7 @@ class McDisClient(commands.Bot):
         
             sys.path.pop(0)
 
-        await self.call_addons('load', (self,), exit_on_error = True)
+        await self.call_addons('load', (self,))
 
     async def   _load_behaviours       (self):
         behaviours_dir = os.path.join(package_path, 'behaviours')
@@ -626,23 +626,26 @@ class McDisClient(commands.Bot):
         
         return True
 
-    async def   call_addons             (self, function: str, args: tuple, *, exit_on_error: bool = False):
+    async def   call_addons             (self, function: str, args: tuple):
         for addon in self.addons:
             try:
-                func = getattr(addon, 'call_behaviours', None) or getattr(addon, function, None)
+                func = getattr(addon, 'call_behaviours', None)
                 if func:
-                    await func(function, args) if 'call_behaviours' in locals() else await func(*args)
+                    await func(function, args)
+
                 else:
-                    pass
+                    func = getattr(addon, function, None)
+                    if func:
+
+                        await func(*args)
+                        
             except Exception:
                 await self.error_report(
                     title=f'{function}() of {addon.__name__}',
                     error=traceback.format_exc()
                 )
 
-                if exit_on_error: os._exit(0)
-
-    async def   error_report            (self, *, title: str, error: str, ):
+    async def   error_report            (self, *, title: str, error: str):
         error_log = f'- Error Report [{title}]:\n\n{error}'.replace('`','’')
         mrkd_error = f'```diff\n{truncate(error_log, 1980)}\n```'
         error_reports = await thread('Error Reports', self.panel)

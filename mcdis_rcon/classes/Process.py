@@ -131,7 +131,7 @@ class Process():
                         plugin_path = os.path.join(self.path_plugins, plugin)
                         sys.path.insert(0, plugin_path)
                         
-                        mod = importlib.import_module('mdplugin.__init__')
+                        mod = importlib.import_module(f'{plugin.removesuffix(".mcdis")}.__init__')
                         sys.path.pop(0)
 
                     self.plugins.append(mod)
