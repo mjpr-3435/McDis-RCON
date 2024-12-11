@@ -1,7 +1,7 @@
 from .modules import *
 
 def run():
-    print('Initializing McDis RCON...')
+    print(f'Initializing McDis RCON {mcdis_vers}...')
     from .classes.McDisClient import McDisClient
     McDisClient()
 

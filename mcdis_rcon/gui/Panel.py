@@ -30,11 +30,11 @@ class FilesButton           (discord.ui.Button):
         self.view : PanelView
 
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManager import FilesManagerView, FilesManagerEmbed
+        from .FileManager import FileManagerView, FileManagerEmbed
 
         await interaction.response.send_message(
-            embed = FilesManagerEmbed(self.view.client),
-            view = FilesManagerView(self.view.client),
+            embed = FileManagerEmbed(self.view.client),
+            view = FileManagerView(self.view.client),
             ephemeral = True)
         
 class UploaderButton        (discord.ui.Button):
@@ -192,7 +192,7 @@ class PanelEmbed            (discord.Embed):
 
     def _add_mcdis_field(self):
         mcdis_ram_used = f'{psutil.Process().memory_info().rss / (1024 ** 2):.1f} MB'
-        self.add_field(inline = True, name = '> McDis RCON', value =
+        self.add_field(inline = True, name = f'> McDis RCON {mcdis_vers}', value =
             f'```asciidoc\n'
             f'RAM Usage::               '[:-len(mcdis_ram_used)] + mcdis_ram_used + '```')
         
