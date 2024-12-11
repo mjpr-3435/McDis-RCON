@@ -2,7 +2,7 @@ from ..modules import *
 from ..classes import *
 from ..utils import *
 
-class FilesManagerView      (discord.ui.View):
+class FileManagerView      (discord.ui.View):
     def __init__(self, client: McDisClient, path: str = '.'):
         super().__init__(timeout = None)
         self.max_rqst_size  = 5 * 1024**2
@@ -79,7 +79,7 @@ class FilesManagerView      (discord.ui.View):
             
         await interaction.followup.edit_message(
                 message_id = interaction.message.id, 
-                embed = FilesManagerEmbed(self.client, self.path, self.page))
+                embed = FileManagerEmbed(self.client, self.path, self.page))
         
     async def   _update_interface           (self, interaction : discord.Interaction, back: bool = False):
         if not interaction.response.is_done():
@@ -89,7 +89,7 @@ class FilesManagerView      (discord.ui.View):
         process_bkp = next(filter(lambda process: self.path == process.path_bkps, self.client.processes), None)
         
         if process_cmd:
-            from .FilesManagerCommands import CommandsEmbed, CommandsView
+            from .FileManagerCommands import CommandsEmbed, CommandsView
 
             await interaction.followup.edit_message(
                 message_id = interaction.message.id,
@@ -97,7 +97,7 @@ class FilesManagerView      (discord.ui.View):
                 view = CommandsView(self.client, process_cmd))
             
         elif process_bkp:
-            from .FilesManagerBackups import BackupsEmbed, BackupsView
+            from .FileManagerBackups import BackupsEmbed, BackupsView
 
             await interaction.followup.edit_message(
                 message_id = interaction.message.id,
@@ -114,8 +114,8 @@ class FilesManagerView      (discord.ui.View):
 
             await interaction.followup.edit_message(
                 message_id = interaction.message.id,
-                embed = FilesManagerEmbed(self.client, self.path),
-                view = FilesManagerView(self.client, self.path))
+                embed = FileManagerEmbed(self.client, self.path),
+                view = FileManagerView(self.client, self.path))
     
     async def   _edit_path                  (self, interaction : discord.Interaction):
         class EditPath(discord.ui.Modal, title = self.client._('Go to path')):
@@ -139,7 +139,7 @@ class FilesManagerView      (discord.ui.View):
 class FileSelect            (discord.ui.Select):
     def __init__(self, client : McDisClient, options: list):
         super().__init__(placeholder = client._('Select a file'), options = options)
-        self.view : FilesManagerView
+        self.view : FileManagerView
     
     async def callback(self, interaction: discord.Interaction):
         if self.values[0] == '__GO_TO__' and False:
@@ -153,7 +153,7 @@ class FileSelect            (discord.ui.Select):
 class PathButton            (discord.ui.Button):
     def __init__(self, client : McDisClient):
         super().__init__(label = emoji_pin, style = discord.ButtonStyle.gray)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         await self.view._edit_path(interaction)
@@ -161,7 +161,7 @@ class PathButton            (discord.ui.Button):
 class FirstPageButton       (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = '<<', style = discord.ButtonStyle.gray, row = 2)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         self.view.page = 1
@@ -171,7 +171,7 @@ class FirstPageButton       (discord.ui.Button):
 class LastPageButton        (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = '>>', style = discord.ButtonStyle.gray, row = 2)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         self.view.page = self.view.max_page
@@ -181,7 +181,7 @@ class LastPageButton        (discord.ui.Button):
 class PreviousPageButton    (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = '<', style = discord.ButtonStyle.gray, row = 2)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         self.view.page = self.view.page - 1 if self.view.page > 1 else 1
@@ -191,7 +191,7 @@ class PreviousPageButton    (discord.ui.Button):
 class NextPageButton        (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = '>', style = discord.ButtonStyle.gray, row = 2)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         self.view.page = self.view.page + 1 if self.view.page < self.view.max_page else self.view.max_page
@@ -201,7 +201,7 @@ class NextPageButton        (discord.ui.Button):
 class BackButton            (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = emoji_arrow_left, style = discord.ButtonStyle.gray)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         await self.view._update_interface(interaction, back = True)
@@ -209,7 +209,7 @@ class BackButton            (discord.ui.Button):
 class UpdateButton          (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = emoji_update, style = discord.ButtonStyle.gray)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         await self.view._update_interface(interaction)
@@ -217,7 +217,7 @@ class UpdateButton          (discord.ui.Button):
 class RequestButton         (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Request', style = discord.ButtonStyle.gray)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         if not self.view.client.config['Flask']['Allow']:
@@ -264,7 +264,7 @@ class RequestButton         (discord.ui.Button):
 class EditButton            (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Edit', style = discord.ButtonStyle.gray)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         file_content = ''
@@ -310,15 +310,15 @@ class EditButton            (discord.ui.Button):
                     return
                 
                 await interaction.response.edit_message(
-                    embed = FilesManagerEmbed(self.view.client, new_path),
-                    view = FilesManagerView(self.view.client, new_path))
+                    embed = FileManagerEmbed(self.view.client, new_path),
+                    view = FileManagerView(self.view.client, new_path))
 
         await interaction.response.send_modal(edit_command())
 
 class DeleteFileButton      (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Delete', style = discord.ButtonStyle.red)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         async def on_confirmation(confirmation_interaction: discord.Interaction): 
@@ -346,10 +346,10 @@ class DeleteFileButton      (discord.ui.Button):
 class ProcessesButton       (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Processes', style = discord.ButtonStyle.gray)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManagerProcesses import ProcessesView, ProcessesEmbed
+        from .FileManagerProcesses import ProcessesView, ProcessesEmbed
         await interaction.response.defer()
         
         processes = self._get_processes()
@@ -373,7 +373,7 @@ class ProcessesButton       (discord.ui.Button):
 class TerminalButton        (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Terminal', style = discord.ButtonStyle.gray)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
         self.names_convention = client._(
             '✖ The name of directories or files renamed with McDis can only contain letters, '
@@ -773,7 +773,7 @@ class TerminalButton        (discord.ui.Button):
 class DeleteDirButton       (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Delete Dir', style = discord.ButtonStyle.red)
-        self.view : FilesManagerView
+        self.view : FileManagerView
 
     async def callback(self, interaction: discord.Interaction):
         async def on_confirmation(confirmation_interaction: discord.Interaction): 
@@ -798,7 +798,7 @@ class DeleteDirButton       (discord.ui.Button):
             on_confirmation = on_confirmation,
             interaction = interaction)
 
-class FilesManagerEmbed     (discord.Embed):
+class FileManagerEmbed     (discord.Embed):
     def __init__(self, client : McDisClient, path: str = '.', page : int = 1):
         super().__init__(color = embed_colour)
         self.max_rqst_size  = 5 * 1024**2

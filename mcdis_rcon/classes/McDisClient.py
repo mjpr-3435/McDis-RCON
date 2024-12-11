@@ -289,7 +289,7 @@ class McDisClient(commands.Bot):
             print(self._('Loading Complete'))
   
         except Exception as error:
-            print(self._('There was an error while loading McDis-RCON.'))
+            print(self._('There was an error while loading McDis RCON.'))
             print(self._('Error: {}').format(error))
             os._exit(0)
 

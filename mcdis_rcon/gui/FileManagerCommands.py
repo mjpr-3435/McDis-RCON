@@ -38,7 +38,7 @@ class CommandSelect            (discord.ui.Select):
         self.view : CommandsView
         
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManagerCommand import CommandEmbed, CommandView
+        from .FileManagerCommand import CommandEmbed, CommandView
 
         if self.values[0] != '__NEW_COMMAND__':
             await interaction.response.edit_message(
@@ -81,11 +81,11 @@ class BackButton                (discord.ui.Button):
         self.view : CommandsView
 
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManager import FilesManagerEmbed, FilesManagerView
+        from .FileManager import FileManagerEmbed, FileManagerView
 
         await interaction.response.edit_message(
-            embed = FilesManagerEmbed(self.view.client, self.view.process.path_files),
-            view = FilesManagerView(self.view.client, self.view.process.path_files)
+            embed = FileManagerEmbed(self.view.client, self.view.process.path_files),
+            view = FileManagerView(self.view.client, self.view.process.path_files)
         )
 
 class UpdateButton              (discord.ui.Button):
@@ -105,11 +105,11 @@ class DirButton                 (discord.ui.Button):
         self.view : CommandsView
 
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManager import FilesManagerEmbed, FilesManagerView
+        from .FileManager import FileManagerEmbed, FileManagerView
 
         await interaction.response.edit_message(
-            embed = FilesManagerEmbed(self.view.client, self.view.process.path_commands),
-            view = FilesManagerView(self.view.client, self.view.process.path_commands)
+            embed = FileManagerEmbed(self.view.client, self.view.process.path_commands),
+            view = FileManagerView(self.view.client, self.view.process.path_commands)
         )
 
 class CommandsEmbed             (discord.Embed):

@@ -58,7 +58,7 @@ class BackButton            (discord.ui.Button):
         self.view : CommandView
 
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManagerCommands import CommandsEmbed, CommandsView
+        from .FileManagerCommands import CommandsEmbed, CommandsView
 
         await interaction.response.edit_message(
             embed = CommandsEmbed(self.view.client, self.view.process),
@@ -161,7 +161,7 @@ class DeleteButton          (discord.ui.Button):
         self.view : CommandView
 
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManagerCommands import CommandsEmbed, CommandsView
+        from .FileManagerCommands import CommandsEmbed, CommandsView
         async def on_confirmation(confirmation_interaction: discord.Interaction):
             try:
                 os.remove(self.view.command_path)

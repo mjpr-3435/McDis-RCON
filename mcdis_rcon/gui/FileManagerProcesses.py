@@ -158,11 +158,11 @@ class BackButton            (discord.ui.Button):
         self.view: ProcessesView
 
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManager import FilesManagerEmbed, FilesManagerView
+        from .FileManager import FileManagerEmbed, FileManagerView
 
         await interaction.response.edit_message(
-            embed = FilesManagerEmbed(self.view.client, self.view.path),
-            view = FilesManagerView(self.view.client, self.view.path)
+            embed = FileManagerEmbed(self.view.client, self.view.path),
+            view = FileManagerView(self.view.client, self.view.path)
         )
 
 class UpdateButton          (discord.ui.Button):

@@ -173,11 +173,11 @@ class BackButton        (discord.ui.Button):
         self.view: BackupsView
 
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManager import FilesManagerEmbed, FilesManagerView
+        from .FileManager import FileManagerEmbed, FileManagerView
 
         await interaction.response.edit_message(
-            embed = FilesManagerEmbed(self.view.client, self.view.client.path_backups),
-            view = FilesManagerView(self.view.client, self.view.client.path_backups),
+            embed = FileManagerEmbed(self.view.client, self.view.client.path_backups),
+            view = FileManagerView(self.view.client, self.view.client.path_backups),
         )
 
 class UpdateButton      (discord.ui.Button):
@@ -197,11 +197,11 @@ class FilesButton       (discord.ui.Button):
         self.view: BackupsView
 
     async def callback(self, interaction: discord.Interaction):
-        from .FilesManager import FilesManagerEmbed, FilesManagerView
+        from .FileManager import FileManagerEmbed, FileManagerView
 
         await interaction.response.edit_message(
-            embed = FilesManagerEmbed(self.view.client, self.view.process.path_bkps),
-            view = FilesManagerView(self.view.client, self.view.process.path_bkps),
+            embed = FileManagerEmbed(self.view.client, self.view.process.path_bkps),
+            view = FileManagerView(self.view.client, self.view.process.path_bkps),
         )
 
 class BackupsEmbed      (discord.Embed):

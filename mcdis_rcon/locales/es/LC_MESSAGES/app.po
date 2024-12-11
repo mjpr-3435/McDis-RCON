@@ -45,8 +45,8 @@ msgstr  "   • Panel cargado"
 msgid   "Loading Complete"
 msgstr  "Carga completa"
 
-msgid   "There was an error while loading McDis-RCON."
-msgstr  "Hubo un error al cargar McDis-RCON."
+msgid   "There was an error while loading McDis RCON."
+msgstr  "Hubo un error al cargar McDis RCON."
 
 msgid   "Error: {}"
 msgstr  "Error: {}"
@@ -231,7 +231,7 @@ msgid   "Are you sure you want to kill the `{}` process?"
 msgstr  "Estás seguro que deseas cerrar forzosamente el proceso `{}`?"
 
 ### ———————————————————————————————————————
-### gui.FilesManagerBackups
+### gui.FileManagerBackups
 
 msgid   "[Make Backup]"
 msgstr  "[Crear Backup]"
@@ -279,7 +279,7 @@ msgid   "If you want to load a backup or make one, select it from the dropdown b
 msgstr  "Si deseas cargar un backup o crear uno, selecciónalo en el desplegable de abajo."
 
 ### ———————————————————————————————————————
-### gui.FilesManagerCommand
+### gui.FileManagerCommand
 
 msgid   "[New Command]"
 msgstr  "[Nuevo Comando]"
@@ -306,7 +306,7 @@ msgid   "Description"
 msgstr  "Descripción"
 
 ### ———————————————————————————————————————
-### gui.FilesManagerCommands
+### gui.FileManagerCommands
 
 msgid   "Select a command"
 msgstr  "Selecciona un comando"
@@ -334,7 +334,7 @@ msgid   "Dropdown:"
 msgstr  "Desplegable:"
 
 ### ———————————————————————————————————————
-### gui.FilesManagerProcesses
+### gui.FileManagerProcesses
 
 msgid   "Processes"
 msgstr  "Procesos"
@@ -349,7 +349,7 @@ msgid   "If you want to close a process, select it from the dropdown below."
 msgstr  "Si desees cerrar un proceso, selecciónalo en el desplegable de abajo."
 
 ### ———————————————————————————————————————
-### gui.FilesManager
+### gui.FileManager
 
 msgid   "Select a file"
 msgstr  "Selecciona un archivo"
