@@ -122,6 +122,9 @@ class McDisClient(commands.Bot):
                         print(f'{process}: The \'start_cmd\' variable must be a string.')
                         os._exit(0)
 
+                    elif process_config['blacklist'] == None:
+                        process_config['blacklist'] = []
+
                     elif not all([isinstance(x,str) for x in process_config['blacklist']]):
                         print(f'{process}: The \'blacklist\' variable must be a list of strings.')
                         os._exit(0)
@@ -172,7 +175,7 @@ class McDisClient(commands.Bot):
             self.networks.append(network)
 
         processes_objects = "\n".join([f'     -> {process.name}' for process in self.processes])
-        print(self._('   • Creating objects\n{}').format(processes_objects))
+        if self.processes: print(self._('   • Creating objects\n{}').format(processes_objects))
             
         for process in self.processes:
             await thread(f'Console {process.name}', self.panel, public = True)
