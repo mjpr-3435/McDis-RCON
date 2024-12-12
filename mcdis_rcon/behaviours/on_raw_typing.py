@@ -8,7 +8,7 @@ class on_raw_typing(commands.Cog):
     @commands.Cog.listener()
 
     async def on_raw_typing(self, payload: discord.RawTypingEvent):
-        await self.client.call_addons('on_raw_typing', (self.client, payload))
+        await self.client.call_addons('on_raw_typing', (payload,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_raw_typing(client))

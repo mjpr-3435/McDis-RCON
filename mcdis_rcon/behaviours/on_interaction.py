@@ -8,7 +8,7 @@ class on_interaction(commands.Cog):
     @commands.Cog.listener()
     
     async def on_interaction(self, interaction: discord.Interaction):
-        await self.client.call_addons('on_interaction', (self.client, interaction))
+        await self.client.call_addons('on_interaction', (interaction,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_interaction(client))

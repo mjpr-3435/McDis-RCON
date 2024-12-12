@@ -1,10 +1,13 @@
 # =========================================
-#         McDis-RCON Configuration
+#         McDis RCON Configuration
 # =========================================
 
 ### Application designed to stream the Minecraft console to Discord.
-### This application is intended to work on Linux systems. (Tested on Ubuntu 22.04.3 LTS)
+### This application is intended to work on Linux systems.
+
+### General Advice:
 ### While it may run on Windows, some features may not work as expected.
+### The File Manager may not function properly if you do not own the files in the directory where McDis is executed.
 ### To apply any changes, you must restart McDis!
 
 
@@ -43,11 +46,11 @@ Flask:
 ### Note: For MCDReforged users, ensure 'advanced_console' is set to False in the MCDR configuration.
 
 Processes:
-  Networks: 
+  Networks:
     network 1:
       start_cmd: start
       stop_cmd : end
-      blacklist: 
+      blacklist:
         - 'example 1'
         - 'example 2'
         - 'example 3'
@@ -56,15 +59,15 @@ Processes:
     server 1:
       start_cmd: start
       stop_cmd : stop
-      blacklist: 
+      blacklist:
         - 'example 1'
         - 'example 2'
         - 'example 3'
-    
+
     server 2:
       start_cmd: start
       stop_cmd : stop
-      blacklist: 
+      blacklist:
         - 'example 1'
         - 'example 2'
         - 'example 3'

@@ -190,23 +190,23 @@ class McDisClient(commands.Bot):
         if not addons: return
 
         if not reload: print(self._('   • Importing addons:'))
-        
+
         for addon in addons:
             addon_path = os.path.join(self.path_addons, addon + '.mcdis')
             sys.path.insert(0, addon_path)
             
             try:
-                mod = importlib.import_module(f'{addon}.__init__')
-                self.addons.append(mod)
+                mod = importlib.import_module(f'mdaddon.__init__')
+                addon_instance = mod.mdaddon(self)
+                self.addons.append(addon_instance)
 
                 if not reload: print(self._('     -> Imported {}').format(addon))
             except:
                 if not reload: print(self._('     -> Unable to import {}\n{}').format(addon, traceback.format_exc()))
-        
+            
+            self.unload_modules_from(addon_path)
             sys.path.pop(0)
-
-        await self.call_addons('load', (self,))
-
+                 
     async def   _load_behaviours       (self):
         behaviours_dir = os.path.join(package_path, 'behaviours')
 
@@ -629,22 +629,16 @@ class McDisClient(commands.Bot):
         
         return True
 
-    async def   call_addons             (self, function: str, args: tuple):
+    async def   call_addons             (self, function: str, args: tuple = tuple()):
         for addon in self.addons:
             try:
-                func = getattr(addon, 'call_behaviours', None)
+                func = getattr(addon, function, None)
                 if func:
-                    await func(function, args)
-
-                else:
-                    func = getattr(addon, function, None)
-                    if func:
-
-                        await func(*args)
+                    await func(*args)
                         
             except Exception:
                 await self.error_report(
-                    title=f'{function}() of {addon.__name__}',
+                    title=f'{function}() of {addon}',
                     error=traceback.format_exc()
                 )
 
@@ -677,8 +671,20 @@ class McDisClient(commands.Bot):
         return decorator
 
     def         unload_addons           (self):
-        for module in self.addons:
-            if module in sys.modules.values():
-                sys.modules.pop(module.__name__, None)
-                
+        for addon in self.addons:
+            if hasattr(addon, 'unload') and callable(addon.unload):
+                addon.unload()
+
         self.addons = []
+    
+    def         unload_modules_from     (self, path):
+            abs_path = os.path.abspath(path)
+            
+            modules_to_remove = [
+                name for name, module in sys.modules.items()
+                if hasattr(module, '__file__') and module.__file__ and 
+                os.path.abspath(module.__file__).startswith(abs_path)
+            ]
+            
+            for module_name in modules_to_remove:
+                del sys.modules[module_name]

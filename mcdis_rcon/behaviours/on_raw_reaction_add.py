@@ -8,7 +8,7 @@ class on_raw_reaction_add(commands.Cog):
     @commands.Cog.listener()
 
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        await self.client.call_addons('on_raw_reaction_add', (self.client, payload))
+        await self.client.call_addons('on_raw_reaction_add', (payload,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_raw_reaction_add(client))

@@ -8,7 +8,7 @@ class on_raw_reaction_clear_emoji(commands.Cog):
     @commands.Cog.listener()
     
     async def on_raw_reaction_clear_emoji(self, payload: discord.RawReactionClearEmojiEvent):
-        await self.client.call_addons('on_raw_reaction_clear_emoji', (self.client, payload))
+        await self.client.call_addons('on_raw_reaction_clear_emoji', (payload,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_raw_reaction_clear_emoji(client))

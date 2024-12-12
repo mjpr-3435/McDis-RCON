@@ -8,7 +8,7 @@ class on_guild_channel_create(commands.Cog):
     @commands.Cog.listener()
 
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel):
-        await self.client.call_addons('on_guild_channel_create', (self.client, channel))
+        await self.client.call_addons('on_guild_channel_create', (channel,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_guild_channel_create(client))

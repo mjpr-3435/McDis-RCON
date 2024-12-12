@@ -8,7 +8,7 @@ class on_stage_instance_delete(commands.Cog):
     @commands.Cog.listener()
     
     async def on_stage_instance_delete(self, stage_instace: discord.StageInstance):
-        await self.client.call_addons('on_stage_instance_delete', (self.client, stage_instace))
+        await self.client.call_addons('on_stage_instance_delete', (stage_instace,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_stage_instance_delete(client))

@@ -8,7 +8,7 @@ class on_connect(commands.Cog):
     @commands.Cog.listener()
     
     async def on_connect(self):
-        await self.client.call_addons('on_connect', (self.client))
+        await self.client.call_addons('on_connect')
 
 async def setup(client: McDisClient):
     await client.add_cog(on_connect(client))

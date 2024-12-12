@@ -24,16 +24,15 @@ class FileManagerView      (discord.ui.View):
             
         self.add_item(BackButton(self.client))
         self.add_item(UpdateButton(self.client))
-        self.add_item(PathButton(self.client))
 
         if os.path.isdir(self.path):
+            self.add_item(PathButton(self.client))
             self.add_item(TerminalButton(self.client))
-            self.add_item(ProcessesButton(self.client))
-            # if path != '.': self.add_item(DeleteDirButton(self.client))
+            if path != '.': self.add_item(DeleteDirButton(self.client))
         else:
             self.add_item(RequestButton(self.client))
             self.add_item(EditButton(self.client))
-            # self.add_item(DeleteFileButton(self.client))
+            self.add_item(DeleteFileButton(self.client))
 
         if self.up_to_99:
             self._add_pagination_buttons()
@@ -66,10 +65,6 @@ class FileManagerView      (discord.ui.View):
                 options.append(discord.SelectOption(
                     label = f'{emoji_file} {truncate(file,90)}', 
                     value = file))
-                
-            #options.insert(0, discord.SelectOption(
-            #        label = f'{emoji_pin} Go to', 
-            #        value = '__GO_TO__'))
             
         return options[:25]
 
@@ -135,20 +130,16 @@ class FileManagerView      (discord.ui.View):
                     await interaction.response.send_message(response, ephemeral = True)
 
         await interaction.response.send_modal(EditPath())
-
+    
 class FileSelect            (discord.ui.Select):
     def __init__(self, client : McDisClient, options: list):
         super().__init__(placeholder = client._('Select a file'), options = options)
         self.view : FileManagerView
     
     async def callback(self, interaction: discord.Interaction):
-        if self.values[0] == '__GO_TO__' and False:
-            await self.view._edit_path(interaction)
+        self.view.path = os.path.join(self.view.path, self.values[0]) if self.view.path != '.' else self.values[0]
 
-        else:
-            self.view.path = os.path.join(self.view.path, self.values[0]) if self.view.path != '.' else self.values[0]
-
-            await self.view._update_interface(interaction)
+        await self.view._update_interface(interaction)
 
 class PathButton            (discord.ui.Button):
     def __init__(self, client : McDisClient):
@@ -343,33 +334,6 @@ class DeleteFileButton      (discord.ui.Button):
             on_confirmation = on_confirmation,
             interaction = interaction)
 
-class ProcessesButton       (discord.ui.Button):
-    def __init__(self, client: McDisClient):
-        super().__init__(label = 'Processes', style = discord.ButtonStyle.gray)
-        self.view : FileManagerView
-
-    async def callback(self, interaction: discord.Interaction):
-        from .FileManagerProcesses import ProcessesView, ProcessesEmbed
-        await interaction.response.defer()
-        
-        processes = self._get_processes()
-
-        await interaction.followup.edit_message(
-            message_id = interaction.message.id, 
-            embed = ProcessesEmbed(self.view.client, self.view.path, processes), 
-            view = ProcessesView(self.view.client, self.view.path, processes))
-
-    def _get_processes(self):
-        processes = []
-        for process in psutil.process_iter():
-            try:
-                if os.path.abspath(self.view.path) in process.cwd():
-                    processes.append(process)
-            except:
-                pass
-
-        return sorted(processes, key=lambda p: p.cwd())
-
 class TerminalButton        (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Terminal', style = discord.ButtonStyle.gray)
@@ -481,7 +445,6 @@ class TerminalButton        (discord.ui.Button):
             msg = self.view.client._('✔ The files have been successfully compressed.')
 
         await response.edit(content = msg)
-        
         await interaction.user.send(content = msg)
 
     async def _cmd_unzip    (self, args: list[str], interaction: discord.Interaction):
@@ -542,8 +505,8 @@ class TerminalButton        (discord.ui.Button):
         else:
             msg = self.view.client._('✔ The files have been successfully unpacked.')
 
-        await interaction.user.send(msg)
         await response.edit(content = msg)
+        await interaction.user.send(msg)
 
     async def _cmd_cd       (self, args: list[str], interaction: discord.Interaction):
         if not args: 

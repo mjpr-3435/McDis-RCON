@@ -3,6 +3,7 @@ import json
 import os
 
 from mcdis_rcon.classes import Server
+from mcdis_rcon.utils import json_to_dict, dict_to_json
 
 channel_id = 0
 
@@ -10,15 +11,12 @@ async def load(server : Server):
     global channel_id
 
     path_file = os.path.join(server.path_plugins_configs, 'to_do_list.json')
-    dictionary = {'Channel ID' : 0}
+    dict = {'Channel ID' : 0}
     
     if not os.path.exists(path_file):
-        os.makedirs(server.path_plugins_configs, exist_ok = True)
-        with open(path_file, 'w', encoding = 'utf-8') as file:
-            json.dump(dictionary, file, ensure_ascii = False, indent = 4)
-    
-    with open(path_file, 'r', encoding='utf-8') as file:
-        config = json.load(file)
+        dict_to_json(path_file, dict)
+        
+    config = json_to_dict(path_file)
         
     channel_id = config['Channel ID']
 

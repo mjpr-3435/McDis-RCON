@@ -8,7 +8,7 @@ class on_guild_role_delete(commands.Cog):
     @commands.Cog.listener()
     
     async def on_guild_role_delete(self, role: discord.Role):
-        await self.client.call_addons('on_guild_role_delete', (self.client, role))
+        await self.client.call_addons('on_guild_role_delete', (role,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_guild_role_delete(client))

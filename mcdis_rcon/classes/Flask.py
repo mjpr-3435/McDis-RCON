@@ -217,3 +217,64 @@ class FlaskManager (Flask):
             await asyncio.sleep(0.5)
             
         await remote_console.send('```\n[Flask Stopped]\n```')
+
+
+def _upload_form(self):
+    return '''
+        <!doctype html>
+        <title>Subir Archivo</title>
+        <h1>Arrastra tu archivo aquí</h1>
+        <div id="drop-area">
+            <input type="file" id="file-input" style="display:none" onchange="uploadFile()">
+            <p>Arrastra y suelta un archivo aquí o haz clic para seleccionarlo.</p>
+        </div>
+        <div id="status" style="display:none;">Subiendo...</div>
+
+        <script>
+            const dropArea = document.getElementById("drop-area");
+            const fileInput = document.getElementById("file-input");
+            const status = document.getElementById("status");
+
+            dropArea.addEventListener("click", () => fileInput.click());
+            dropArea.addEventListener("dragover", (e) => e.preventDefault());
+            dropArea.addEventListener("drop", handleDrop);
+
+            function handleDrop(event) {
+                event.preventDefault();
+                const file = event.dataTransfer.files[0];
+                uploadFile(file);
+            }
+
+            function uploadFile(file) {
+                const formData = new FormData();
+                formData.append("file", file);
+                
+                // Mostrar mensaje de 'subiendo'
+                status.style.display = "block";
+
+                fetch("/upload", {
+                    method: "POST",
+                    body: formData,
+                })
+                .then(response => response.text())
+                .then(result => {
+                    status.textContent = "Archivo subido con éxito";
+                })
+                .catch(error => {
+                    status.textContent = "Error al subir el archivo";
+                });
+            }
+        </script>
+    '''
+
+def _upload_file(self):
+    if 'file' not in request.files:
+        return abort(404)
+    file = request.files['file']
+    if file.filename == '':
+        return "No file was selected", 400
+    if file:
+        dirpath = self.client.uploader.path_to_upload
+        filepath = os.path.join(dirpath, file.filename)
+        file.save(filepath)
+        return f"File {file.filename} uploaded to {mcdis_path(dirpath)}"

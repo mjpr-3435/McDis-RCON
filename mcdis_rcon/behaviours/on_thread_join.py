@@ -8,7 +8,7 @@ class on_thread_join(commands.Cog):
     @commands.Cog.listener()
     
     async def on_thread_join(self, thread: discord.Thread):
-        await self.client.call_addons('on_thread_join', (self.client, thread))
+        await self.client.call_addons('on_thread_join', (thread,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_thread_join(client))

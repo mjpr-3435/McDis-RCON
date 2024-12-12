@@ -14,6 +14,7 @@ async def load(server: Server):
     
     if not os.path.exists(path_file):
         dict_to_json(path_file, dict)
+        
     config = json_to_dict(path_file)
 
     webhook_url = config['Webhook URL']

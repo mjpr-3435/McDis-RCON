@@ -8,7 +8,7 @@ class on_thread_create(commands.Cog):
     @commands.Cog.listener()
     
     async def on_thread_create(self, thread: discord.Thread):
-        await self.client.call_addons('on_thread_create', (self.client, thread))
+        await self.client.call_addons('on_thread_create', (thread,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_thread_create(client))

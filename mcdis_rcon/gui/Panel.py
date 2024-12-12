@@ -9,8 +9,7 @@ class PanelView             (discord.ui.View):
 
         self.add_item(ManagerButton     (self.client))
         self.add_item(FilesButton       (self.client))
-        self.add_item(UploaderButton    (self.client))
-        self.add_item(FlaskButton       (self.client))
+        self.add_item(ToolsButton       (self.client))
         self.add_item(RestartButton     (self.client))
 
 class ManagerButton         (discord.ui.Button):
@@ -19,7 +18,7 @@ class ManagerButton         (discord.ui.Button):
         self.view : PanelView
 
     async def callback(self, interaction: discord.Interaction):
-        from .McDisManager import McDisManagerView
+        from .PanelManager import McDisManagerView
 
         await interaction.response.edit_message(
             view = McDisManagerView(self.view.client))
@@ -36,33 +35,18 @@ class FilesButton           (discord.ui.Button):
             embed = FileManagerEmbed(self.view.client),
             view = FileManagerView(self.view.client),
             ephemeral = True)
+
+class ToolsButton           (discord.ui.Button):
+    def __init__(self, client: McDisClient):
+        super().__init__(label = 'Tools', style = discord.ButtonStyle.gray)
+        self.view : PanelView
+
+    async def callback(self, interaction: discord.Interaction):
+        from .PanelTools import ToolsView
+
+        await interaction.response.edit_message(
+            view = ToolsView(self.view.client),)
         
-class UploaderButton        (discord.ui.Button):
-    def __init__(self, client: McDisClient):
-        super().__init__(label = 'Uploader', style = discord.ButtonStyle.gray)
-        self.view : PanelView
-
-    async def callback(self, interaction: discord.Interaction):
-        from .Uploader import UploaderView, UploaderEmbed
-
-        await interaction.response.send_message(
-            embed = UploaderEmbed(self.view.client),
-            view = UploaderView(self.view.client),
-            ephemeral = True)
-
-class FlaskButton           (discord.ui.Button):
-    def __init__(self, client: McDisClient):
-        super().__init__(label = 'Flask', style = discord.ButtonStyle.gray)
-        self.view : PanelView
-
-    async def callback(self, interaction: discord.Interaction):
-        from .Flask import FlaskView, FlaskEmbed
-
-        await interaction.response.send_message(
-            embed = FlaskEmbed(self.view.client),
-            view = FlaskView(self.view.client),
-            ephemeral = True)
-
 class RestartButton         (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label = 'Restart', style = discord.ButtonStyle.red)

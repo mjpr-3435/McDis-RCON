@@ -131,10 +131,11 @@ class Process():
                         plugin_path = os.path.join(self.path_plugins, plugin)
                         sys.path.insert(0, plugin_path)
                         
-                        mod = importlib.import_module(f'{plugin.removesuffix(".mcdis")}.__init__')
+                        mod = importlib.import_module(f'mdplugin.__init__')
                         sys.path.pop(0)
-
-                    self.plugins.append(mod)
+                    
+                    plugin_instance = mod.mdplugin(self)
+                    self.plugins.append(plugin_instance)
                     logs.append(f'Plugin imported:: {plugin}')
                     
                 except:
@@ -146,15 +147,14 @@ class Process():
                     )
         
         if not reload: logs.append('Initializing process...')
-        asyncio.create_task(self.call_plugins('load', (self,)))
 
         for log in logs: self.add_log(log)
 
     def         unload_plugins          (self):
-        for module in self.plugins:
-            if module in sys.modules.values():
-                sys.modules.pop(module.__name__, None)
-                
+        for plugin in self.plugins:
+            if hasattr(plugin, 'unload') and callable(plugin.unload):
+                plugin.unload()
+
         self.plugins = []
 
     async def   restart                 (self):
@@ -211,6 +211,12 @@ class Process():
                 return
             
         make_zip(self.path_files, bkp_path, counter)
+
+        log_filename = 'backup_log.txt'
+        log_content = f'Backup created on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n'
+
+        with zipfile.ZipFile(bkp_path, 'a') as zipf:
+            zipf.writestr(log_filename, log_content)
     
     def         unpack_bkp              (self, backup,  *, counter : list = None):
         shutil.rmtree(self.path_files)
@@ -223,7 +229,7 @@ class Process():
     ###         Behaviours          ###
 
     async def   discord_listener        (self, message: discord.Message):
-        await self.call_plugins('on_discord_message', (self, message))
+        await self.call_plugins('on_discord_message', (message,))
          
         if not isinstance(message.channel, discord.Thread): return
         elif not message.channel.parent_id == self.client.panel.id: return
@@ -303,7 +309,7 @@ class Process():
         self._relaying = False
 
     async def   _listener_events       (self, log: str):
-        await self.call_plugins('listener_events', (self, log))
+        await self.call_plugins('listener_events', (log, ))
 
     async def   _listener_console        (self):
         asyncio.create_task(self._relay_console())
@@ -345,7 +351,7 @@ class Process():
     def         add_log                 (self, log: str):
         self._console_relay.put(self.log_format(log))
 
-    async def   call_plugins            (self, function: str, args: tuple):
+    async def   call_plugins            (self, function: str, args: tuple = tuple()):
        for plugin in self.plugins:
             try: 
                 func = getattr(plugin, function, None)
@@ -353,7 +359,7 @@ class Process():
                     await func(*args)
             except: 
                 await self.error_report(
-                    title = f'{function}() of {plugin.__name__}',
+                    title = f'{function}() of {plugin}',
                     error = traceback.format_exc()
                     )
 

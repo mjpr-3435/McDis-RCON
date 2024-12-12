@@ -94,8 +94,6 @@ class BackupSelect      (discord.ui.Select):
                 else:
                     msg = self.view.client._('✔ The files have been successfully compressed.')
 
-                await interaction.user.send(msg)
-
                 await confirmation_interaction.followup.edit_message(
                 message_id = confirmation_interaction.message.id,
                 content = msg)
@@ -104,6 +102,8 @@ class BackupSelect      (discord.ui.Select):
                 message_id = interaction.message.id,
                 embed = BackupsEmbed(self.view.client, self.view.process),
                 view = BackupsView(self.view.client, self.view.process))
+
+                await interaction.user.send(msg)
 
             await confirmation_request(
                 self.view.client._('Are you sure you want to make a backup?'),
@@ -149,8 +149,6 @@ class BackupSelect      (discord.ui.Select):
                 else:
                     msg = self.view.client._('✔ The files have been successfully unpacked.')
 
-                await interaction.user.send(msg)
-
                 await confirmation_interaction.followup.edit_message(
                 message_id = confirmation_interaction.message.id,
                 content = msg)
@@ -159,6 +157,8 @@ class BackupSelect      (discord.ui.Select):
                 message_id = interaction.message.id,
                 embed = BackupsEmbed(self.view.client, self.view.process),
                 view = BackupsView(self.view.client, self.view.process))
+
+                await interaction.user.send(msg)
 
             await confirmation_request(
                 self.view.client._('Are you sure you want to load the backup `{}`?')
@@ -245,7 +245,22 @@ class BackupsEmbed      (discord.Embed):
         self.set_footer(text=footer_text)
 
     def _mrkd(self, file: str, index: int) -> str:
-        date = datetime.fromtimestamp(os.path.getctime(file)).strftime("%Y-%m-%d %H:%M:%S")
+        with zipfile.ZipFile(file, 'r') as zipf:
+            log_filename = 'backup_log.txt'
+
+            if log_filename in zipf.namelist():
+                with zipf.open(log_filename) as log_file:
+                    log_content = log_file.read().decode('utf-8')
+                    
+                    lines = log_content.splitlines()
+                    for line in lines:
+                        if line.startswith('Backup created on:'):
+                            date_str = line.replace('Backup created on:', '').strip()
+                            date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
+                            break
+            else:
+                date = "Date not found in log"
+
         size = get_path_size(file)
         offset_hours, offset_minutes = divmod(
             time.timezone // 60 if time.localtime().tm_isdst == 0 else time.altzone // 60,

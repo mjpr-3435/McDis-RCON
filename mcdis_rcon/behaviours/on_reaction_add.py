@@ -8,7 +8,7 @@ class on_reaction_add(commands.Cog):
     @commands.Cog.listener()
     
     async def on_reaction_add(self, reaction: discord.Reaction, user: Union[discord.User,discord.Member]):
-        await self.client.call_addons('on_reaction_add', (self.client, reaction, user))
+        await self.client.call_addons('on_reaction_add', (reaction, user))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_reaction_add(client))

@@ -3,23 +3,21 @@ import os
 
 from datetime import datetime
 from mcdis_rcon.classes import Server
+from mcdis_rcon.utils import json_to_dict, dict_to_json
 foundation_date = ''
 
 async def load(server: Server):
     global foundation_date
 
     path_file = os.path.join(server.path_plugins_configs, 'join_motd.json')
-    dictionary = {
+    dict = {
         'Foundation Date' : '0-0-0'
         }
     
     if not os.path.exists(path_file):
-        os.makedirs(server.path_plugins_configs, exist_ok = True)
-        with open(path_file, 'w', encoding = 'utf-8') as file:
-            json.dump(dictionary, file, ensure_ascii = False, indent = 4)
-    
-    with open(path_file, 'r', encoding = 'utf-8') as file:
-        config = json.load(file)
+        dict_to_json(path_file, dict)
+        
+    config = json_to_dict(path_file)
 
     foundation_date = config['Foundation Date']
 

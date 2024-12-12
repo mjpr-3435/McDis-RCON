@@ -3,13 +3,7 @@ import json
 import os
 
 from mcdis_rcon.classes import Server
-
-def send_to_servers(server: Server, msg: str):
-    msg = msg.replace("\n","").replace('"',"'")
-
-    for server in server.client.servers:
-        if server.name != server.name and server.online_players:
-            server.send_response('@a', msg)  
+from mcdis_rcon.utils import json_to_dict, dict_to_json
     
 webhook = None
 
@@ -17,15 +11,12 @@ async def load(server: Server):
     global webhook
     
     path_file = os.path.join(server.path_plugins_configs,'chatbridge.json')
-    dictionary = {'Webhook URL' : ''}
+    dict = {'Webhook URL' : ''}
     
     if not os.path.exists(path_file):
-        os.makedirs(server.path_plugins_configs, exist_ok = True)
-        with open(path_file, 'w', encoding = 'utf-8') as file:
-            json.dump(dictionary, file, ensure_ascii = False, indent = 4)
-    
-    with open(path_file, 'r', encoding='utf-8') as file:
-        config = json.load(file)
+        dict_to_json(path_file, dict)
+        
+    config = json_to_dict(path_file)
 
     webhook_url = config['Webhook URL']
 
@@ -98,3 +89,10 @@ async def on_crash(server: Server):
     send_to_servers(server, f'[{server.name}] El servidor crasheó')
         
     await webhook.send(f'[{server.name}] El servidor crasheó')
+
+def send_to_servers(server: Server, msg: str):
+    msg = msg.replace("\n","").replace('"',"'")
+
+    for server in server.client.servers:
+        if server.name != server.name and server.online_players:
+            server.send_response('@a', msg)  

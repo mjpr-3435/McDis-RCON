@@ -8,7 +8,7 @@ class on_automod_rule_update(commands.Cog):
     @commands.Cog.listener()
     
     async def on_automod_rule_update(self, rule: discord.AutoModRule):
-        await self.client.call_addons('on_automod_rule_update', (self.client, rule))
+        await self.client.call_addons('on_automod_rule_update', (rule,))
     
 async def setup(client: McDisClient):
     await client.add_cog(on_automod_rule_update(client))

@@ -3,7 +3,7 @@ from ..classes import *
 from ..utils import *
 
 class ProcessesView(discord.ui.View):
-    def __init__(self, client: McDisClient, path: str, processes: list[psutil.Process], page: int = 1):
+    def __init__(self, client: McDisClient, processes: list[psutil.Process], path: str = '.', page: int = 1):
         super().__init__(timeout=None)
         self.client         = client
         self.path           = path
@@ -19,8 +19,9 @@ class ProcessesView(discord.ui.View):
         if self.options:
             self.add_item(ProcessSelection(self.client, self.options))
 
-        self.add_item(BackButton(self.client))
+        # self.add_item(BackButton(self.client))
         self.add_item(UpdateButton(self.client))
+        self.add_item(PathButton(self.client))
 
         if self.up_to_max:
             self._add_pagination_buttons()
@@ -82,9 +83,28 @@ class ProcessesView(discord.ui.View):
 
         await interaction.followup.edit_message(
             message_id = interaction.message.id,
-            embed = ProcessesEmbed(self.client, self.path, self.processes),
-            view = ProcessesView(self.client, self.path, self.processes)
+            embed = ProcessesEmbed(self.client, self.processes, self.path),
+            view = ProcessesView(self.client, self.processes, self.path)
         )
+    
+    async def   _edit_path                  (self, interaction : discord.Interaction):
+        class EditPath(discord.ui.Modal, title = self.client._('Go to path')):
+            name = discord.ui.TextInput(
+                label = self.client._('Path'),
+                style = discord.TextStyle.short,
+                default = mcdis_path(self.path)
+            )
+
+            async def on_submit(modal, interaction: discord.Interaction):
+                response = self.client.is_valid_mcdis_path(modal.name.value)
+
+                if response is True:
+                    self.path = un_mcdis_path(modal.name.value)
+                    await self._update_interface(interaction)
+                else:
+                    await interaction.response.send_message(response, ephemeral = True)
+
+        await interaction.response.send_modal(EditPath())
         
 class ProcessSelection      (discord.ui.Select):
     def __init__(self, client: McDisClient, options: list):
@@ -152,6 +172,14 @@ class NextPageButton        (discord.ui.Button):
 
         await self.view._update_page(interaction)
 
+class PathButton            (discord.ui.Button):
+    def __init__(self, client : McDisClient):
+        super().__init__(label = emoji_pin, style = discord.ButtonStyle.gray)
+        self.view : ProcessesView
+
+    async def callback(self, interaction: discord.Interaction):
+        await self.view._edit_path(interaction)
+
 class BackButton            (discord.ui.Button):
     def __init__(self, client: McDisClient):
         super().__init__(label=emoji_arrow_left, style=discord.ButtonStyle.gray)
@@ -174,7 +202,7 @@ class UpdateButton          (discord.ui.Button):
         await self.view._update_interface(interaction)
     
 class ProcessesEmbed        (discord.Embed):
-    def __init__(self, client: McDisClient, path: str, processes: list[psutil.Process], page: int = 1):
+    def __init__(self, client: McDisClient, processes: list[psutil.Process], path: str = '.', page: int = 1):
         super().__init__(
             title = client._('> Processes in `{}`').format(mcdis_path(path)),
             colour = embed_colour,

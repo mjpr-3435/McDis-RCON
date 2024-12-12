@@ -8,7 +8,7 @@ class on_raw_message_edit(commands.Cog):
     @commands.Cog.listener()
     
     async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent):
-        await self.client.call_addons('on_raw_message_edit', (self.client, payload))
+        await self.client.call_addons('on_raw_message_edit', (payload,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_raw_message_edit(client))

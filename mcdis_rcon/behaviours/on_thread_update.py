@@ -7,7 +7,7 @@ class on_thread_update(commands.Cog):
 
     @commands.Cog.listener()
     async def on_thread_update(self, before: discord.Thread, after: discord.Thread):
-        await self.client.call_addons('on_thread_update', (self.client, before, after))
+        await self.client.call_addons('on_thread_update', (before, after))
         
 async def setup(client: McDisClient):
     await client.add_cog(on_thread_update(client))

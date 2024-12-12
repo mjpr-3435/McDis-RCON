@@ -8,7 +8,7 @@ class on_member_unban(commands.Cog):
     @commands.Cog.listener()
     
     async def on_member_unban(self, guild: discord.Guild, user: discord.User):
-        await self.client.call_addons('on_member_unban', (self.client, guild, user))
+        await self.client.call_addons('on_member_unban', (guild, user))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_member_unban(client))

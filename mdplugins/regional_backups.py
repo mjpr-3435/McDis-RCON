@@ -6,34 +6,13 @@ import os
 import re
 
 from datetime import datetime
-from mcdis_rcon.utils import hover_and_suggest, extras
+from mcdis_rcon.utils import hover_and_suggest, extras, json_to_dict, dict_to_json
 from mcdis_rcon.classes import Server
 
 targets = []
 waiting = {}
 files_to_zip = {}
 creating_bkp = False
-admins = []
-
-async def load(server: Server):
-    global admins
-
-    path_file = os.path.join(server.path_plugins_configs, 'regional_backups.json')
-    dictionary = {
-        'Admins' : []
-        }
-    
-    os.makedirs(os.path.join(server.path_plugins, 'reg-bkps'), exist_ok = True)
-
-    if not os.path.exists(path_file):
-        os.makedirs(server.path_plugins_configs, exist_ok = True)
-        with open(path_file, 'w', encoding = 'utf-8') as file:
-            json.dump(dictionary, file, ensure_ascii = False, indent = 4)
-    
-    with open(path_file, 'r', encoding = 'utf-8') as file:
-        config = json.load(file)
-
-    admins = config['Admins']
 
 async def on_player_command(server: Server, player: str, message: str):
     global targets, files_to_zip, waiting, creating_bkp
@@ -41,7 +20,7 @@ async def on_player_command(server: Server, player: str, message: str):
     reg_bkps_dir = os.path.join(server.path_plugins, 'reg-bkps')
     zips = [x for x in os.listdir(reg_bkps_dir) if x.endswith('.zip')]
 
-    if not player in admins:
+    if not player in server.admins:
         return
     
     elif server.is_command(message, 'help'):

@@ -8,7 +8,7 @@ class on_disconnect(commands.Cog):
     @commands.Cog.listener()
     
     async def on_disconnect(self):
-        await self.client.call_addons('on_disconnect', (self.client))
+        await self.client.call_addons('on_disconnect')
 
 async def setup(client: McDisClient):
     await client.add_cog(on_disconnect(client))

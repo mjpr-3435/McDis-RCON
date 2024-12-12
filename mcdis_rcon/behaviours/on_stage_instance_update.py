@@ -8,7 +8,7 @@ class on_stage_instance_update(commands.Cog):
     @commands.Cog.listener()
     
     async def on_stage_instance_update(self, before: discord.StageInstance, after: discord.StageInstance):
-        await self.client.call_addons('on_stage_instance_update', (self.client, before, after))
+        await self.client.call_addons('on_stage_instance_update', (before, after))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_stage_instance_update(client))

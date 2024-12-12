@@ -5,7 +5,7 @@ import json
 import asyncio
 
 from mcdis_rcon.classes import Server
-from mcdis_rcon.utils import extras, hover_and_suggest
+from mcdis_rcon.utils import extras, hover_and_suggest, json_to_dict, dict_to_json
 
 config = dict()
 
@@ -13,15 +13,12 @@ async def load(server: Server):
     global config
     
     path_file = os.path.join(server.path_plugins_configs,'execute.json')
-    dictionary = {}
+    dict = {}
     
     if not os.path.exists(path_file):
-        os.makedirs(server.path_plugins_configs, exist_ok = True)
-        with open(path_file, 'w', encoding = 'utf-8') as file:
-            json.dump(dictionary, file, ensure_ascii = False, indent = 4)
-    
-    with open(path_file, 'r', encoding='utf-8') as file:
-        config = json.load(file)
+        dict_to_json(path_file, dict)
+        
+    config = json_to_dict(path_file)
 
 async def on_already_started(server: Server):
     global config
@@ -87,7 +84,7 @@ async def on_player_command(server: Server, player: str, message: str):
             keys = list(data.keys())
 
         if not action:
-            messages = ["Descripción:", data[keys[0]], " ", "Acciones disponibles:"]
+            messages = [f"Descripción: {data[keys[0]]}", " ", "Acciones disponibles:"]
             server.send_response(player, messages)
 
             for i in range(1, len(keys)):

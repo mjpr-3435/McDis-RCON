@@ -10,7 +10,7 @@ class on_message(commands.Cog):
     async def on_message(self, message: discord.Message):
         await self.client.panel_interface(message)
         await self.client.upload_logic(message)
-        await self.client.call_addons('on_message', (self.client, message))
+        await self.client.call_addons('on_message', (message,))
     
 async def setup(client: McDisClient):
     await client.add_cog(on_message(client))

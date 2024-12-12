@@ -2,30 +2,10 @@ import json
 import os
 
 from mcdis_rcon.classes import Server
-admins = []
-
-async def load(server: Server):
-    global admins
-
-    path_file = os.path.join(server.path_plugins_configs, 'processes_manager.json')
-    dictionary = {
-        'Admins' : []
-        }
-    
-    if not os.path.exists(path_file):
-        os.makedirs(server.path_plugins_configs, exist_ok = True)
-        with open(path_file, 'w', encoding = 'utf-8') as file:
-            json.dump(dictionary, file, ensure_ascii = False, indent = 4)
-    
-    with open(path_file, 'r', encoding = 'utf-8') as file:
-        config = json.load(file)
-
-    admins = config['Admins']
+from mcdis_rcon.utils import json_to_dict, dict_to_json
 
 async def on_player_command(server: Server, player: str, message: str):
-    global admins
-
-    if not player in admins:
+    if not player in server.admins:
         return
     
     elif server.is_command(message, 'help'):

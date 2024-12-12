@@ -8,7 +8,7 @@ class on_user_update(commands.Cog):
     @commands.Cog.listener()
     
     async def on_user_update(self, before: discord.User, after: discord.User):
-        await self.client.call_addons('on_user_update', (self.client, before, after))
+        await self.client.call_addons('on_user_update', (before, after))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_user_update(client))

@@ -8,7 +8,7 @@ class on_integration_create(commands.Cog):
     @commands.Cog.listener()
     
     async def on_integration_create(self, integration: discord.Integration):
-        await self.client.call_addons('on_integration_create', (self.client, integration))
+        await self.client.call_addons('on_integration_create', (integration,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_integration_create(client))
