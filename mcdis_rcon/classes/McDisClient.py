@@ -16,8 +16,8 @@ class McDisClient(commands.Bot):
         self._          : Callable[[str], str]                  = None
         self.path_backups                                       = '.mdbackups'
         self.path_addons                                        = '.mdaddons'
-        self.path_addons_configs                                 = os.path.join('.mdaddons', 'configs')
-        self.addons                                             = []
+        self.path_addons_configs                                = os.path.join('.mdaddons', 'configs')
+        self.addons                                             = {}
         self.flask      : FlaskManager                          = None
         self.processes  : list[Union[Network,Server]]           = []
         self.networks   : list[Network]                         = []
@@ -183,7 +183,8 @@ class McDisClient(commands.Bot):
         await thread('Console Flask', self.panel, public = True)
 
     async def   _load_addons           (self, *, reload: bool = False):
-
+        if reload: self.unload_addons()
+        
         files_in_addons_dir = os.listdir(self.path_addons)
         
         addons = [file.removesuffix('.mcdis') for file in files_in_addons_dir if file.endswith('.mcdis')]
@@ -198,7 +199,7 @@ class McDisClient(commands.Bot):
             try:
                 mod = importlib.import_module(f'mdaddon.__init__')
                 addon_instance = mod.mdaddon(self)
-                self.addons.append(addon_instance)
+                self.addons[addon] = addon_instance
 
                 if not reload: print(self._('     -> Imported {}').format(addon))
             except:
@@ -630,7 +631,7 @@ class McDisClient(commands.Bot):
         return True
 
     async def   call_addons             (self, function: str, args: tuple = tuple()):
-        for addon in self.addons:
+        for name, addon in self.addons.items():
             try:
                 func = getattr(addon, function, None)
                 if func:
@@ -671,11 +672,11 @@ class McDisClient(commands.Bot):
         return decorator
 
     def         unload_addons           (self):
-        for addon in self.addons:
+        for name, addon in self.addons.items():
             if hasattr(addon, 'unload') and callable(addon.unload):
                 addon.unload()
 
-        self.addons = []
+        self.addons = {}
     
     def         unload_modules_from     (self, path):
             abs_path = os.path.abspath(path)

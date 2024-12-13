@@ -16,7 +16,7 @@ class Process():
         self.start_cmd              = config['start_cmd']
         self.stop_cmd               = config['stop_cmd']
         self.blacklist              = config['blacklist']
-        self.plugins                = []
+        self.plugins                = {}
         self.process                = None
         self.real_process           = None
         self._relaying              = False
@@ -135,7 +135,7 @@ class Process():
                         sys.path.pop(0)
                     
                     plugin_instance = mod.mdplugin(self)
-                    self.plugins.append(plugin_instance)
+                    self.plugins[os.path.splitext(plugin)[0]] = plugin_instance
                     logs.append(f'Plugin imported:: {plugin}')
                     
                 except:
@@ -151,11 +151,11 @@ class Process():
         for log in logs: self.add_log(log)
 
     def         unload_plugins          (self):
-        for plugin in self.plugins:
+        for name, plugin in self.plugins.items():
             if hasattr(plugin, 'unload') and callable(plugin.unload):
                 plugin.unload()
 
-        self.plugins = []
+        self.plugins = {}
 
     async def   restart                 (self):
         if not self.is_running(): return
@@ -352,7 +352,7 @@ class Process():
         self._console_relay.put(self.log_format(log))
 
     async def   call_plugins            (self, function: str, args: tuple = tuple()):
-       for plugin in self.plugins:
+       for name, plugin in self.plugins.items():
             try: 
                 func = getattr(plugin, function, None)
                 if func:

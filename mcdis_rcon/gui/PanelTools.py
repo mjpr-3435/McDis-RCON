@@ -11,6 +11,7 @@ class ToolsView      (discord.ui.View):
         self.add_item(ProcessesButton   (self.client))
         self.add_item(UploaderButton    (self.client))
         self.add_item(FlaskButton       (self.client))
+        self.add_item(ReloadButton      (self.client))
 
 class BackButton            (discord.ui.Button):
     def __init__(self, client : McDisClient):
@@ -75,3 +76,16 @@ class FlaskButton           (discord.ui.Button):
             embed = FlaskEmbed(self.view.client),
             view = FlaskView(self.view.client),
             ephemeral = True)
+
+class ReloadButton      (discord.ui.Button):
+    def __init__(self, client: McDisClient):
+        super().__init__(label = 'Reload Addons', style = discord.ButtonStyle.gray)
+        self.view: ToolsView
+
+    async def callback(self, interaction: discord.Interaction):
+        await self.view.client._load_addons(reload = True)
+        addons = [addon for addon in self.view.client.addons.keys()]
+        extra = '\n • '.join([''] + addons) if addons else self.view.client._('No addons were found.')
+        msg = self.view.client._('✔ Addons reloaded: ') + extra
+        
+        await interaction.response.send_message(msg , ephemeral = True)
