@@ -30,6 +30,9 @@ class mdplugin():
         elif message.author.bot : return
 
         elif message.channel.id == self.webhook.channel.id:
+            if not hasattr(self.server, 'online_players') or not hasattr(self.server, 'bots'): return
+            elif not (self.server.online_players + self.server.bots): return
+
             msg = message.content.replace('\n', ' ').replace('"',"'")
             self.server.send_response('@a', f'[DIS] <{message.author.display_name}> {msg}')
 
@@ -80,5 +83,8 @@ class mdplugin():
         msg = msg.replace("\n","").replace('"',"'")
 
         for server in self.server.client.servers:
+            if not hasattr(server, 'online_players') or not hasattr(server, 'bots'):
+                continue
+            
             if server.name != self.server.name and (server.online_players + server.bots):
                 server.send_response('@a', msg)  
