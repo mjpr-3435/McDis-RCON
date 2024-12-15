@@ -98,7 +98,7 @@ class Process():
         except: pass
     
     def         load_plugins            (self, *, reload = False):
-        if self.is_running() == 'Closed': return
+        if not self.is_running(): return
         
         if reload:
             self.unload_plugins()
