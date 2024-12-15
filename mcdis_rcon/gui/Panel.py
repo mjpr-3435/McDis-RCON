@@ -10,6 +10,7 @@ class PanelView             (discord.ui.View):
         self.add_item(ManagerButton     (self.client))
         self.add_item(FilesButton       (self.client))
         self.add_item(ToolsButton       (self.client))
+        # self.add_item(GuideButton       (self.client))
         self.add_item(RestartButton     (self.client))
 
 class ManagerButton         (discord.ui.Button):
@@ -45,7 +46,22 @@ class ToolsButton           (discord.ui.Button):
         from .PanelTools import ToolsView
 
         await interaction.response.edit_message(
-            view = ToolsView(self.view.client),)
+            view = ToolsView(self.view.client))
+
+class GuideButton           (discord.ui.Button):
+    def __init__(self, client: McDisClient):
+        super().__init__(label = 'Guide', style = discord.ButtonStyle.gray)
+        self.view : PanelView
+
+    async def callback(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title = '> Credits',
+            colour = embed_colour,
+            description = 
+            f'Coded by KassiuLo.\n[[Kassius\' Discord]](https://discord.gg/xB9N38HBJY)\n\n'
+            f'McDis RCON v{mcdis_vers}')
+
+        await interaction.response.send_message(embed = embed, ephemeral = True)
         
 class RestartButton         (discord.ui.Button):
     def __init__(self, client: McDisClient):
@@ -176,7 +192,7 @@ class PanelEmbed            (discord.Embed):
 
     def _add_mcdis_field(self):
         mcdis_ram_used = f'{psutil.Process().memory_info().rss / (1024 ** 2):.1f} MB'
-        self.add_field(inline = True, name = f'> McDis RCON {mcdis_vers}', value =
+        self.add_field(inline = True, name = f'> McDis RCON', value =
             f'```asciidoc\n'
             f'RAM Usage::               '[:-len(mcdis_ram_used)] + mcdis_ram_used + '```')
         

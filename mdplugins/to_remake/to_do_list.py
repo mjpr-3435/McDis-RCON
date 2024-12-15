@@ -1,5 +1,4 @@
 import discord
-import json
 import os
 
 from mcdis_rcon.classes import Server

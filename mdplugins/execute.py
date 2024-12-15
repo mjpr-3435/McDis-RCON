@@ -1,112 +1,96 @@
 import os
-import ruamel.yaml
-import discord
-import json
 import asyncio
 
 from mcdis_rcon.classes import Server
-from mcdis_rcon.utils import extras, hover_and_suggest, json_to_dict, dict_to_json
+from mcdis_rcon.utils import extras, hover_and_suggest, json_to_dict, dict_to_json, read_yml
 
-config = dict()
-
-async def load(server: Server):
-    global config
+class mdplugin():
+    def __init__(self, server: Server):
+        self.server = server
     
-    path_file = os.path.join(server.path_plugins_configs,'execute.json')
-    dict = {}
-    
-    if not os.path.exists(path_file):
-        dict_to_json(path_file, dict)
-        
-    config = json_to_dict(path_file)
+        dict = {}
 
-async def on_already_started(server: Server):
-    global config
-    
-    keys = list(config.keys())
+        path = os.path.join(self.server.path_plugins_configs,'execute.json')
+        if not os.path.exists(path): dict_to_json(path, dict)
+        self.config = json_to_dict(path)
 
-    for key in keys:
-        with open(os.path.join(server.path_commands, f'{key}.yml'), "r+") as file:
-            yaml = ruamel.yaml.YAML()
-            yaml.indent(mapping = 2, sequence = 4, offset = 2)
-            yaml.preserve_quotes = True
+    async def on_already_started    (self):
+        keys = list(self.config.keys())
 
-            data = yaml.load(file)
-
-        commands = data[config[key]]   
-        
-        for command in commands:
-            if 'await' in command:
-                await asyncio.sleep(int(command.replace('await','').strip()))
-                continue
-            server.execute(command.strip())
-            await asyncio.sleep(1)
-
-async def on_player_command(server: Server, player: str, message: str):
-    commands = [file.removesuffix('.yml') for file in os.listdir(server.path_commands) if file.endswith('.yml')]
-    commands.sort()
-    message = message.replace(' ', '').lower()
-
-    if server.is_command(message, 'help'):
-        server.show_command(player, 
-                          "commands", 
-                          "Lista de comandos predifinidos del servidor.")
-        
-    elif server.is_command(message, 'commands'):
-        server.send_response(player, "Comandos disponibles:")
-        for i in range(len(commands)):
-            text = f'{i} • {commands[i]}'
+        for key in keys:
+            path = os.path.join(self.server.path_commands, f'{key}.yml')
+            if not os.path.exists(path): continue
+                                
+            data = read_yml(path)
+            commands = data[self.config[key]]   
             
-            with open(os.path.join(server.path_commands, f'{commands[i]}.yml'), "r+") as file:
-                yaml = ruamel.yaml.YAML()
-                yaml.indent(mapping = 2, sequence = 4, offset = 2)
-                yaml.preserve_quotes = True
-
-                data = yaml.load(file)
-                keys = list(data.keys())
-            
-            placeholder = 'Acciones: ' + ', '.join(keys[1:])
-            ext = extras([hover_and_suggest(text, suggest = server.prefix + commands[i] + ' ', hoover = placeholder)])
-            server.execute(f'tellraw {player} {ext}')
-
-    elif any(message.startswith(server.prefix + command.replace(' ', '').lower()) for command in commands):
-        command = next(filter(lambda command: message.startswith(server.prefix + command.replace(' ', '').lower()), commands), None)
-        action = message.removeprefix(server.prefix + command.replace(' ', '').lower())
-
-        if not command: return
-        
-        with open(os.path.join(server.path_commands, f'{command}.yml'), "r+") as file:
-            yaml = ruamel.yaml.YAML()
-            yaml.indent(mapping = 2, sequence = 4, offset = 2)
-            yaml.preserve_quotes = True
-
-            data = yaml.load(file)
-            keys = list(data.keys())
-
-        if not action:
-            messages = [f"Descripción: {data[keys[0]]}", " ", "Acciones disponibles:"]
-            server.send_response(player, messages)
-
-            for i in range(1, len(keys)):
-                commands = ', '.join(data[keys[i]])
-                suggestion = server.prefix + command + ' ' + keys[i]
-                ext = extras([hover_and_suggest(f'{i} • {keys[i]}', suggest =  suggestion, hoover = commands)])
-                server.execute(f'tellraw {player} {ext}')
-            return
-        
-        if action.lower().replace(' ','') in [action.lower().replace(' ','') for action in keys]:
-            action = next(filter(lambda x: x.lower().replace(' ','') == action.lower().replace(' ',''), keys))
-            commands = data[action]   
-            server.send_response(player, 'Ejecutando comandos...')
-            
-            for cmd in commands:
-                if 'await' in cmd:
-                    await asyncio.sleep(int(cmd.replace('await','').strip()))
+            for command in commands:
+                if 'await' in command:
+                    await asyncio.sleep(int(command.replace('await','').strip()))
                     continue
-                server.execute(cmd.strip())
+                self.server.execute(command.strip())
                 await asyncio.sleep(1)
 
-            server.send_response(player, f'✔ {command}: Comandos ejecutados.')
+    async def on_player_command     (self, player: str, message: str):
+        commands = [file.removesuffix('.yml') for file in os.listdir(self.server.path_commands) if file.endswith('.yml')]
+        commands.sort()
+        message = message.replace(' ', '').lower()
 
-        else:
-            server.send_response(player, "✖ No hay una acción con ese nombre.")
+        if self.server.is_command(message, 'help'):
+            self.server.show_command(player, 
+                            "commands", 
+                            "Lista de comandos predifinidos del servidor.")
+            
+        elif self.server.is_command(message, 'commands'):
+            if not commands:
+                self.server.send_response(player, "No hay comandos disponibles.")
+                return
+            
+            self.server.send_response(player, "Comandos disponibles:")
+            for i in range(len(commands)):
+                text = f'{i} • {commands[i]}'
+                path = os.path.join(self.server.path_commands, f'{commands[i]}.yml')
+
+                data = read_yml(path)
+                keys = list(data.keys())
+                
+                placeholder = 'Acciones: ' + ', '.join(keys[1:])
+                ext = extras([hover_and_suggest(text, suggest = self.server.prefix + commands[i] + ' ', hoover = placeholder)])
+                self.server.execute(f'tellraw {player} {ext}')
+
+        elif any(message.startswith(self.server.prefix + command.replace(' ', '').lower()) for command in commands):
+            command = next(filter(lambda command: message.startswith(self.server.prefix + command.replace(' ', '').lower()), commands), None)
+            action = message.removeprefix(self.server.prefix + command.replace(' ', '').lower())
+
+            if not command: return
+            path = os.path.join(self.server.path_commands, f'{command}.yml')
+            data = read_yml(path)
+            keys = list(data.keys())
+
+            if not action:
+                messages = [f"Descripción: {data[keys[0]]}", " ", "Acciones disponibles:"]
+                self.server.send_response(player, messages)
+
+                for i in range(1, len(keys)):
+                    commands = ', '.join(data[keys[i]])
+                    suggestion = self.server.prefix + command + ' ' + keys[i]
+                    ext = extras([hover_and_suggest(f'{i} • {keys[i]}', suggest =  suggestion, hoover = commands)])
+                    self.server.execute(f'tellraw {player} {ext}')
+                return
+            
+            if action.lower().replace(' ','') in [action.lower().replace(' ','') for action in keys]:
+                action = next(filter(lambda x: x.lower().replace(' ','') == action.lower().replace(' ',''), keys))
+                commands = data[action]   
+                self.server.send_response(player, 'Ejecutando comandos...')
+                
+                for cmd in commands:
+                    if 'await' in cmd:
+                        await asyncio.sleep(int(cmd.replace('await','').strip()))
+                        continue
+                    self.server.execute(cmd.strip())
+                    await asyncio.sleep(1)
+
+                self.server.send_response(player, f'✔ {command}: Comandos ejecutados.')
+
+            else:
+                self.server.send_response(player, "✖ No hay una acción con ese nombre.")

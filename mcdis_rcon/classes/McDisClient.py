@@ -190,7 +190,7 @@ class McDisClient(commands.Bot):
         addons = [file.removesuffix('.mcdis') for file in files_in_addons_dir if file.endswith('.mcdis')]
         if not addons: return
 
-        if not reload: print(self._('   • Importing addons:'))
+        print(self._('   • Importing addons:'))
 
         for addon in addons:
             addon_path = os.path.join(self.path_addons, addon + '.mcdis')
@@ -201,9 +201,9 @@ class McDisClient(commands.Bot):
                 addon_instance = mod.mdaddon(self)
                 self.addons[addon] = addon_instance
 
-                if not reload: print(self._('     -> Imported {}').format(addon))
+                print(self._('     -> Imported {}').format(addon))
             except:
-                if not reload: print(self._('     -> Unable to import {}\n{}').format(addon, traceback.format_exc()))
+                print(self._('     -> Unable to import {}\n{}').format(addon, traceback.format_exc()))
             
             self.unload_modules_from(addon_path)
             sys.path.pop(0)

@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
 from setuptools.command.install import install
-from .mcdis_rcon.modules import mcdis_vers
 import subprocess
 import sys
 
@@ -10,8 +9,7 @@ class CustomInstall(install):
         install.run(self)
 
 setup(
-    name="mcdis_rcon",
-    version=mcdis_vers,
+    version="0.4.2a",
     packages=find_packages(),
     include_package_data=True,
     package_data={

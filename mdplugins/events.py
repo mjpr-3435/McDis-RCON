@@ -1,28 +1,25 @@
 import re
 import os
-import json
 
 from mcdis_rcon.classes import Server
-from mcdis_rcon.utils import json_to_dict, dict_to_json
+from mcdis_rcon.utils import dict_to_json, json_to_dict
 
 class mdplugin():
-    def __init__(self, server: Server):
+    def __init__    (self, server: Server):
         self.server = server
-
-        path_file = os.path.join(self.server.path_plugins_configs,'events.json')
+        
         dict = {"omit crash report relay" : False,
                 "Admins"                  : []}
-        
-        if not os.path.exists(path_file):
-            dict_to_json(path_file, dict)
-            
-        config = json_to_dict(path_file)
 
-        self.server.admins = config['Admins']
+        path_file = os.path.join(self.server.path_plugins_configs,'events.json')
+        if not os.path.exists(path_file): dict_to_json(path_file, dict)
+        self.config = json_to_dict(path_file)
+
+        self.server.admins = self.config['Admins']
         if not hasattr(server, 'bots'): self.server.bots = []
         if not hasattr(server, 'online_players'): self.server.online_players = []
 
-    async def listener_events(self, log : str):
+    async def listener_events           (self, log : str):
         if 'INFO]: ' in log:
             if any([f'<{player}>' in log for player in self.server.online_players]):
                 player = log[log.index('<') + 1:log.index('>')]
@@ -68,6 +65,8 @@ class mdplugin():
                 await self.server.call_plugins('on_stopped')
             
             elif log.endswith('ThreadedAnvilChunkStorage: All dimensions are saved'):
+                self.server.bots = []
+                self.server.online_players = []
                 await self.server.call_plugins('on_already_stopped')
 
         elif 'ERROR]: ' in log:
@@ -75,4 +74,4 @@ class mdplugin():
                 if self.config['omit crash report relay']:
                     self.server.stop_relaying(self.server.log_format('Crash detected. Finalizing relay...'))
                 
-                await self.server.call_plugins('on_crash')
+                await self.server.call_plugins('on_crash')   
