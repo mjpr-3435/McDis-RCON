@@ -41,7 +41,7 @@ from datetime import datetime
 from typing import Union, Callable
 from pathlib import Path
 
-mcdis_vers          = "0.4.2a"
+mcdis_vers          = "0.4.3a"
 package_path        = os.path.dirname(__file__)
 embed_colour        = 0x2f3136
 blank_space         = '‎ '
