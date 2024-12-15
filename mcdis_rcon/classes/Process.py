@@ -247,7 +247,7 @@ class Process():
         elif message.content.lower() == 'stop':
             self.stop()
 
-        elif message.content.lower() == 'reload mdplugins':
+        elif message.content.lower() == 'mdreload':
             self.load_plugins(reload = True)
 
         else:

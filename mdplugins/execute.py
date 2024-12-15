@@ -48,7 +48,7 @@ class mdplugin():
             
             self.server.send_response(player, "Comandos disponibles:")
             for i in range(len(commands)):
-                text = f'{i} • {commands[i]}'
+                text = f'{i + 1} • {commands[i]}'
                 path = os.path.join(self.server.path_commands, f'{commands[i]}.yml')
 
                 data = read_yml(path)
