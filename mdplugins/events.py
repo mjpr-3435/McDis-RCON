@@ -16,6 +16,7 @@ class mdplugin():
         self.config = json_to_dict(path_file)
 
         self.server.admins = self.config['Admins']
+        if not hasattr(server, 'stop_signal_received'): self.server.stop_signal_received = False
         if not hasattr(server, 'bots'): self.server.bots = []
         if not hasattr(server, 'online_players'): self.server.online_players = []
 
@@ -62,11 +63,13 @@ class mdplugin():
                 await self.server.call_plugins('on_already_started')
                 
             elif log.endswith('Stopping server'):
+                self.server.stop_signal_received = True
                 await self.server.call_plugins('on_stopped')
             
-            elif log.endswith('ThreadedAnvilChunkStorage: All dimensions are saved'):
+            elif log.endswith('ThreadedAnvilChunkStorage: All dimensions are saved') and self.server.stop_signal_received:
                 self.server.bots = []
                 self.server.online_players = []
+                self.server.stop_signal_received = False
                 await self.server.call_plugins('on_already_stopped')
 
         elif 'ERROR]: ' in log:
