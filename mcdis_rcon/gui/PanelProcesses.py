@@ -72,7 +72,7 @@ class ProcessesView(discord.ui.View):
         
         await interaction.followup.edit_message(
             message_id = interaction.message.id,
-            embed = ProcessesEmbed(self.client, self.path, self.processes, self.page),
+            embed = ProcessesEmbed(self.client, self.processes, self.path, self.page),
             view = self
         )
         
