@@ -28,10 +28,6 @@ class Process():
         
         dirs = [self.path_files, self.path_bkps, self.path_plugins, self.path_commands, self.path_plugins_configs]
         for dir in dirs: os.makedirs(dir, exist_ok = True)
-    
-    @abstractmethod
-    def _find_real_process(self):
-        pass
 
     ###         Manager Logic       ###
 
@@ -168,6 +164,21 @@ class Process():
         self.start()
 
     ###         Resources           ###
+    
+    def _find_real_process(self):
+        abs_file_path = os.path.abspath(self.path_files)
+        
+        for process in psutil.process_iter():
+            try:
+                javas = ['java', 'java.exe']
+                cond_1 = process.name() in javas
+                cond_2 = os.path.commonpath([abs_file_path, process.cwd()]) == abs_file_path
+                cond_3 = any([java in process.cmdline()[0] for java in javas])
+                
+                if cond_1 and cond_2 and cond_3:
+                    self.real_process = process
+                    break
+            except: pass
 
     def         ram_usage               (self) -> str:
         if not self.is_running(): 
