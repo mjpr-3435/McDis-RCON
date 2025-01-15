@@ -22,11 +22,12 @@ class Server(Process):
 
     def         show_command        (self, target : str, command : str, description : str):
         signs = [self.prefix, '<', '>', ':', '|']
-        command = f'{self.prefix}{command}'
+        mrkd_command = f'{self.prefix}{command}'
         
         for sign in signs: 
-            command = command.replace(sign, f'§6{sign}§f')
+            mrkd_command = mrkd_command.replace(sign, f'§6{sign}§f')
         
         description = '  ↳ ' + description
 
-        self.send_response(target, [command, description])
+        self.execute(f'tellraw {target} {hover_and_suggest(mrkd_command, suggest = f"{self.prefix}{command}", hover = mrkd_command)}')
+        self.send_response(target, description)
