@@ -55,7 +55,7 @@ class mdplugin():
                 keys = list(data.keys())
                 
                 placeholder = 'Acciones: ' + ', '.join(keys[1:])
-                ext = extras([hover_and_suggest(text, suggest = self.server.prefix + commands[i] + ' ', hoover = placeholder)])
+                ext = extras([hover_and_suggest(text, suggest = self.server.prefix + commands[i] + ' ', hover = placeholder)])
                 self.server.execute(f'tellraw {player} {ext}')
 
         elif any(message.startswith(self.server.prefix + command.replace(' ', '').lower()) for command in commands):
@@ -74,7 +74,7 @@ class mdplugin():
                 for i in range(1, len(keys)):
                     commands = ', '.join(data[keys[i]])
                     suggestion = self.server.prefix + command + ' ' + keys[i]
-                    ext = extras([hover_and_suggest(f'{i} • {keys[i]}', suggest =  suggestion, hoover = commands)])
+                    ext = extras([hover_and_suggest(f'{i} • {keys[i]}', suggest =  suggestion, hover = commands)])
                     self.server.execute(f'tellraw {player} {ext}')
                 return
             

@@ -16,6 +16,6 @@ class mdplugin():
             for server in self.server.client.servers:
                 if hasattr(server, 'online_players') and hasattr(server, 'bots'):
                     players = ", ".join(self.server.online_players + self.server.bots)
-                    msgs.append(hover(f'[{self.server.name}] ', color = 'gray', hoover = players))
+                    msgs.append(hover(f'[{self.server.name}] ', color = 'gray', hover = players))
 
             self.server.execute(f'tellraw {player} {extras(msgs, text = "Jugadores: ")}')

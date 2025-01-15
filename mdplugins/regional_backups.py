@@ -214,9 +214,9 @@ class mdplugin():
             date = datetime.fromtimestamp(os.path.getctime(os.path.join(reg_bkps_dir, zip))).strftime("%Y-%m-%d %H:%M:%S")
 
             dummy = [
-            hover_and_suggest('[>] ' , color = 'green', suggest = f'!!rb load-bkp {zip.removesuffix(".zip")}', hoover = 'Load reg-bkp'),
-            hover_and_suggest('[⥁] ', color = 'aqua', suggest = f'!!rb mk-bkp {zip.removesuffix(".zip")}', hoover = 'Remake reg-bkp'),
-            hover_and_suggest('[x] ' , color = 'red', suggest = f'!!rb del-bkp {zip.removesuffix(".zip")}', hoover = 'Del reg-bkp'),
+            hover_and_suggest('[>] ' , color = 'green', suggest = f'!!rb load-bkp {zip.removesuffix(".zip")}', hover = 'Load reg-bkp'),
+            hover_and_suggest('[⥁] ', color = 'aqua', suggest = f'!!rb mk-bkp {zip.removesuffix(".zip")}', hover = 'Remake reg-bkp'),
+            hover_and_suggest('[x] ' , color = 'red', suggest = f'!!rb del-bkp {zip.removesuffix(".zip")}', hover = 'Del reg-bkp'),
             f'{{"text":"{zip} [{date}]"}}'
             ]
 

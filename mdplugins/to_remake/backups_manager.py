@@ -94,8 +94,8 @@ def show_bkps(server: Server, player : str):
         date = datetime.fromtimestamp(os.path.getctime(os.path.join(server.path_bkps, zip))).strftime("%Y-%m-%d %H:%M:%S")
 
         dummy = [
-        hover_and_suggest('[>] ' , color = 'green', suggest = f'!!load-bkp {zip.removesuffix(".zip")}', hoover = 'Load backup'),
-        hover_and_suggest('[x] ' , color = 'red', suggest = f'!!del-bkp {zip.removesuffix(".zip")}', hoover = 'Del backup'),
+        hover_and_suggest('[>] ' , color = 'green', suggest = f'!!load-bkp {zip.removesuffix(".zip")}', hover = 'Load backup'),
+        hover_and_suggest('[x] ' , color = 'red', suggest = f'!!del-bkp {zip.removesuffix(".zip")}', hover = 'Del backup'),
         f'{{"text":"{zip} [{date}]"}}'
         ]
 
