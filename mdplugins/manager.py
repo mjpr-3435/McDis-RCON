@@ -1,16 +1,29 @@
-import os
-
 from mcdis_rcon.classes import Server
+from mcdis_rcon.utils import hover, extras
 
 class mdplugin():
     def __init__(self, server: Server):
         self.server = server
 
     async def on_player_command(self, player: str, message: str):
+        if self.server.is_command(message, 'mdhelp'):
+            self.server.show_command(player, 
+                            "online", 
+                            "Muestra los jugadores en los servidores.")
+            
+        elif self.server.is_command(message, 'online'):
+            msgs = []
+            for server in self.server.client.servers:
+                if hasattr(server, 'online_players') and hasattr(server, 'bots'):
+                    players = ", ".join(server.online_players + server.bots)
+                    msgs.append(hover(f'[{server.name}] ', color = 'gray', hover = players))
+
+            self.server.execute(f'tellraw {player} {extras(msgs, text = "Jugadores: ")}')
+
         if not player in self.server.admins:
             return
         
-        elif self.server.is_command(message, 'help'):
+        elif self.server.is_command(message, 'mdhelp'):
             self.server.show_command(player, f"pm help", "Muestra los comandos del processes manager.")
 
         elif self.server.is_command(message, 'pm help'):
@@ -70,7 +83,7 @@ class mdplugin():
             if not arg:
                 self.server.send_response(player, "✔ mdplugins recargados. Importados:")
                 self.server.load_plugins(reload = True)
-                self.server.send_response(player, [f'   • {os.path.basename(str(x.__file__))}' for x in self.server.plugins])
+                self.server.send_response(player, [f'   • {x}' for x in self.server.plugins])
             else:
                 if arg in [ x.name.lower() for x in self.server.client.processes]:
                     process = next(filter(lambda x: arg == x.name.lower(), self.server.client.processes), None)
@@ -81,7 +94,7 @@ class mdplugin():
                     
                     self.server.send_response(player, f"[{process.name}] mdplugins recargados.")
                     process.load_plugins(reload = True)
-                    process.send_response(player, [f'   • {os.path.basename(str(x.__file__))}' for x in self.server.plugins])
+                    process.send_response(player, [f'   • {x}' for x in self.server.plugins])
                 else:
                     self.server.send_response(player, "✖ No hay un proceso con ese nombre.")
 

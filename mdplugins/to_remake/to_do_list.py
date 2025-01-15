@@ -24,7 +24,7 @@ async def load(server : Server):
         channel_id = 0
 
 async def on_player_command(server : Server, player: str, message: str):
-    if server.is_command(message, 'help'):
+    if server.is_command(message, 'mdhelp'):
         server.show_command(player, "to do list", "Solicita tu lista de tareas personales.")
         server.show_command(player, "add task <tarea>", "Añade una tarea.")
         server.show_command(player, "del task <index>", "Elimina la tarea de índice <index>.")

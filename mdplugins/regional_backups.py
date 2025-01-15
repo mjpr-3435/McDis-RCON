@@ -27,7 +27,7 @@ class mdplugin():
         if not player in self.server.admins:
             return
         
-        elif self.server.is_command(message, 'help'):
+        elif self.server.is_command(message, 'mdhelp'):
             self.server.show_command(player, 'rb help'           , 'Muestra los comandos del regional backup.')
 
         elif self.server.is_command(message, 'rb help'):

@@ -2,7 +2,7 @@ import re
 import os
 
 from mcdis_rcon.classes import Server
-from mcdis_rcon.utils import dict_to_json, json_to_dict
+from mcdis_rcon.utils import dict_to_json, json_to_dict, write_in_file, read_file
 
 class mdplugin():
     def __init__    (self, server: Server):
@@ -20,7 +20,7 @@ class mdplugin():
         if not hasattr(server, 'bots'): self.server.bots = []
         if not hasattr(server, 'online_players'): self.server.online_players = []
 
-    async def listener_events           (self, log : str):
+    async def   listener_events         (self, log : str):
         if 'INFO]: ' in log:
             if any([f'<{player}>' in log for player in self.server.online_players]):
                 player = log[log.index('<') + 1:log.index('>')]

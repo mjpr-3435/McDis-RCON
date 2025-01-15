@@ -165,7 +165,7 @@ class Process():
 
     ###         Resources           ###
     
-    def _find_real_process(self):
+    def         _find_real_process(self):
         abs_file_path = os.path.abspath(self.path_files)
         
         for process in psutil.process_iter():

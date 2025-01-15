@@ -36,7 +36,7 @@ class mdplugin():
         commands.sort()
         message = message.replace(' ', '').lower()
 
-        if self.server.is_command(message, 'help'):
+        if self.server.is_command(message, 'mdhelp'):
             self.server.show_command(player, 
                             "commands", 
                             "Lista de comandos predifinidos del servidor.")

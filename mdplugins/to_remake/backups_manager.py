@@ -1,13 +1,9 @@
 import asyncio
 import threading
-import zipfile
-import json
-import time
 import os
-import re
 
 from datetime import datetime
-from mcdis_rcon.utils import hover_and_suggest, extras, json_to_dict, dict_to_json
+from mcdis_rcon.utils import hover_and_suggest, extras
 from mcdis_rcon.classes import Server
 
 async def on_player_command(server: Server, player: str, message: str):
@@ -16,7 +12,7 @@ async def on_player_command(server: Server, player: str, message: str):
     if not player in server.admins:
         return
     
-    elif server.is_command(message, 'help'):
+    elif server.is_command(message, 'mdhelp'):
         server.show_command(player, 'gb help'          , 'Muestra los comandos del backups manager.')
 
     elif server.is_command(message, 'gb help'):
