@@ -33,11 +33,11 @@ def extras(extras: list, *, text: str = '', color: str = 'gray'):
     extras = ', '.join(extras)
     return f'{{"text": "{text}", "color" : "{color}", "extra": [{extras}]}}' 
 
-def hover(text: str, *, color: str = 'gray', hoover: str):
-    return f'{{"text" : "{text}", "color" : "{color}", "hoverEvent" : {{"action": "show_text", "value": "{hoover}"}}}}'
+def hover(text: str, *, color: str = 'gray', hover: str):
+    return f'{{"text" : "{text}", "color" : "{color}", "hoverEvent" : {{"action": "show_text", "value": "{hover}"}}}}'
 
-def hover_and_suggest(text: str, *, color: str = 'gray', suggest: str, hoover: str):
-    return f'{{"text" : "{text}", "color" : "{color}", "clickEvent": {{"action": "suggest_command" , "value": "{suggest}"}}, "hoverEvent" : {{"action": "show_text", "value": "{hoover}"}}}}'
+def hover_and_suggest(text: str, *, color: str = 'gray', suggest: str, hover: str):
+    return f'{{"text" : "{text}", "color" : "{color}", "clickEvent": {{"action": "suggest_command" , "value": "{suggest}"}}, "hoverEvent" : {{"action": "show_text", "value": "{hover}"}}}}'
 
-def hover_and_run(text: str, *, color: str = 'gray', command: str, hoover: str):
-    return f'{{"text" : "{text}", "color" : "{color}", "clickEvent": {{"action": "run_command" , "value": "{command}"}}, "hoverEvent" : {{"action": "show_text", "value": "{hoover}"}}}}'
+def hover_and_run(text: str, *, color: str = 'gray', command: str, hover: str):
+    return f'{{"text" : "{text}", "color" : "{color}", "clickEvent": {{"action": "run_command" , "value": "{command}"}}, "hoverEvent" : {{"action": "show_text", "value": "{hover}"}}}}'
