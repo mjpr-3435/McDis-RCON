@@ -28,7 +28,7 @@ class mdplugin():
 
                 await self.server.call_plugins('on_player_message', (player, message))
                 
-                if not message.startswith(f'{self.server.prefix}'): return
+                if not message.startswith(self.server.prefix): return
                 
                 await self.server.call_plugins('on_player_command', (player, message))
 
