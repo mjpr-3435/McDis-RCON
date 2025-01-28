@@ -4,7 +4,7 @@ import asyncio
 from datetime import datetime
 
 from mcdis_rcon.classes import Server
-from mcdis_rcon.utils import hover_and_run, extras, read_file, write_in_file, thread, hover_and_suggest
+from mcdis_rcon.utils import hover_and_run, extras, read_file, write_in_file, thread
 
 class mdplugin():
     def __init__(self, server: Server):

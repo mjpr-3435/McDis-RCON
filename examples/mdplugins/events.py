@@ -2,7 +2,7 @@ import re
 import os
 
 from mcdis_rcon.classes import Server
-from mcdis_rcon.utils import dict_to_json, json_to_dict, write_in_file, read_file
+from mcdis_rcon.utils import dict_to_json, json_to_dict
 
 class mdplugin():
     def __init__    (self, server: Server):
