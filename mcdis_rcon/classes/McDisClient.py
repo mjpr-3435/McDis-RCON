@@ -24,9 +24,10 @@ class McDisClient(commands.Bot):
         self.servers    : list[Server]                          = []
         self.uploader                                           = Uploader()
         self.is_running                                         = False
+        self.display_panel                                      = False
 
-        os.makedirs(self.path_backups       , exist_ok = True)
-        os.makedirs(self.path_addons        , exist_ok = True)
+        os.makedirs(self.path_backups        , exist_ok = True)
+        os.makedirs(self.path_addons         , exist_ok = True)
         os.makedirs(self.path_addons_configs , exist_ok = True)
         
         self._load_config()
@@ -299,12 +300,141 @@ class McDisClient(commands.Bot):
         signal.signal(signal.SIGINT, signal_handler)
         self.is_running = True
 
+        await execute_and_wait(self.console_listener)
+
+    def         console_listener        (self):
+        
+        while True:
+            command = input('\n>>')
+            asyncio.run_coroutine_threadsafe(self.console_interface(command), self.loop)
+            time.sleep(3)
+
+    async def   console_interface       (self, command: str):
+
+        if   self.is_command(command.lower(), 'start-all'      , console = True):
+            print(self._('✔ Initializing processes.'))
+
+            for process in self.processes: 
+                process.start()
+                
+        elif self.is_command(command.lower(), 'stop-all'       , console = True):
+            print(self._('✔ Stopping processes.'))
+
+            for process in self.processes: 
+                process.stop()
+                            
+        elif self.is_command(command.lower(), 'kill-all'       , console = True):
+            print(self._('✔ Forcibly stopped processes.'))
+
+            for process in self.processes: 
+                process.kill()
+                            
+        elif self.is_command(command.lower(), 'restart-all'    , console = True):
+            print(self._('✔ Restarting processes...'))
+
+            for process in self.processes: 
+                await process.restart()
+                            
+        elif self.is_command(command.lower(), 'mdreload-all'   , console = True):
+            print(self._('✔ Reloading mdplugins...'))
+
+            for process in self.processes: 
+                process.load_plugins(reload = True)
+                            
+        elif self.is_command(command.lower(), 'start'          , console = True):
+            process_name = command.removeprefix('start').lower().strip()
+            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+
+            if not process:
+                print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                        .format(self.prefix, 'start', self.prefix, 'start'))
+
+            elif process.is_running():
+                print(self._('✖ `[{}]`: The process was already open.').format(process.name).replace('`',''))
+            
+            else:
+                print(self._('✔ `[{}]`: Initializing process.').format(process.name).replace('`',''))
+                process.start()
+
+        elif self.is_command(command.lower(), 'stop'           , console = True):
+            process_name = command.removeprefix('stop').lower().strip()
+            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+
+            if not process:
+                print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                        .format(self.prefix, 'stop', self.prefix, 'stop'))
+
+            elif not process.is_running():
+                print(self._('✖ `[{}]`: The process was not open.').format(process.name).replace('`',''))
+            
+            else:
+                print(self._('✔ `[{}]`: Stopping process.').format(process.name).replace('`',''))
+                process.stop()
+        
+        elif self.is_command(command.lower(), 'kill'           , console = True):
+            process_name = command.removeprefix('kill').lower().strip()
+            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+
+            await command.delete()
+            
+            if not process:
+                print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                        .format(self.prefix, 'kill', self.prefix, 'kill'))
+
+            elif not process.is_running():
+                print(self._('✖ `[{}]`: The process was not open.').format(process.name).replace('`',''))
+            
+            else:
+                print(self._('✔ `[{}]`: Forcibly stopped process.').format(process.name).replace('`',''))
+                process.kill()
+
+        elif self.is_command(command.lower(), 'restart'        , console = True):
+            process_name = command.removeprefix('restart').lower().strip()
+            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+            
+            if not process:
+                print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                        .format(self.prefix, 'restart', self.prefix, 'restart'))
+
+            elif not process.is_running():
+                print(self._('✖ `[{}]`: The process was not open.').format(process.name).replace('`',''))
+            
+            else:
+                print(self._('✔ `[{}]`: Restarting process...').format(process.name).replace('`',''))
+                await process.restart()
+
+        elif self.is_command(command.lower(), 'mdreload'       , console = True):
+            process_name = command.removeprefix('mdreload').lower().strip()
+            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+            
+            if not process:
+                print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
+                        .format(self.prefix, 'mdreload', self.prefix, 'mdreload'))
+
+            elif not process.is_running():
+                print(self._('✖ `[{}]`: The process was not open.').format(process.name).replace('`',''))
+            
+            else:
+                print(self._('✔ `[{}]`: Reloading mdplugins...').format(process.name).replace('`',''))
+                process.load_plugins(reload = True)
+
+        elif self.is_command(command.lower(), 'status'       , console = True) and not self.display_panel:
+            self.display_panel = True
+
+            await self._load_banner(loop = False, view = False)
+        
+        elif self.is_command(command.lower(), 'exit'         , console = True):
+            threading.Thread(target = self.on_stop).start()
+
+        else:
+            print(self._('✖ Invalid command `{}`.').format(command))
+        
     async def   panel_interface         (self, message: discord.Message):
         if message.author.bot: 
             return
 
         if message.channel.id == self.panel.id:
-            if   self.is_command(message.content.lower(), f'start-all'):
+            if   self.is_command(message.content.lower(), 'start-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -314,7 +444,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     process.start()
                     
-            elif self.is_command(message.content.lower(), f'stop-all'):
+            elif self.is_command(message.content.lower(), 'stop-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -324,7 +454,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     process.stop()
                                 
-            elif self.is_command(message.content.lower(), f'kill-all'):
+            elif self.is_command(message.content.lower(), 'kill-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -334,7 +464,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     process.kill()
                                 
-            elif self.is_command(message.content.lower(), f'restart-all'):
+            elif self.is_command(message.content.lower(), 'restart-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -344,7 +474,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     await process.restart()
                                 
-            elif self.is_command(message.content.lower(), f'mdreload-all'):
+            elif self.is_command(message.content.lower(), 'mdreload-all'):
                 await message.delete()
 
                 response = await message.channel.send(
@@ -354,7 +484,7 @@ class McDisClient(commands.Bot):
                 for process in self.processes: 
                     process.load_plugins(reload = True)
                                 
-            elif self.is_command(message.content.lower(), f'start'):
+            elif self.is_command(message.content.lower(), 'start'):
                 process_name = message.content.removeprefix(f'{ self.prefix}start').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -377,7 +507,7 @@ class McDisClient(commands.Bot):
                     await response.delete(delay = 2)
                     process.start()
 
-            elif self.is_command(message.content.lower(), f'stop'):
+            elif self.is_command(message.content.lower(), 'stop'):
                 process_name = message.content.removeprefix(f'{ self.prefix}stop').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -400,7 +530,7 @@ class McDisClient(commands.Bot):
                     await response.delete(delay = 2)
                     process.stop()
             
-            elif self.is_command(message.content.lower(), f'kill'):
+            elif self.is_command(message.content.lower(), 'kill'):
                 process_name = message.content.removeprefix(f'{ self.prefix}kill').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -423,7 +553,7 @@ class McDisClient(commands.Bot):
                     await response.delete(delay = 2)
                     process.kill()
 
-            elif self.is_command(message.content.lower(), f'restart'):
+            elif self.is_command(message.content.lower(), 'restart'):
                 process_name = message.content.removeprefix(f'{ self.prefix}restart').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -446,7 +576,7 @@ class McDisClient(commands.Bot):
                     await response.delete(delay = 2)
                     await process.restart()
 
-            elif self.is_command(message.content.lower(), f'mdreload'):
+            elif self.is_command(message.content.lower(), 'mdreload'):
                 process_name = message.content.removeprefix(f'{ self.prefix}mdreload').lower().strip()
                 process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
@@ -605,9 +735,9 @@ class McDisClient(commands.Bot):
     
     ###         Utils               ###
     
-    def         is_command              (self, message: str, command: str):
-            dummy = message + ' '
-            return dummy.startswith(f'{self.prefix}{command} ')
+    def         is_command              (self, message: str, command: str, console: bool = False):
+        dummy = message + ' '
+        return dummy.startswith(f'{self.prefix}{command} ') if not console else dummy.startswith(command) 
         
     def         is_valid_mcdis_path     (self, path: str, *, check_if_file: bool = False, check_if_dir: bool = False):
         real_path = un_mcdis_path(path)
