@@ -398,8 +398,10 @@ class Process():
 
         await remote_console.send(mrkd)
     
-    async def   send_to_console         (self, message : str):
+    async def   send_to_console         (self, message : str) -> discord.Message:
         mrkd = f'```md\n{truncate(message, 1990)}\n```'
         remote_console = await thread(f'Console {self.name}', self.client.panel)
 
-        await remote_console.send(mrkd)
+        discord_message = await remote_console.send(mrkd)
+
+        return discord_message
