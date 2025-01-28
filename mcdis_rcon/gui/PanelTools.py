@@ -83,9 +83,10 @@ class ReloadButton      (discord.ui.Button):
         self.view: ToolsView
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(thinking=True, ephemeral=True)
         await self.view.client._load_addons(reload = True)
         addons = [addon for addon in self.view.client.addons.keys()]
         extra = '\n • '.join([''] + addons) if addons else self.view.client._('No addons were found.')
         msg = self.view.client._('✔ Addons reloaded: ') + extra
         
-        await interaction.response.send_message(msg , ephemeral = True)
+        await interaction.followup.send(msg)

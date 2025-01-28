@@ -30,8 +30,8 @@ msgstr  "   • Importando addons:"
 msgid   "     -> Imported {}"
 msgstr  "     -> Se importó {}"
 
-msgid   "     -> Unable to import {}\n{}"
-msgstr  "     -> No se pudo importar {}\n{}"
+msgid   "     -> Unable to import {}"
+msgstr  "     -> No se pudo importar {}"
 
 msgid   "   • Loaded Discord events"
 msgstr  "   • Eventos de Discord cargados"

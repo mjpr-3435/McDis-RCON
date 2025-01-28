@@ -123,7 +123,7 @@ class Process():
                         mod = importlib.util.module_from_spec(spec)
                         spec.loader.exec_module(mod)
                         
-                    elif plugin.endswith('.mcdis'):
+                    elif plugin.endswith('.mcdis') and False:
                         plugin_path = os.path.join(self.path_plugins, plugin)
                         sys.path.insert(0, plugin_path)
                         

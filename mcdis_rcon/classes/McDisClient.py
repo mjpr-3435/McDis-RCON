@@ -184,31 +184,53 @@ class McDisClient(commands.Bot):
         await thread('Console Flask', self.panel, public = True)
 
     async def   _load_addons           (self, *, reload: bool = False):
-        if reload: self.unload_addons()
+        if reload: await self.unload_addons()
         
         files_in_addons_dir = os.listdir(self.path_addons)
         
-        addons = [file.removesuffix('.mcdis') for file in files_in_addons_dir if file.endswith('.mcdis')]
+        addons = [file for file in files_in_addons_dir
+                  if file.endswith('.mcdis') or os.path.exists(os.path.join(self.path_addons, file, '__init__.py'))]
+
         if not addons: return
 
-        print(self._('   • Importing addons:'))
+        if not reload: print(self._('   • Importing addons:'))
 
         for addon in addons:
-            addon_path = os.path.join(self.path_addons, addon + '.mcdis')
-            sys.path.insert(0, addon_path)
-            
             try:
-                mod = importlib.import_module(f'mdaddon.__init__')
-                addon_instance = mod.mdaddon(self)
-                self.addons[addon] = addon_instance
+                if os.path.isdir(os.path.join(self.path_addons, addon)):
+                    addon_name = addon
 
-                print(self._('     -> Imported {}').format(addon))
+                    module_path = os.path.join(self.path_addons, addon, '__init__.py')
+                    spec = importlib.util.spec_from_file_location(addon, module_path)
+                    mod = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(mod)
+                    
+                elif addon.endswith('.mcdis') and False:
+                    addon_name = addon.removesuffix('.mcdis')
+
+                    addon_path = os.path.join(self.path_addons, addon)
+                    sys.path.insert(0, addon_path)
+
+                    mod = importlib.import_module(f'mdaddon.__init__')
+
+                    sys.path.pop(0)
+
+                addon_instance = mod.mdaddon(self)
+                self.addons[addon_name] = addon_instance
+
+                if not reload: print(self._('     -> Imported {}').format(addon))
             except:
-                print(self._('     -> Unable to import {}\n{}').format(addon, traceback.format_exc()))
-            
-            self.unload_modules_from(addon_path)
-            sys.path.pop(0)
-                 
+                if not reload: print(self._('     -> Unable to import {}').format(addon))
+
+                await self.error_report(
+                            title = f'Unable to import plugin {addon}',
+                            error = traceback.format_exc(),
+                            should_print = False
+                        )
+    
+        await self.tree.sync()
+        if not reload: print(self._('   • Client commands synchronized to Discord'))
+
     async def   _load_behaviours       (self):
         behaviours_dir = os.path.join(package_path, 'behaviours')
 
@@ -282,8 +304,6 @@ class McDisClient(commands.Bot):
             await self._load_addons()
             await self._load_behaviours()
             print(self._('   • Loaded Discord events'))
-            await self.tree.sync()
-            print(self._('   • Client commands synchronized to Discord'))
             self.flask = FlaskManager(self)
 
             asyncio.create_task(self._load_banner())
@@ -422,7 +442,7 @@ class McDisClient(commands.Bot):
             self.display_panel = True
 
             await self._load_banner(loop = False, view = False)
-        
+
         elif self.is_command(command.lower(), 'exit'         , console = True):
             threading.Thread(target = self.on_stop).start()
 
@@ -773,12 +793,12 @@ class McDisClient(commands.Bot):
                     error=traceback.format_exc()
                 )
 
-    async def   error_report            (self, *, title: str, error: str):
+    async def   error_report            (self, *, title: str, error: str, should_print: bool = True):
         error_log = f'- Error Report [{title}]:\n\n{error}'.replace('`','’')
         mrkd_error = f'```diff\n{truncate(error_log, 1980)}\n```'
         error_reports = await thread('Error Reports', self.panel)
         error_report = await error_reports.send(mrkd_error)
-        print(f'\n{error_log}')
+        if should_print: print(f'\n{error_log}')
         
         return error_report.jump_url
 
@@ -807,15 +827,3 @@ class McDisClient(commands.Bot):
                 addon.unload()
 
         self.addons = {}
-    
-    def         unload_modules_from     (self, path):
-            abs_path = os.path.abspath(path)
-            
-            modules_to_remove = [
-                name for name, module in sys.modules.items()
-                if hasattr(module, '__file__') and module.__file__ and 
-                os.path.abspath(module.__file__).startswith(abs_path)
-            ]
-            
-            for module_name in modules_to_remove:
-                del sys.modules[module_name]
