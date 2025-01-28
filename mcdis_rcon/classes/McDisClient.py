@@ -184,7 +184,7 @@ class McDisClient(commands.Bot):
         await thread('Console Flask', self.panel, public = True)
 
     async def   _load_addons           (self, *, reload: bool = False):
-        if reload: await self.unload_addons()
+        if reload: self.unload_addons()
         
         files_in_addons_dir = os.listdir(self.path_addons)
         
@@ -227,9 +227,6 @@ class McDisClient(commands.Bot):
                             error = traceback.format_exc(),
                             should_print = False
                         )
-    
-        await self.tree.sync()
-        if not reload: print(self._('   • Client commands synchronized to Discord'))
 
     async def   _load_behaviours       (self):
         behaviours_dir = os.path.join(package_path, 'behaviours')

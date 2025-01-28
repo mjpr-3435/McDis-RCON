@@ -9,7 +9,6 @@ from mcdis_rcon.classes import Server
 
 class mdplugin():
     def __init__(self, server: Server):
-        self.server = server
         self.server         = server
         self.targets        = []
         self.waiting        = {}
@@ -66,7 +65,7 @@ class mdplugin():
                 while self.server.is_running():
                     await asyncio.sleep(0.1)
 
-                await self.server.send_to_console(f'Unpacking reg-bkp {zip}...')
+                discord_message = await self.server.send_to_console(f'[reg-bkps]: Unpacking reg-bkp {zip}...')
 
                 source = os.path.join(self.server.path_plugins, 'reg-bkps', zip)
                 destination = os.path.join(self.server.path_files, 'server', 'world')
@@ -75,7 +74,7 @@ class mdplugin():
                     for file in zip_ref.namelist():
                         zip_ref.extract(file, destination)
 
-                await self.server.send_to_console(f'Reg-bkp {zip} unpacked.')
+                await discord_message.edit(content = f'[reg-bkps]: ✔ Reg-bkp {zip} unpacked.')
 
                 self.server.start()
 
@@ -139,11 +138,11 @@ class mdplugin():
                         entities, region, poi = os.path.join('DIM1','entities'), os.path.join('DIM1','region'), os.path.join('DIM1','poi')
                     
                     for reg in self.files_to_zip[player][dim]:
-                        file_path = os.path.join(self.server.path_files, 'server', 'world', region, reg)
+                        file_path = os.path.join(self.server.path_files, 'world', region, reg)
                         zipf.write(file_path, os.path.join(region, reg))
-                        file_path = os.path.join(self.server.path_files, 'server', 'world', poi, reg)
+                        file_path = os.path.join(self.server.path_files, 'world', poi, reg)
                         zipf.write(file_path, os.path.join(poi, reg))
-                        file_path = os.path.join(self.server.path_files, 'server', 'world', entities, reg)
+                        file_path = os.path.join(self.server.path_files, 'world', entities, reg)
                         zipf.write(file_path, os.path.join(entities, reg))
 
             self.server.execute('save-on')

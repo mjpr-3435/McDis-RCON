@@ -1,33 +1,29 @@
 import os
-import importlib.util
+import asyncio
+import sys
 
 from mcdis_rcon.classes import McDisClient
 
 class mdaddon():
     def __init__(self, client: McDisClient):
         self.client = client
+        
+        asyncio.create_task(self.load())
 
     async def load(self):
-        cogs = [os.path.join(self.client.path_addons, 'BotExtensions', dir) for dir in ['Commands', 'ContextMenus']]
+        addon_path = os.path.dirname(__file__)
+
+        sys.path.insert(0, os.path.dirname(__file__))
+
+        cogs = ['Commands', 'ContextMenus']
 
         for cog in cogs:
-            scripts = [file for file in os.listdir(cog) if file.endswith('.py')]
+            cog_path = os.path.join(addon_path, cog)
+            scripts = [file.removesuffix('.py') for file in os.listdir(cog_path) if file.endswith('.py')]
 
             for script in scripts:
-                module_path = os.path.join(cog, script)
-                
-                spec = importlib.util.spec_from_file_location(script, module_path)
-                mod = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(mod)
+                await self.client.load_extension(f'{cog}.{script}')
 
-                await self.client.load_extension(mod)
-
-    """spec = importlib.util.find_spec(module_path)
-    if spec is None:
-        raise ImportError(f"No se pudo encontrar el módulo: {module_path}")
-    
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    await self.client.load_extension(module_path)"""
-
+        sys.path.pop(0)
         
+        await self.client.tree.sync()

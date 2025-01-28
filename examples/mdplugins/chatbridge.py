@@ -9,12 +9,7 @@ class mdplugin():
     def __init__(self, server: Server):
         self.server                     = server
         self.webhook : discord.Webhook  = None
-        
-        dict = {'Webhook URL' : ''}
-
-        path_file = os.path.join(self.server.path_plugins_configs,'chatbridge.json')
-        if not os.path.exists(path_file): dict_to_json(path_file, dict)
-        self.config = json_to_dict(path_file)
+        self.config                     = {'Webhook URL' : ''}
 
         asyncio.create_task(self.load())
 

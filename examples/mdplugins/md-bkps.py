@@ -1,5 +1,6 @@
 import asyncio
 import threading
+import zipfile
 import os
 
 from datetime import datetime
@@ -17,9 +18,9 @@ class mdplugin():
             return
         
         elif self.server.is_command(message, 'mdhelp'):
-            self.server.show_command(player, 'gb help'          , 'Muestra los comandos del backup manager.')
+            self.server.show_command(player, 'bk help'          , 'Muestra los comandos del backup manager.')
 
-        elif self.server.is_command(message, 'gb help'):
+        elif self.server.is_command(message, 'bk help'):
             self.server.show_command(player, 'bkps'             , 'Lista los backups del servidor.')
             self.server.show_command(player, 'mk-bkp'           , 'Crea un backup con la lógica de McDis.')
             self.server.show_command(player, 'del-bkp <name>'   , 'Elimina el backup <name>.zip.')
@@ -31,15 +32,37 @@ class mdplugin():
             while self.server.is_running():
                 await asyncio.sleep(0.1)
 
-            await self.server.send_to_console('Creating backup...')
+            discord_message = await self.server.send_to_console('Creating backup...')
 
-            task = threading.Thread(target = self.server.make_bkp)
+            counter = [0,0]
+            reports = {'error': False}
+            
+            make_bkp = self.server.client.error_wrapper(
+                error_title = f'{self.server.name}: make_bkp()',
+                reports = reports
+                )(self.server.make_bkp)
+
+            task = threading.Thread(
+                target = make_bkp, 
+                kwargs = {'counter' : counter})
             task.start()
-                
+            
             while task.is_alive():
-                await asyncio.sleep(0.5)
+                if counter[1] == 0: 
+                    await asyncio.sleep(0.1)
+                else:
+                    show = '```md\n[md-bkps]: [{}/{}] files have been compressed...\n```'\
+                        .format(counter[0], counter[1])
+                    await discord_message.edit(
+                        content = show)
+                    await asyncio.sleep(0.5)
+            
+            if reports['error']:
+                msg = '```md\n[md-bkps]: ✖ An error occurred while compressing files.\n```'
+            else:
+                msg = '```md\n[md-bkps]: ✔ The files have been successfully compressed.\n```'
 
-            await self.server.send_to_console('Backup created.')
+            await discord_message.edit(content = msg)
 
             self.server.start()
 
@@ -51,16 +74,39 @@ class mdplugin():
 
                 while self.server.is_running():
                     await asyncio.sleep(0.1)
-
-                await self.server.send_to_console(f'Unpacking the backup {zip}...')
-
-                task = threading.Thread(target = self.server.unpack_bkp, args = (zip,))
-                task.start()
                     
-                while task.is_alive():
-                    await asyncio.sleep(0.5)
+                discord_message = await self.server.send_to_console(f'Unpacking the backup {zip}...')
 
-                await self.server.send_to_console(f'Backup {zip} unpacked.')
+                counter = [0,0]
+                reports = {'error': False}
+                
+                unpack_bkp = self.server.client.error_wrapper(
+                    error_title = f'{self.server.name}: unpack_bkp()',
+                    reports = reports
+                    )(self.server.unpack_bkp)
+
+                task = threading.Thread(
+                    target = unpack_bkp, 
+                    args = (zip,),
+                    kwargs = {'counter' : counter})
+                task.start()
+                
+                while task.is_alive():
+                    if counter[1] == 0: 
+                        await asyncio.sleep(0.1)
+                    else:
+                        show = '```md\n[md-bkps]: [{}/{}] files have been unpacked...\n```'\
+                            .format(counter[0], counter[1])
+                        await discord_message.edit(
+                            content = show)
+                        await asyncio.sleep(0.5)
+                
+                if reports['error']:
+                    msg = '```md\n[md-bkps]: ✖ An error occurred while unpacking files.\n```'
+                else:
+                    msg = '```md\n[md-bkps]: ✔ The files have been successfully unpacked.\n```'
+
+                await discord_message.edit(content = msg)
 
                 self.server.start()
 
@@ -91,7 +137,23 @@ class mdplugin():
         self.server.send_response(player, 'Backups disponibles:')
 
         for zip in zips:
-            date = datetime.fromtimestamp(os.path.getctime(os.path.join(self.server.path_bkps, zip))).strftime("%Y-%m-%d %H:%M:%S")
+            file = os.path.join(self.server.path_bkps, zip)
+            
+            with zipfile.ZipFile(file, 'r') as zipf:
+                log_filename = 'backup_log.txt'
+
+                if log_filename in zipf.namelist():
+                    with zipf.open(log_filename) as log_file:
+                        log_content = log_file.read().decode('utf-8')
+                        
+                        lines = log_content.splitlines()
+                        for line in lines:
+                            if line.startswith('Backup created on:'):
+                                date_str = line.replace('Backup created on:', '').strip()
+                                date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
+                                break
+                else:
+                    date = "Date not found in log"
 
             dummy = [
             hover_and_suggest('[>] ' , color = 'green', suggest = f'!!load-bkp {zip.removesuffix(".zip")}', hover = 'Load backup'),

@@ -2,17 +2,12 @@ import os
 import asyncio
 
 from mcdis_rcon.classes import Server
-from mcdis_rcon.utils import extras, hover_and_suggest, json_to_dict, dict_to_json, read_yml
+from mcdis_rcon.utils import extras, hover_and_suggest, read_yml
 
 class mdplugin():
     def __init__(self, server: Server):
         self.server = server
-    
-        dict = {}
-
-        path = os.path.join(self.server.path_plugins_configs,'execute.json')
-        if not os.path.exists(path): dict_to_json(path, dict)
-        self.config = json_to_dict(path)
+        self.config = {"Mob Switch" : "Reset"}
 
     async def on_already_started    (self):
         keys = list(self.config.keys())
@@ -48,7 +43,7 @@ class mdplugin():
             
             self.server.send_response(player, "Comandos disponibles:")
             for i in range(len(commands)):
-                text = f'{i + 1} • {commands[i]}'
+                text = f'• {commands[i]}'
                 path = os.path.join(self.server.path_commands, f'{commands[i]}.yml')
 
                 data = read_yml(path)
@@ -74,7 +69,7 @@ class mdplugin():
                 for i in range(1, len(keys)):
                     commands = ', '.join(data[keys[i]])
                     suggestion = self.server.prefix + command + ' ' + keys[i]
-                    ext = extras([hover_and_suggest(f'{i} • {keys[i]}', suggest =  suggestion, hover = commands)])
+                    ext = extras([hover_and_suggest(f'• {keys[i]}', suggest =  suggestion, hover = commands)])
                     self.server.execute(f'tellraw {player} {ext}')
                 return
             

@@ -1,4 +1,3 @@
-from discord.app_commands import describe, choices, check, Choice, AppCommandThread, AppCommandChannel
 from discord.ext import commands
 import discord
 
@@ -27,7 +26,6 @@ class send_command(commands.Cog):
 
 async def setup(client: commands.Bot):
     await client.add_cog(send_command(client))
-
 
 def isAdmin(member: discord.Member) -> bool:
     return member.guild_permissions.administrator
