@@ -228,6 +228,16 @@ class Process():
 
         with zipfile.ZipFile(bkp_path, 'a') as zipf:
             zipf.writestr(log_filename, log_content)
+
+        with zipfile.ZipFile(bkp_path, 'a') as zipf:
+            if log_filename in zipf.namelist():
+                temp_zip = zipfile.ZipFile(bkp_path, 'w')
+                for item in zipf.infolist():
+                    if item.filename != log_filename:
+                        temp_zip.writestr(item.filename, zipf.read(item.filename))
+                temp_zip.close()
+            
+            zipf.writestr(log_filename, log_content)
     
     def         unpack_bkp              (self, backup,  *, counter : list = None):
         shutil.rmtree(self.path_files)
