@@ -10,7 +10,7 @@ class PanelView             (discord.ui.View):
         self.add_item(ManagerButton     (self.client))
         self.add_item(FilesButton       (self.client))
         self.add_item(ToolsButton       (self.client))
-        # self.add_item(GuideButton       (self.client))
+        self.add_item(GuideButton       (self.client))
         self.add_item(RestartButton     (self.client))
 
 class ManagerButton         (discord.ui.Button):
@@ -55,11 +55,13 @@ class GuideButton           (discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         embed = discord.Embed(
-            title = '> Credits',
+            title = f'> McDis RCON v{mcdis_vers}',
             colour = embed_colour,
             description = 
-            f'Coded by KassiuLo.\n[[Kassius\' Discord]](https://discord.gg/xB9N38HBJY)\n\n'
-            f'McDis RCON v{mcdis_vers}')
+            f'Coded by KassiuLo.\n[[Kassius\' Discord]](https://discord.gg/xB9N38HBJY)')
+        embed.set_image(url = 'https://i.imgur.com/phe4JAf.png')
+        embed.set_footer()
+        embed.url = 'https://github.com/mjpr-3435/McDis-RCON'
 
         await interaction.response.send_message(embed = embed, ephemeral = True)
         

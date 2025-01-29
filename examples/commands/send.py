@@ -7,8 +7,7 @@ class send_command(commands.Cog):
         
         @client.tree.command(
             name            = 'send', 
-            description     =  'Haz que el bot envíe un mensaje', 
-            extras          = {'rank' : 3})
+            description     =  'Haz que el bot envíe un mensaje')
         
         async def send_command(interaction: discord.Interaction):
             if not isAdmin(interaction.user):

@@ -187,9 +187,12 @@ class McDisClient(commands.Bot):
         if reload: self.unload_addons()
         
         files_in_addons_dir = os.listdir(self.path_addons)
+                
+        valid_extensions = ['.py', '.mcdis']
+        cond = lambda file: os.path.splitext(file)[1] in valid_extensions
         
         addons = [file for file in files_in_addons_dir
-                  if file.endswith('.mcdis') or os.path.exists(os.path.join(self.path_addons, file, '__init__.py'))]
+                  if cond(file) or os.path.exists(os.path.join(self.path_addons, file, '__init__.py'))]
 
         if not addons: return
 
@@ -197,7 +200,15 @@ class McDisClient(commands.Bot):
 
         for addon in addons:
             try:
-                if os.path.isdir(os.path.join(self.path_addons, addon)):
+                if addon.endswith('.py'):
+                    addon_name = addon.removesuffix('.py')
+
+                    module_path = os.path.join(self.path_plugins, addon)
+                    spec = importlib.util.spec_from_file_location(addon.removesuffix('.py'), module_path)
+                    mod = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(mod)
+                        
+                elif os.path.isdir(os.path.join(self.path_addons, addon)):
                     addon_name = addon
 
                     module_path = os.path.join(self.path_addons, addon, '__init__.py')

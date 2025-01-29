@@ -11,8 +11,7 @@ class create_transcription_command(commands.Cog):
         
         @client.tree.command(
             name            = 'create_transcription',    
-            description     = 'Transcribe un canal',
-            extras          = {'rank' : 3})
+            description     = 'Transcribe un canal')
 
         @describe(send_transcription_to = 'Canal o hilo a donde quieres mandar la transcripción')
         

@@ -8,8 +8,7 @@ class create_transcription_command(commands.Cog):
         
         @client.tree.command(
             name            = 'help',    
-            description     = 'Lista de comandos del servidor',
-            extras          = {'rank' : 0})
+            description     = 'Lista de comandos del servidor')
 
         async def help_command(interaction: discord.Interaction):
             await interaction.response.send_message(embed = embed(client), ephemeral = True)

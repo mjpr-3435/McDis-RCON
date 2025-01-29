@@ -1,4 +1,3 @@
-from discord.app_commands import describe, choices, check, Choice, AppCommandThread, AppCommandChannel
 from discord.ext import commands
 import discord
 import psutil
@@ -9,8 +8,7 @@ class bot_banner_command(commands.Cog):
 
         @client.tree.command(
             name            = 'bot_banner',
-            description     = 'Banner del bot',
-            extras          = {'rank' : 3})
+            description     = 'Banner del bot')
 
         async def help_command(interaction: discord.Interaction):
             if not isAdmin(interaction.user):

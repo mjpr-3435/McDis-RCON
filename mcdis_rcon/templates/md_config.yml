@@ -40,7 +40,7 @@ Flask:
 ###                 and networks (e.g., Waterfall, Bungeecord, Velocity).
 
 ### • start_cmd   : Command to start the process. e.g.: java -Xms6G -Xmx6G -Dfile.encoding=UTF-8 -jar <launcher>.jar nogui
-### • stop_cmd    : Command to stop the process.
+### • stop_cmd    : Command to stop the process.  e.g.: stop, end
 ### • blacklist   : List of terms; logs containing these terms will not be sent to Discord.
 
 ### Note: For MCDReforged users, ensure 'advanced_console' is set to False in the MCDR configuration.

@@ -11,14 +11,13 @@ class mdaddon():
         asyncio.create_task(self.load())
 
     async def load(self):
-        addon_path = os.path.dirname(__file__)
-
-        sys.path.insert(0, os.path.dirname(__file__))
+        sys.path.insert(0, self.client.path_addons)
 
         cogs = ['Commands', 'ContextMenus']
 
         for cog in cogs:
-            cog_path = os.path.join(addon_path, cog)
+            cog_path = os.path.join(self.client.path_addons, cog)
+            os.makedirs(cog_path, exist_ok = True)
             scripts = [file.removesuffix('.py') for file in os.listdir(cog_path) if file.endswith('.py')]
 
             for script in scripts:

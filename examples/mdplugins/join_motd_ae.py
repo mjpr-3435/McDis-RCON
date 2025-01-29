@@ -1,5 +1,3 @@
-import os
-
 from datetime import datetime
 
 from mcdis_rcon.classes import Server

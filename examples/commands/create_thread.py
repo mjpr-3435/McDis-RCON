@@ -8,8 +8,7 @@ class create_thread_command(commands.Cog):
         
         @client.tree.command(
             name            = 'create_thread',
-            description     = 'Crea un hilo en el canal',
-            extras          = {'rank' : 3})
+            description     = 'Crea un hilo en el canal')
 
         @describe(name          = 'Nombre del hilo')
         @describe(public        = 'Si el hilo será público')
