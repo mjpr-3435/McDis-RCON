@@ -74,8 +74,6 @@ python -m pip install --force-reinstall ruamel.yaml
 
 Esto suele solucionar el problema en la mayoría de los casos.  
 
-McDis-RCON sigue en desarrollo, pero sus funcionalidades principales ya están bien implementadas.  
-
 ## 🤝 Colaboración  
 
 McDis-RCON es un proyecto que he desarrollado de forma autodidacta, sin estudios formales en programación. A pesar de ello, ha resultado ser una herramienta útil para muchas personas, por lo que he decidido publicarlo y seguir mejorándolo con el tiempo.  
