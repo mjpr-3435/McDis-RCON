@@ -1,25 +1,14 @@
 # McDis-RCON
-![McDis-RCON Banner]()
 
-McDis-RCON es una aplicación basada en python diseñada para transmitir la consola de Minecraft a Discord, permitiendo la administración de servidores de forma remota y eficiente mediante un bot de Discord.
+McDis-RCON es una aplicación basada en python diseñada para transmitir la consola de Minecraft a Discord.
+Esto permite la administración de servidores de forma remota y eficiente mediante un bot de Discord.
 
 ## Características
 
 - Abrir, cerrar, reiniciar o killear procesos.
-- Retransmisión de la consola a discord, puedes interactuar con ellas desde discord
+- Retransmisión de la consola a discord, puedes interactuar con ellas desde discord.
 - Sistema de backups implementado.
-- Navegador de archivos implementado. Este te permite
-    - Crear carpetas
-    - Borrar archivos
-    - Hacer comprimidos y descomprimir zips
-    - Cambiar nombres
-    - Editar archivos de texto (Ideal para cambios en el server.properties por ejemplo)
-    - Copiar archivos
-    - Mover archivos
-    - Descargar archivos o subirlos.
-    
-    En el caso de la descarga y subida de archivos, la subida se ve limitada por discord, pues funcionan subiendo los archivos a un canal y el programa los descarga en el dedicado; en el caso de la descarga, por defecto también está limitado por discord, sin embargo también hay implementada una opción para poder descargar archivos grandes, pero tienes que abrir un puerto específico.
-
+- Navegador de archivos implementado. Este te permite realizar varias operaciones comunes con archivos.
 - Administrador de procesos dentro de la carpeta donde se ejecuta McDis.
 - Sistema de plugins para los procesos, dependen de que esté abierto el proceso.
 - Sistema de addons para el bot de discord, estos no dependen de que haya un proceso abierto.
@@ -32,10 +21,6 @@ McDis-RCON es una aplicación basada en python diseñada para transmitir la cons
     Ejemplo configurado con 3 servidores: smp, cmp, mmp y una network: velocity.
 
 ![McDis-RCON Panel](https://i.imgur.com/0049CAU.png)
-
-## How to use it
-
-    Ejemplo configurado con 3 servidores: smp, cmp, mmp y una network: velocity.
 
 ## Collaboration
 
