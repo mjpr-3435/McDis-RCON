@@ -5,8 +5,8 @@ import sys
 
 class CustomInstall(install):
     def run(self):
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--force', 'ruamel.yaml'])
         install.run(self)
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--force', 'ruamel.yaml'])
 
 setup(
     name="mcdis_rcon",

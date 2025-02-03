@@ -15,8 +15,10 @@ McDis-RCON es una aplicación escrita en Python que permite retransmitir la cons
 - **Comandos predefinidos**: Ejecuta comandos personalizados en la consola cuando los necesites.
 - **Reporte de errores avanzado**: Los errores del programa son detectados y notificados automáticamente en Discord, facilitando su monitoreo y resolución.  
 - **Compatibilidad con múltiples launchers**: Funciona con Fabric, Paper, Vanilla y más (cualquier proceso en Java). 
-- **No modifica el servidor de Minecraft**: McDis-RCON ejecuta procesos con `Popen`, similar a MCDR.   
-- **Compatible con MCDReforged**.  
+- **No modifica el servidor de Minecraft**: McDis-RCON ejecuta procesos con `Popen`, de manera similar a **MCDReforged**.  
+- **Sistema de eventos**: A diferencia de **MCDReforged**, McDis-RCON no incluye un sistema de eventos por defecto. Sin embargo, este puede ser añadido por medio de un plugin. 
+- **Compatible con MCDReforgedeforged**.  
+
 
 ### 📌 Ejemplo de configuración  
 McDis-RCON puede administrar múltiples servidores simultáneamente. Ejemplo con tres servidores (`smp`, `cmp`, `mmp`) y una network (`velocity`).  
@@ -24,38 +26,61 @@ McDis-RCON puede administrar múltiples servidores simultáneamente. Ejemplo con
 ![McDis-RCON Panel](https://i.imgur.com/lE4GRIV.png)
 
 
-## Como instalar
+## 🚀 Cómo instalar  
 
-Para inslar mcdis-rcon en tu servidor solo debes ejecutar el siguiente comando
+Para instalar **McDis-RCON**, simplemente ejecuta el siguiente comando:  
+
+```sh
 pip install mcdis_rcon
-
-si tienes algun problema al ejecutar posteriormente mcdis rcon  con el modulo ruamel.yaml, utiliza 
-python3 pip install --force ruamel.yaml
-
-normalmente esto se arregla despues de esto
+```
 
 
-## Como configurar
+## ⚙️ Cómo configurar  
 
-Entre los archivos en este repositorio se encuentra una carpeta llamada setup_examples donde podrás encontrar un ejemplo de cómo yo tengo configurado mcdis-rcon para mi uso personal.
+Después de instalar **McDis-RCON**, ejecuta el siguiente comando en la carpeta donde vayas a tener los archivos de tu servidor:  
 
-McDis a diferencia de MCDR no tiene un sistema de eventos por defecto. En todos los servidores que yo tengo hay un mdplugin de nombre events, esto inserta un sistema de eventos en el servidor basado en el output de la consola, este lo puedes modificar dependiendo de tus necesidades. En la carpeta mencionada los archivos dentro de .mdplugins no tienen contenido, en carpeta examples/mdplugins encontraran la ultima versión de los plugins que yo utilizo, según lo haya actualizado con mis preferencias personales, si no se ajusta para ti eso, puedes hacer uno propio.
+```sh
+mcdis init
+```
 
-posteriormente subiré un archivo con una documentación un poco más amplia, además de implementar la guia completa en el panel de mcdis
+Esto creará el archivo md_config.yml con el cual podrás establecer la configuración. Hecho eso utiliza 
 
+```sh
+mcdis run
+```
+
+En este repositorio, dentro de la carpeta **`examples/my_setup`**, se encuentra un ejemplo de cómo tengo configurado **McDis-RCON** para mi uso personal.  
+
+Dentro de esta carpeta, los archivos dentro de **`.mdaddons`**  o **`*/.mdplugins`** no tienen contenido. Sin embargo, en **`examples/mdplugins`** encontrarás la última versión de los plugins que utilizo. En cuanto al **mdplugin**: **`events`**, que añade un sistema de eventos basado en la salida de la consola, puedes modificarlo o crear el tuyo según tus necesidades. 
+
+📌 **Próximamente**: Publicaré una documentación más completa y también integraré la guía completa en el panel de McDis.  
 
 ## 🚧 Problemas conocidos  
 
 McDis-RCON ha sido probado durante varios meses en seis servidores. Aunque es estable, existen algunos problemas menores conocidos:  
 
-- En casos muy raros, una de las consolas puede congelarse. Este problema solo se ha reportado en uno de los seis servidores y ocurre de forma muy poco frecuente. Actualmente, estoy trabajando en identificar la causa y solucionar el error.  
-- En algunas ocasiones, el módulo `ruamel.yaml` no se instala correctamente.  
+- En casos muy raros, una de las consolas puede congelarse. Este problema solo se ha reportado en uno de los seis servidores y ocurre de forma muy poco frecuente. Actualmente, estoy investigando la causa para solucionarlo.  
+- En algunas ocasiones, el módulo `ruamel.yaml` puede no instalarse correctamente.  
+
+Si experimentas problemas con `ruamel.yaml`, puedes intentar reinstalarlo con el siguiente comando:  
+
+```sh
+# En Linux
+python3 -m pip install --force-reinstall ruamel.yaml
+
+# En Windows
+python -m pip install --force-reinstall ruamel.yaml
+```
+
+Esto suele solucionar el problema en la mayoría de los casos.  
 
 McDis-RCON sigue en desarrollo, pero sus funcionalidades principales ya están bien implementadas.  
 
 ## 🤝 Colaboración  
 
-Si te gustaría colaborar en este repositorio agregando nuevas funciones, mejorando el código o contribuyendo de cualquier otra forma, no dudes en contactarme.  
+McDis-RCON es un proyecto que he desarrollado de forma autodidacta, sin estudios formales en programación. A pesar de ello, ha resultado ser una herramienta útil para muchas personas, por lo que he decidido publicarlo y seguir mejorándolo con el tiempo.  
+
+Si te gustaría contribuir agregando nuevas funciones, optimizando el código o colaborando de cualquier otra manera, estaré encantado de recibir tu ayuda.  
 
 Únete a mi servidor de Discord:  
 [![Discord](https://img.shields.io/badge/Join-Discord-5865F2?logo=discord&logoColor=white)](https://discord.gg/xB9N38HBJY)  
