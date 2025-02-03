@@ -4,6 +4,7 @@ McDis-RCON es una aplicación escrita en Python que permite retransmitir la cons
 
 ## ✨ Características  
 
+- **Soporte para inglés y español**
 - **Control de procesos**: Inicia, detiene, reinicia y finaliza servidores con facilidad.  
 - **Retransmisión de la consola**: Visualiza e interactúa con la consola del servidor directamente desde Discord.  
 - **Sistema de backups**: Realiza copias de seguridad automáticas para mayor seguridad.  
@@ -21,6 +22,27 @@ McDis-RCON es una aplicación escrita en Python que permite retransmitir la cons
 McDis-RCON puede administrar múltiples servidores simultáneamente. Ejemplo con tres servidores (`smp`, `cmp`, `mmp`) y una network (`velocity`).  
 
 ![McDis-RCON Panel](https://i.imgur.com/lE4GRIV.png)
+
+
+## Como instalar
+
+Para inslar mcdis-rcon en tu servidor solo debes ejecutar el siguiente comando
+pip install mcdis_rcon
+
+si tienes algun problema al ejecutar posteriormente mcdis rcon  con el modulo ruamel.yaml, utiliza 
+python3 pip install --force ruamel.yaml
+
+normalmente esto se arregla despues de esto
+
+
+## Como configurar
+
+Entre los archivos en este repositorio se encuentra una carpeta llamada setup_examples donde podrás encontrar un ejemplo de cómo yo tengo configurado mcdis-rcon para mi uso personal.
+
+McDis a diferencia de MCDR no tiene un sistema de eventos por defecto. En todos los servidores que yo tengo hay un mdplugin de nombre events, esto inserta un sistema de eventos en el servidor basado en el output de la consola, este lo puedes modificar dependiendo de tus necesidades. En la carpeta mencionada los archivos dentro de .mdplugins no tienen contenido, en carpeta examples/mdplugins encontraran la ultima versión de los plugins que yo utilizo, según lo haya actualizado con mis preferencias personales, si no se ajusta para ti eso, puedes hacer uno propio.
+
+posteriormente subiré un archivo con una documentación un poco más amplia, además de implementar la guia completa en el panel de mcdis
+
 
 ## 🚧 Problemas conocidos  
 

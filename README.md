@@ -2,10 +2,9 @@
 
 McDis-RCON is a Python-based application that allows you to stream a Minecraft server console to Discord, enabling remote and efficient server management through a Discord bot.  
 
-[Español](README.es.md) 
-
 ## ✨ Features  
 
+- **Support for English and Spanish**  
 - **Process control**: Start, stop, restart, and terminate servers with ease.  
 - **Console streaming**: View and interact with the server console directly from Discord.  
 - **Backup system**: Automatically create backups for increased security.  
