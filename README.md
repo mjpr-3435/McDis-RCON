@@ -1,41 +1,43 @@
 # McDis-RCON  
 
-McDis-RCON es una aplicación escrita en Python que permite retransmitir la consola de un servidor de Minecraft a Discord, facilitando su administración de manera remota y eficiente a través de un bot de Discord.  
+McDis-RCON is a Python-based application that allows you to stream a Minecraft server console to Discord, enabling remote and efficient server management through a Discord bot.  
 
-## ✨ Características  
+[Español](README.es.md) 
 
-- **Control de procesos**: Inicia, detiene, reinicia y finaliza servidores con facilidad.  
-- **Retransmisión de la consola**: Visualiza e interactúa con la consola del servidor directamente desde Discord.  
-- **Sistema de backups**: Realiza copias de seguridad automáticas para mayor seguridad.  
-- **Explorador de archivos**: Gestiona archivos del servidor con operaciones básicas integradas.  
-- **Gestor de procesos**: Supervisa y administra procesos dentro de la carpeta de ejecución de McDis.  
-- **Soporte para plugins**: Ejecuta plugins específicos para los procesos en ejecución.  
-- **Sistema de addons**: Amplía las funcionalidades del bot sin depender de un proceso activo.  
-- **Comandos predefinidos**: Ejecuta comandos personalizados en la consola cuando los necesites.
-- **Reporte de errores avanzado**: Los errores del programa son detectados y notificados automáticamente en Discord, facilitando su monitoreo y resolución.  
-- **Compatibilidad con múltiples launchers**: Funciona con Fabric, Paper, Vanilla y más (cualquier proceso en Java). 
-- **No modifica el servidor de Minecraft**: McDis-RCON ejecuta procesos con `Popen`, similar a MCDR.   
-- **Compatible con MCDReforged**.  
+## ✨ Features  
 
-### 📌 Ejemplo de configuración  
-McDis-RCON puede administrar múltiples servidores simultáneamente. Ejemplo con tres servidores (`smp`, `cmp`, `mmp`) y una network (`velocity`).  
+- **Process control**: Start, stop, restart, and terminate servers with ease.  
+- **Console streaming**: View and interact with the server console directly from Discord.  
+- **Backup system**: Automatically create backups for increased security.  
+- **File explorer**: Manage server files with built-in basic operations.  
+- **Process manager**: Monitor and manage processes within the McDis execution folder.  
+- **Plugin support**: Run plugins for active processes.  
+- **Addon system**: Extend bot functionality without depending on an active process.  
+- **Predefined commands**: Execute custom commands in the console whenever needed.  
+- **Advanced error reporting**: Program errors are detected and automatically reported on Discord, making monitoring and troubleshooting easier.  
+- **Compatibility with multiple launchers**: Works with Fabric, Paper, Vanilla, and more (any Java-based process).  
+- **Does not modify the Minecraft server**: McDis-RCON runs processes using `Popen`, similar to MCDR.  
+- **Compatible with MCDReforged**.  
+
+### 📌 Configuration example  
+McDis-RCON can manage multiple servers simultaneously. Example with three servers (`smp`, `cmp`, `mmp`) and a network (`velocity`).  
 
 ![McDis-RCON Panel](https://i.imgur.com/lE4GRIV.png)
 
-## 🚧 Problemas conocidos  
+## 🚧 Known Issues  
 
-McDis-RCON ha sido probado durante varios meses en seis servidores. Aunque es estable, existen algunos problemas menores conocidos:  
+McDis-RCON has been tested for several months on six servers. Although it is stable, there are some minor known issues:  
 
-- En casos muy raros, una de las consolas puede congelarse. Este problema solo se ha reportado en uno de los seis servidores y ocurre de forma muy poco frecuente. Actualmente, estoy trabajando en identificar la causa y solucionar el error.  
-- En algunas ocasiones, el módulo `ruamel.yaml` no se instala correctamente.  
+- In very rare cases, one of the consoles may freeze. This issue has only been reported on one of the six servers and occurs very infrequently. I am currently working on identifying the cause and resolving it.  
+- Occasionally, the `ruamel.yaml` module does not install correctly.  
 
-McDis-RCON sigue en desarrollo, pero sus funcionalidades principales ya están bien implementadas.  
+McDis-RCON is still in development, but its core features are already well implemented.  
 
-## 🤝 Colaboración  
+## 🤝 Collaboration  
 
-Si te gustaría colaborar en este repositorio agregando nuevas funciones, mejorando el código o contribuyendo de cualquier otra forma, no dudes en contactarme.  
+If you would like to contribute to this repository by adding new features, improving the code, or helping in any other way, feel free to contact me.  
 
-Únete a mi servidor de Discord:  
+Join my Discord server:  
 [![Discord](https://img.shields.io/badge/Join-Discord-5865F2?logo=discord&logoColor=white)](https://discord.gg/xB9N38HBJY)  
 
-También puedes contactarme directamente en Discord: **kassiulo**  
+You can also reach me directly on Discord: **kassiulo**  
