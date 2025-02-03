@@ -7,7 +7,7 @@ McDis-RCON is a Python application that allows you to relay the console of a Min
 - **Support for English and Spanish**
 - **Process Control**: Easily start, stop, restart, and terminate servers.
 - **Console Relay**: View and interact with the server console directly from Discord.
-- **Backup System**: Automatically creates backups for added security.
+- **Backup system**: Allows you to create backups of the process files.
 - **File Explorer**: Manage server files with basic integrated operations.
 - **Process Manager**: Monitor and manage processes within McDis's execution folder.
 - **Plugin Support**: Run specific plugins for active processes.

@@ -7,7 +7,7 @@ McDis-RCON es una aplicación escrita en Python que permite retransmitir la cons
 - **Soporte para inglés y español**
 - **Control de procesos**: Inicia, detiene, reinicia y finaliza servidores con facilidad.  
 - **Retransmisión de la consola**: Visualiza e interactúa con la consola del servidor directamente desde Discord.  
-- **Sistema de backups**: Realiza copias de seguridad automáticas para mayor seguridad.  
+- **Sistema de backups**: Permite crear copias de seguridad de los archivos de los procesos.
 - **Explorador de archivos**: Gestiona archivos del servidor con operaciones básicas integradas.  
 - **Gestor de procesos**: Supervisa y administra procesos dentro de la carpeta de ejecución de McDis.  
 - **Soporte para plugins**: Ejecuta plugins específicos para los procesos en ejecución.  
