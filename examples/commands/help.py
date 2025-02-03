@@ -7,8 +7,7 @@ class create_transcription_command(commands.Cog):
         self.client = client
         
         @client.tree.command(
-            name            = 'help',    
-            description     = 'Lista de comandos del servidor')
+            name            = 'help')
 
         async def help_command(interaction: discord.Interaction):
             await interaction.response.send_message(embed = embed(client), ephemeral = True)
@@ -27,7 +26,7 @@ def embed(client: commands.Bot) -> discord.Embed:
     link_ds_py_api              = 'https://discordpy.readthedocs.io/en/stable/api.html'
     link_ds_py_interactions_api = 'https://discordpy.readthedocs.io/en/stable/interactions/api.html'
     link_discord_markdown       = 'https://gist.github.com/matthewzring/9f7bbfd102003963f9be7dbcf7d40e51'
-    link_github                 = 'https://github.com/aeternumsmp'
+    link_github                 = 'https://github.com'
     link_default_thumbnail      = 'https://i.postimg.cc/XqQx5rT5/logo.png'
 
     commands = '\n'.join([f'/{command.name}' for command in client.tree.get_commands(type = discord.AppCommandType.chat_input)])

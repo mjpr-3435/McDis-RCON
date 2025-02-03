@@ -6,14 +6,9 @@ class send_command(commands.Cog):
         self.client = client
         
         @client.tree.command(
-            name            = 'send', 
-            description     =  'Haz que el bot envíe un mensaje')
+            name            = 'send')
         
         async def send_command(interaction: discord.Interaction):
-            if not isAdmin(interaction.user):
-                await interaction.response.send_message('✖ No tienes permisos.', ephemeral = True, delete_after = 1)
-                return
-            
             class send_message_modal(discord.ui.Modal, title = 'Enviar mensaje'):
                 message = discord.ui.TextInput(label = 'Mensaje', style = discord.TextStyle.paragraph)
                 
@@ -25,6 +20,3 @@ class send_command(commands.Cog):
 
 async def setup(client: commands.Bot):
     await client.add_cog(send_command(client))
-
-def isAdmin(member: discord.Member) -> bool:
-    return member.guild_permissions.administrator

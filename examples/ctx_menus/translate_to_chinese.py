@@ -20,5 +20,3 @@ class translate_to_chinese(commands.Cog):
 
 async def setup(client: commands.Bot):
     await client.add_cog(translate_to_chinese(client))
-
-    from discord.app_commands import describe, choices, check, Choice, AppCommandThread, AppCommandChannel

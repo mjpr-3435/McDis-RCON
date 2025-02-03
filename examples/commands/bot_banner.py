@@ -7,14 +7,9 @@ class bot_banner_command(commands.Cog):
         self.client = client
 
         @client.tree.command(
-            name            = 'bot_banner',
-            description     = 'Banner del bot')
+            name            = 'bot_banner')
 
         async def help_command(interaction: discord.Interaction):
-            if not isAdmin(interaction.user):
-                await interaction.response.send_message('✖ No tienes permisos.', ephemeral = True, delete_after = 1)
-                return
-            
             await interaction.response.send_message(embed = embed(client), ephemeral = True)
 
 async def setup(client: commands.Bot):
@@ -72,6 +67,3 @@ def embed(client: commands.Bot) -> discord.Embed:
     
 
     return embed
-
-def isAdmin(member: discord.Member) -> bool:
-    return member.guild_permissions.administrator
