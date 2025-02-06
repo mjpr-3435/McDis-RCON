@@ -65,26 +65,34 @@ class Process():
             )
             self.stop()
 
-    def         stop                    (self, *, omit_tasks = False):
+    def         stop                    (self, *, omit_task = False):
         if not self.is_running(): return
-
-        async def finalize():
-            while self.is_running(poll_based = True) or self._relaying: 
-                await asyncio.sleep(0.1)
-
-            self.process               = None
-            self.real_process          = None
-            self._stop_relay           = False
-            self._stop_relay_reason    = None
-            self._console_log          = None
-            self._console_relay        = None
-            self.unload_plugins()
         
         self.execute(self.stop_cmd)
 
-        if not omit_tasks: asyncio.create_task(finalize())
-        
-    def         kill                    (self):
+        if not omit_task: asyncio.create_task(self.stop_task())
+
+    async def   stop_task               (self):
+        while self.is_running(poll_based = True) or self._relaying: 
+            await asyncio.sleep(0.1)
+
+        self.finalize()
+
+    async def   kill_task               (self):
+        await asyncio.sleep(5)
+
+        self.finalize()
+
+    def         finalize                (self):
+        self.process               = None
+        self.real_process          = None
+        self._stop_relay           = False
+        self._stop_relay_reason    = None
+        self._console_log          = None
+        self._console_relay        = None
+        self.unload_plugins()
+
+    def         kill                    (self, *, omit_task = False):
         if isinstance(self.process, subprocess.Popen): 
             try: self.process.kill()
             except: pass
@@ -93,13 +101,7 @@ class Process():
         try: self.real_process.kill()
         except: pass
 
-        self.process               = None
-        self.real_process          = None
-        self._stop_relay           = False
-        self._stop_relay_reason    = None
-        self._console_log          = None
-        self._console_relay        = None
-        self.unload_plugins()
+        if not omit_task: asyncio.create_task(self.stop_task())
     
     def         load_plugins            (self, *, reload = False):
         if not self.is_running(): return
