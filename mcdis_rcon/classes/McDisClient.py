@@ -331,12 +331,14 @@ class McDisClient(commands.Bot):
         await execute_and_wait(self.console_listener)
 
     def         console_listener        (self):
-        
-        while True:
-            print('\n'+ self._('Commands') + self._(': start, stop, restart, kill, mdreload, status, exit'))
-            command = input('>>')
-            asyncio.run_coroutine_threadsafe(self.console_interface(command), self.loop)
-            time.sleep(3)
+        try:
+            while True:
+                print('\n'+ self._('Commands') + self._(': start, stop, restart, kill, mdreload, status, exit'))
+                command = input('>>')
+                asyncio.run_coroutine_threadsafe(self.console_interface(command), self.loop)
+                time.sleep(3)
+        except:
+            pass
 
     async def   console_interface       (self, command: str):
 
@@ -403,8 +405,6 @@ class McDisClient(commands.Bot):
         elif self.is_command(command.lower(), 'kill'           , console = True):
             process_name = command.removeprefix('kill').lower().strip()
             process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
-
-            await command.delete()
             
             if not process:
                 print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
@@ -743,7 +743,7 @@ class McDisClient(commands.Bot):
             print(self._('Closing processes...'))
 
             for process in  self.processes:
-                process.stop(omit_tasks=True)
+                process.stop(omit_task=True)
             
             i = 60
             while i > 0 and any_process_open():
@@ -755,7 +755,7 @@ class McDisClient(commands.Bot):
                 
             if any_process_open():
                 for process in self.processes:
-                    process.kill()
+                    process.kill(omit_task=True)
                 
                 print(self._('Processes forcibly closed.'))
             else:
