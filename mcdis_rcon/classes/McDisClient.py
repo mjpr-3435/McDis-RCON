@@ -333,7 +333,8 @@ class McDisClient(commands.Bot):
     def         console_listener        (self):
         
         while True:
-            command = input('\n>>')
+            print('\n'+ self._('Commands') + self._(': start, stop, restart, kill, mdreload, status, exit'))
+            command = input('>>')
             asyncio.run_coroutine_threadsafe(self.console_interface(command), self.loop)
             time.sleep(3)
 
@@ -375,7 +376,7 @@ class McDisClient(commands.Bot):
 
             if not process:
                 print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
-                        .format(self.prefix, 'start', self.prefix, 'start'))
+                        .format('', 'start', '', 'start'))
 
             elif process.is_running():
                 print(self._('✖ `[{}]`: The process was already open.').format(process.name).replace('`',''))
@@ -390,7 +391,7 @@ class McDisClient(commands.Bot):
 
             if not process:
                 print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
-                        .format(self.prefix, 'stop', self.prefix, 'stop'))
+                        .format('', 'stop', '', 'stop'))
 
             elif not process.is_running():
                 print(self._('✖ `[{}]`: The process was not open.').format(process.name).replace('`',''))
@@ -407,7 +408,7 @@ class McDisClient(commands.Bot):
             
             if not process:
                 print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
-                        .format(self.prefix, 'kill', self.prefix, 'kill'))
+                        .format('', 'kill', '', 'kill'))
 
             elif not process.is_running():
                 print(self._('✖ `[{}]`: The process was not open.').format(process.name).replace('`',''))
@@ -422,7 +423,7 @@ class McDisClient(commands.Bot):
             
             if not process:
                 print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
-                        .format(self.prefix, 'restart', self.prefix, 'restart'))
+                        .format('', 'restart', '', 'restart'))
 
             elif not process.is_running():
                 print(self._('✖ `[{}]`: The process was not open.').format(process.name).replace('`',''))
@@ -437,7 +438,7 @@ class McDisClient(commands.Bot):
             
             if not process:
                 print(self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.')\
-                        .format(self.prefix, 'mdreload', self.prefix, 'mdreload'))
+                        .format('', 'mdreload', '', 'mdreload'))
 
             elif not process.is_running():
                 print(self._('✖ `[{}]`: The process was not open.').format(process.name).replace('`',''))
