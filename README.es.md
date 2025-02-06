@@ -31,7 +31,7 @@ McDis-RCON puede administrar múltiples servidores simultáneamente. Ejemplo con
 Para instalar **McDis-RCON**, simplemente ejecuta el siguiente comando:  
 
 ```sh
-pip install mcdis_rcon
+pip install mcdis-rcon
 ```
 
 
@@ -66,10 +66,10 @@ Si experimentas problemas con `ruamel.yaml`, puedes intentar reinstalarlo con el
 
 ```sh
 # En Linux
-python3 -m pip install --force-reinstall ruamel.yaml
+python3 -m pip install --force ruamel.yaml
 
 # En Windows
-python -m pip install --force-reinstall ruamel.yaml
+python -m pip install --force ruamel.yaml
 ```
 
 Esto suele solucionar el problema en la mayoría de los casos.  
