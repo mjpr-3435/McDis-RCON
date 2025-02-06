@@ -12,12 +12,18 @@ def get_cpu_temp() -> str:
     except:
         return f'—— °C'
     
-def ram_usage(process: psutil.Process) -> str:
+def ram_usage(process: psutil.Process, string: bool = True) -> str:
     try:
         total = process.memory_info().rss
         magnitude = ['B', 'KB', 'MB', 'GB', 'TB']
         i = int(math.log(total, 1024)) if total != 0 else 0
 
-        return f'{total / (1024 ** (i)) :.1f} {magnitude[i]}'
+        if not string:
+            return total / (1024 ** (i))
+        else:
+            return f'{total / (1024 ** (i)) :.1f} {magnitude[i]}'
     except:
-        return '———'
+        if not string: 
+            return 0
+        else:
+            return '———'
