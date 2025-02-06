@@ -1,4 +1,7 @@
 # McDis-RCON  
+[![Python Versions](https://img.shields.io/pypi/pyversions/mcdis_rcon.svg)](https://pypi.org/project/mcdis_rcon)
+[![PyPI Version](https://img.shields.io/pypi/v/mcdis_rcon.svg)](https://pypi.org/project/mcdis_rcon)
+[![License](https://img.shields.io/github/license/mjpr-3435/McDis-RCON.svg)](https://github.com/mjpr-3435/McDis-RCON/blob/master/LICENSE)
 
 McDis-RCON es una aplicación escrita en Python que permite retransmitir la consola de un servidor de Minecraft a Discord, facilitando su administración de manera remota y eficiente a través de un bot de Discord.  
 
