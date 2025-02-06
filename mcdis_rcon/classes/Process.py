@@ -92,6 +92,14 @@ class Process():
         self._find_real_process()
         try: self.real_process.kill()
         except: pass
+
+        self.process               = None
+        self.real_process          = None
+        self._stop_relay           = False
+        self._stop_relay_reason    = None
+        self._console_log          = None
+        self._console_relay        = None
+        self.unload_plugins()
     
     def         load_plugins            (self, *, reload = False):
         if not self.is_running(): return
@@ -174,8 +182,9 @@ class Process():
                 cond_1 = process.name() in javas
                 cond_2 = os.path.commonpath([abs_file_path, process.cwd()]) == abs_file_path
                 cond_3 = any([java in process.cmdline()[0] for java in javas])
+                cond_4 = process.memory_info().rss // (1024**2) > 50
                 
-                if cond_1 and cond_2 and cond_3:
+                if cond_1 and cond_2 and cond_3 and cond_4:
                     self.real_process = process
                     break
             except: pass
