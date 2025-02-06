@@ -76,7 +76,7 @@ msgid   "✔ `[{}]`: Initializing process."
 msgstr  "✔ `[{}]`: Inicializando proceso."
 
 msgid   "✖ `[{}]`: The process was not open."
-msgstr  "✖ `[{}]`: El proceso no estab abierto."
+msgstr  "✖ `[{}]`: El proceso no estaba abierto."
 
 msgid   "✔ `[{}]`: Stopping process."
 msgstr  "✔ `[{}]`: Deteniendo proceso."
@@ -118,7 +118,7 @@ msgid   "Closing processes..."
 msgstr  "Cerrando procesos..."
 
 msgid   "Processes will be forcibly closed in {} seconds..."
-msgstr  "Los procesos será cerrados forzosamente en {} segundos..."
+msgstr  "Los procesos serán cerrados forzosamente en {} segundos..."
 
 msgid   "Processes forcibly closed."
 msgstr  "Procesos cerrados forzosamente."
