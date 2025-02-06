@@ -1,16 +1,11 @@
 from setuptools import setup, find_packages
-from setuptools.command.install import install
-import subprocess
-import sys
 
-class CustomInstall(install):
-    def run(self):
-        install.run(self)
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--force', 'ruamel.yaml'])
+with open("README.md", "r", encoding="utf-8") as f:
+    description = f.read()
 
 setup(
     name="mcdis_rcon",
-    version="0.4.5a",
+    version="0.4.9a",
     packages=find_packages(),
     include_package_data=True,
     package_data={
@@ -27,9 +22,9 @@ setup(
         'flask',
         'requests',
         'nbtlib',
-        'requests'
+        'requests',
+        'ruamel.yaml',
     ],
-    cmdclass={
-        'install': CustomInstall,
-    },
+    long_description = description,
+    long_description_content_type = 'text/markdown'
 )
