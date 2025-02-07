@@ -203,7 +203,7 @@ class McDisClient(commands.Bot):
                 if addon.endswith('.py'):
                     addon_name = addon.removesuffix('.py')
 
-                    module_path = os.path.join(self.path_plugins, addon)
+                    module_path = os.path.join(self.path_addons, addon)
                     spec = importlib.util.spec_from_file_location(addon.removesuffix('.py'), module_path)
                     mod = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(mod)
