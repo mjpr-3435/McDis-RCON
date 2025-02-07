@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="mcdis_rcon",
-    version="0.4.13a",
+    version="0.4.14a",
     packages=find_packages(),
     include_package_data=True,
     package_data={
@@ -24,6 +24,14 @@ setup(
         'nbtlib',
         'requests',
         'ruamel.yaml',
+    ],
+    classifiers=[
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
     ],
     long_description = description,
     long_description_content_type = 'text/markdown',
