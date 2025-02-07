@@ -49,8 +49,9 @@ class mdplugin():
                 return
             
             elif smp_server.is_running():
-                self.server.send_response(player, 'El SMP está abierto.')
-                return
+                smp_server.execute('save-off')
+                smp_server.execute('save-all')
+                await asyncio.sleep(5)
 
             self.server.stop()
 
@@ -82,6 +83,9 @@ class mdplugin():
 
             await discord_message.edit(content = f'```md\n[reg-updater]: ✔ Files have been copied.\n```')
 
+            if smp_server.is_running():
+                smp_server.execute('save-on')
+            
             self.server.start()
 
     async def listener_events(self, log : str):
