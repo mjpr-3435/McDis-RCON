@@ -635,6 +635,9 @@ class McDisClient(commands.Bot):
         if message.author.bot: 
             return
         
+        elif not message.channel.id == self.panel.id:
+            return
+        
         elif not message.attachments: 
             return
         
