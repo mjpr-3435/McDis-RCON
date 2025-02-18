@@ -11,7 +11,6 @@ class Process():
         self.prefix                 = self.client.prefix
         self.path_bkps              = os.path.join(client.path_backups, self.name)
         self.path_plugins           = os.path.join(self.path_files,'.mdplugins')
-        self.path_plugins_configs   = os.path.join(self.path_plugins,'configs')
         self.path_commands          = os.path.join(self.path_files,'.mdcommands')
         self.start_cmd              = config['start_cmd']
         self.stop_cmd               = config['stop_cmd']
@@ -26,7 +25,7 @@ class Process():
         self._console_relay         = None
         self._max_logs_in_queue     = 1000
         
-        dirs = [self.path_files, self.path_bkps, self.path_plugins, self.path_commands, self.path_plugins_configs]
+        dirs = [self.path_files, self.path_bkps, self.path_plugins, self.path_commands]
         for dir in dirs: os.makedirs(dir, exist_ok = True)
 
     ###         Manager Logic       ###
@@ -42,7 +41,7 @@ class Process():
         if self.is_running() : return
 
         try:
-            dirs = [self.path_files, self.path_plugins, self.path_plugins_configs, self.path_commands]
+            dirs = [self.path_files, self.path_plugins, self.path_commands]
             for dir in dirs: os.makedirs(dir, exist_ok = True)
 
             self._console_log            = queue.Queue()

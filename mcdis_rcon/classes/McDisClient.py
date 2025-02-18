@@ -16,7 +16,6 @@ class McDisClient(commands.Bot):
         self._          : Callable[[str], str]                  = None
         self.path_backups                                       = '.mdbackups'
         self.path_addons                                        = '.mdaddons'
-        self.path_addons_configs                                = os.path.join('.mdaddons', 'configs')
         self.addons                                             = {}
         self.flask      : FlaskManager                          = None
         self.processes  : list[Union[Network,Server]]           = []
@@ -28,7 +27,6 @@ class McDisClient(commands.Bot):
 
         os.makedirs(self.path_backups        , exist_ok = True)
         os.makedirs(self.path_addons         , exist_ok = True)
-        os.makedirs(self.path_addons_configs , exist_ok = True)
         
         self._load_config()
 
