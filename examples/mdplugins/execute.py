@@ -7,9 +7,11 @@ from mcdis_rcon.utils import extras, hover_and_suggest, read_yml
 class mdplugin():
     def __init__(self, server: Server):
         self.server = server
-        self.config = {"Mob Switch" : "Reset"}
+        self.config = {"MobSwitch" : "Reset"}
 
     async def on_already_started    (self):
+        await asyncio.sleep(5)
+
         keys = list(self.config.keys())
 
         for key in keys:

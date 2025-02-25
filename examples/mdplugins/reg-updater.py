@@ -69,16 +69,16 @@ class mdplugin():
                     entities, region, poi = os.path.join('DIM1','entities'), os.path.join('DIM1','region'), os.path.join('DIM1','poi')
                 
                 for reg in self.files_to_copy[player][dim]:
-                    source = os.path.join(smp_server.path_files, 'world', region, reg)
-                    destination = os.path.join(self.server.path_files, 'world', region, reg)
+                    source = os.path.join(smp_server.path_files, 'server', 'world', region, reg)
+                    destination = os.path.join(self.server.path_files,  'server', 'world', region, reg)
                     shutil.copy2(source, destination)
 
-                    source = os.path.join(smp_server.path_files, 'world', poi, reg)
-                    destination = os.path.join(self.server.path_files, 'world', poi, reg)
+                    source = os.path.join(smp_server.path_files,  'server', 'world', poi, reg)
+                    destination = os.path.join(self.server.path_files,  'server', 'world', poi, reg)
                     shutil.copy2(source, destination)
 
-                    source = os.path.join(smp_server.path_files, 'world', entities, reg)
-                    destination = os.path.join(self.server.path_files, 'world', entities, reg)
+                    source = os.path.join(smp_server.path_files, 'server', 'world', entities, reg)
+                    destination = os.path.join(self.server.path_files,  'server', 'world', entities, reg)
                     shutil.copy2(source, destination)
 
             await discord_message.edit(content = f'```md\n[reg-updater]: ✔ Files have been copied.\n```')
@@ -96,10 +96,10 @@ class mdplugin():
             match = re.search(r"(.*?) has the following entity data: (.*)", log)
             player = match.group(1).strip().split(' ')[-1]
             data = match.group(2)
-            raw_pos = data[data.find('Pos:'):]
+            raw_pos = data[data.find(', Pos:'):]
             raw_pos = raw_pos[raw_pos.find('[') + 1 : raw_pos.find(']')].split(',')
-            raw_dim = data[data.find('Dimension:'):]
-            dim     = raw_dim[raw_dim.find('"') + 1 : raw_dim.find(',')-1].split(':')[1]
+            raw_dim = data[data.find(', Dimension:'):]
+            dim     = raw_dim.split(':')[2].split('"')[0]
             pos     = tuple(float(x.strip()[:-1]) for x in raw_pos)
             reg     = self.pos_to_region(pos)
 
