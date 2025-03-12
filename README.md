@@ -49,9 +49,9 @@ This will create the `md_config.yml` file, which allows you to configure the set
 mcdis run
 ```
 
-In this repository, inside the **`examples/my_setup`** folder, you'll find an example of how I have McDis-RCON set up for my personal use.
-
-Within this folder, the files inside **`.mdaddons`** or **`*/.mdplugins`** do not have content. However, in **`examples/mdplugins`**, you'll find the latest version of the plugins I use. As for the **mdplugin**: **`events`**, which adds an event system based on the console output, you can modify or create your own based on your needs.
+In the following repositories, you can see how McDis-RCON is configured: EnigmaTech SMP and Aeternum SMP.
+- [AeternumBot](https://github.com/mjpr-3435/AeternumBot).
+- [EnigmaBot](https://github.com/mjpr-3435/AeternumBot).
 
 📌 **Coming Soon**: I will publish a more comprehensive documentation and also integrate the full guide in McDis's panel.
 
