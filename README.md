@@ -49,7 +49,7 @@ This will create the `md_config.yml` file, which allows you to configure the set
 mcdis run
 ```
 
-In the following repositories, you can see how McDis-RCON is configured: EnigmaTech SMP and Aeternum SMP.
+In the following repositories, you can see how McDis-RCON is configured in EnigmaTech SMP and Aeternum SMP.
 - [AeternumBot](https://github.com/mjpr-3435/AeternumBot).
 - [EnigmaBot](https://github.com/mjpr-3435/AeternumBot).
 
