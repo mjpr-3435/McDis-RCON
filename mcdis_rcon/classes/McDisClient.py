@@ -331,7 +331,7 @@ class McDisClient(commands.Bot):
     def         console_listener        (self):
         try:
             while True:
-                print('\n'+ self._('Commands') + self._(': start, stop, restart, kill, mdreload, status, exit'))
+                print('\n'+ self._('Commands') + self._(': start, stop, restart, kill, mdreload, adreload, status, exit'))
                 command = input('>>')
                 asyncio.run_coroutine_threadsafe(self.console_interface(command), self.loop)
                 time.sleep(3)
@@ -444,6 +444,10 @@ class McDisClient(commands.Bot):
             else:
                 print(self._('✔ `[{}]`: Reloading mdplugins...').format(process.name).replace('`',''))
                 process.load_plugins(reload = True)
+        
+        elif self.is_command(command.lower(), 'adreload', console = True):
+            await self._load_addons(reload = True)
+            print(self._('✔ Reloading mdaddons...'))
 
         elif self.is_command(command.lower(), 'status'       , console = True) and not self.display_panel:
             self.display_panel = True
@@ -625,6 +629,14 @@ class McDisClient(commands.Bot):
                         self._('✔ `[{}]`: Reloading mdplugins...').format(process.name))
                     await response.delete(delay = 2)
                     process.load_plugins(reload = True)
+
+            elif self.is_command(message.content.lower(), 'adreload'):
+                await message.delete()
+                
+                response = await message.channel.send(
+                    self._('✔ Reloading mdaddons...'))
+                await response.delete(delay = 2)
+                await self._load_addons(reload = True)
             
         for process in self.processes: 
             await process.discord_listener(message)

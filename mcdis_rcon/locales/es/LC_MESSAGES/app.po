@@ -66,6 +66,9 @@ msgstr  "✔ Reiniciando procesos..."
 msgid   "✔ Reloading mdplugins..."
 msgstr  "✔ Recargando mdplugins..."
 
+msgid   "✔ Reloading mdaddons..."
+msgstr  "✔ Recargando mdaddons..."
+
 msgid   "✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`."
 msgstr  "✖ Especifica el proceso. Ej.: `{}{} <name>` or `{}{}-all`."
 

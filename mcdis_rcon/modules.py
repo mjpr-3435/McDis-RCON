@@ -41,7 +41,7 @@ from datetime import datetime
 from typing import Union, Callable
 from pathlib import Path
 
-mcdis_vers          = "0.4.17a"
+mcdis_vers          = "0.4.18a"
 package_path        = os.path.dirname(__file__)
 embed_colour        = 0x2f3136
 blank_space         = '‎ '
@@ -60,7 +60,7 @@ check               = '✔'
 uncheck             = '✖'
 
 allowed_languages   = [ 'en', 'es']
-panel_commands      = [ 'start', 'stop', 'kill', 'restart', 'mdreload']
+panel_commands      = [ 'start', 'stop', 'kill', 'restart', 'mdreload', 'adreload']
 console_commands    = [ 'start', 'stop', 'kill', 'restart', 'mdreload']
 terminal_commands   = [ 'mkdir <name>', 
                         'zip <dir:index>', 

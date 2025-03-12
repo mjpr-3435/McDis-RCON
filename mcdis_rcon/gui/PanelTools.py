@@ -11,7 +11,7 @@ class ToolsView      (discord.ui.View):
         self.add_item(ProcessesButton   (self.client))
         self.add_item(UploaderButton    (self.client))
         self.add_item(FlaskButton       (self.client))
-        self.add_item(ReloadButton      (self.client))
+        # self.add_item(ReloadButton      (self.client))
 
 class BackButton            (discord.ui.Button):
     def __init__(self, client : McDisClient):
