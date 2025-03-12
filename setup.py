@@ -25,7 +25,8 @@ setup(
         'ruamel.yaml',
     ],
     classifiers=[
-        "Programming Language :: Python :: 3.10"
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.12"
     ],
     long_description = description,
     long_description_content_type = 'text/markdown',
