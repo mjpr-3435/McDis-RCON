@@ -822,7 +822,7 @@ class McDisClient(commands.Bot):
 
         if plugins:
             if function in self.discord_listeners: 
-                function += 'listener_'
+                function = 'listener_' + function
 
             for process in self.processes:
                 await process.call_plugins(function, args)
