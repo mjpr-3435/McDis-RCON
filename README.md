@@ -5,6 +5,8 @@
 
 McDis-RCON is a Python application that allows you to relay the console of a Minecraft server to Discord, facilitating remote and efficient management through a Discord bot.
 
+[[Español]](README.es.md)
+
 ## ✨ Features
 
 - **Support for English and Spanish**
