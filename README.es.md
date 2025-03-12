@@ -53,8 +53,8 @@ mcdis run
 ```
 
 En los siguientes repositorios se muestra cómo tienen configurado McDis-RCON: EnigmaTech SMP y Aeternum SMP.
-- [AeternumBot](https://github.com/mjpr-3435/AeternumBot).
-- [EnigmaBot](https://github.com/mjpr-3435/AeternumBot).
+- [AeternumBot](https://github.com/mjpr-3435/AeternumBot)
+- [EnigmaBot](https://github.com/mjpr-3435/AeternumBot)
 
 📌 **Próximamente**: Publicaré una documentación más completa y también integraré la guía completa en el panel de McDis.  
 
