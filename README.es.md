@@ -20,7 +20,7 @@ McDis-RCON es una aplicación escrita en Python que permite retransmitir la cons
 - **Compatibilidad con múltiples launchers**: Funciona con Fabric, Paper, Vanilla y más (cualquier proceso en Java). 
 - **No modifica el servidor de Minecraft**: McDis-RCON ejecuta procesos con `Popen`, de manera similar a **MCDReforged**.  
 - **Sistema de eventos**: A diferencia de **MCDReforged**, McDis-RCON no incluye un sistema de eventos por defecto. Sin embargo, este puede ser añadido por medio de un plugin. 
-- **Compatible con MCDReforgedeforged**.  
+- **Compatible con MCDReforged**.  
 
 
 ### 📌 Ejemplo de configuración  
