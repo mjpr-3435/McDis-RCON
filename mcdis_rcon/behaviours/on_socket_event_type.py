@@ -8,7 +8,7 @@ class on_socket_event_type(commands.Cog):
     @commands.Cog.listener()
     
     async def on_socket_event_type(self, event_type: str):
-        await self.client.call_addons('on_socket_event_type', (event_type,))
+        await self.client.call_mdextras('on_socket_event_type', (event_type,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_socket_event_type(client))

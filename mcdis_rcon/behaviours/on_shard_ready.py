@@ -8,7 +8,7 @@ class on_shard_ready(commands.Cog):
     @commands.Cog.listener()
     
     async def on_shard_ready(self, shard_id: int):
-        await self.client.call_addons('on_shard_ready', (shard_id,))
+        await self.client.call_mdextras('on_shard_ready', (shard_id,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_shard_ready(client))

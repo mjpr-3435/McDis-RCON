@@ -8,7 +8,7 @@ class on_reaction_clear(commands.Cog):
     @commands.Cog.listener()
     
     async def on_reaction_clear(self, message: discord.Message, reactions: list[discord.Reaction]):
-        await self.client.call_addons('on_reaction_clear', (message, reactions))
+        await self.client.call_mdextras('on_reaction_clear', (message, reactions))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_reaction_clear(client))

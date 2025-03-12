@@ -8,7 +8,7 @@ class on_thread_remove(commands.Cog):
     @commands.Cog.listener()
     
     async def on_thread_remove(self, thread: discord.Thread):
-        await self.client.call_addons('on_thread_remove', (thread,))
+        await self.client.call_mdextras('on_thread_remove', (thread,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_thread_remove(client))

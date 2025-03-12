@@ -8,7 +8,7 @@ class on_stage_instance_create(commands.Cog):
     @commands.Cog.listener()
     
     async def on_stage_instance_create(self, stage_instance: discord.StageInstance):
-        await self.client.call_addons('on_stage_instance_create', (stage_instance,))
+        await self.client.call_mdextras('on_stage_instance_create', (stage_instance,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_stage_instance_create(client))

@@ -8,7 +8,7 @@ class on_scheduled_event_user_remove(commands.Cog):
     @commands.Cog.listener()
     
     async def on_scheduled_event_user_remove(self, event: discord.ScheduledEvent, user: discord.User):
-        await self.client.call_addons('on_scheduled_event_user_remove', (event, user))
+        await self.client.call_mdextras('on_scheduled_event_user_remove', (event, user))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_scheduled_event_user_remove(client))

@@ -8,7 +8,7 @@ class on_voice_server_update(commands.Cog):
     @commands.Cog.listener()
     
     async def on_voice_server_update(self, data: dict):
-        await self.client.call_addons('on_voice_server_update', (data,))
+        await self.client.call_mdextras('on_voice_server_update', (data,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_voice_server_update(client))

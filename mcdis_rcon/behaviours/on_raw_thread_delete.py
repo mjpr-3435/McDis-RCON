@@ -7,7 +7,7 @@ class on_raw_thread_delete(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_thread_delete(self, payload: discord.RawThreadDeleteEvent):
-        await self.client.call_addons('on_raw_thread_delete', (payload,))
+        await self.client.call_mdextras('on_raw_thread_delete', (payload,))
 
 
 async def setup(client: McDisClient):

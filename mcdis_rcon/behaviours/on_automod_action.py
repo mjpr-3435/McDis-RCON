@@ -8,7 +8,7 @@ class on_automod_action(commands.Cog):
     @commands.Cog.listener()
     
     async def on_automod_action(self, execution: discord.AutoModAction):
-        await self.client.call_addons('on_automod_action', (execution,))
+        await self.client.call_mdextras('on_automod_action', (execution,))
     
 async def setup(client: McDisClient):
     await client.add_cog(on_automod_action(client))

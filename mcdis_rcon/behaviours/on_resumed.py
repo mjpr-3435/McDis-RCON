@@ -8,7 +8,7 @@ class on_resumed(commands.Cog):
     @commands.Cog.listener()
     
     async def on_resumed(self):
-        await self.client.call_addons('on_resumed')
+        await self.client.call_mdextras('on_resumed')
 
 async def setup(client: McDisClient):
     await client.add_cog(on_resumed(client))

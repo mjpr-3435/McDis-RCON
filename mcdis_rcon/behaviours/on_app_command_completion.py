@@ -8,7 +8,7 @@ class on_app_command_completion(commands.Cog):
     @commands.Cog.listener()
     
     async def on_app_command_completion(self, interaction: discord.Interaction, command: Union[discord.app_commands.Command, discord.app_commands.ContextMenu]):
-        await self.client.call_addons('on_app_command_completion', (interaction, command))
+        await self.client.call_mdextras('on_app_command_completion', (interaction, command))
     
 async def setup(client: McDisClient):
     await client.add_cog(on_app_command_completion(client))

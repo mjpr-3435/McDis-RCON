@@ -8,7 +8,7 @@ class on_socket_raw_receive(commands.Cog):
     @commands.Cog.listener()
     
     async def on_socket_raw_receive(self, message: str):
-        await self.client.call_addons('on_socket_raw_receive', (message,))
+        await self.client.call_mdextras('on_socket_raw_receive', (message,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_socket_raw_receive(client))

@@ -260,8 +260,6 @@ class Process():
     ###         Behaviours          ###
 
     async def   discord_listener        (self, message: discord.Message):
-        await self.call_plugins('on_discord_message', (message,))
-         
         if not isinstance(message.channel, discord.Thread): return
         elif not message.channel.parent_id == self.client.panel.id: return
         elif not message.channel.name == f'Console {self.name}': return

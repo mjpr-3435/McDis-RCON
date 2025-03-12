@@ -8,7 +8,7 @@ class on_member_remove(commands.Cog):
     @commands.Cog.listener()
     
     async def on_member_remove(self, member: discord.Member):
-        await self.client.call_addons('on_member_remove', (member,))
+        await self.client.call_mdextras('on_member_remove', (member,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_member_remove(client))

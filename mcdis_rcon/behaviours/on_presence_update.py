@@ -8,7 +8,7 @@ class on_presence_update(commands.Cog):
     @commands.Cog.listener()
     
     async def on_presence_update(self, before: discord.Member, after: discord.Member):
-        await self.client.call_addons('on_presence_update', (before, after))
+        await self.client.call_mdextras('on_presence_update', (before, after))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_presence_update(client))

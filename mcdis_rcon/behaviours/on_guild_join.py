@@ -8,7 +8,7 @@ class on_guild_join(commands.Cog):
     @commands.Cog.listener()
     
     async def on_guild_join(self, guild: discord.Guild):
-        await self.client.call_addons('on_guild_join', (guild,))
+        await self.client.call_mdextras('on_guild_join', (guild,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_guild_join(client))

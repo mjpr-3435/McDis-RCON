@@ -8,7 +8,7 @@ class on_raw_bulk_message_delete(commands.Cog):
     @commands.Cog.listener()
     
     async def on_raw_bulk_message_delete(self, payload: discord.RawBulkMessageDeleteEvent):
-        await self.client.call_addons('on_raw_bulk_message_delete', (payload,))
+        await self.client.call_mdextras('on_raw_bulk_message_delete', (payload,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_raw_bulk_message_delete(client))

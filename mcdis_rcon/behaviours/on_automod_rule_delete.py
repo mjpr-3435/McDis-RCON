@@ -8,7 +8,7 @@ class on_automod_rule_delete(commands.Cog):
     @commands.Cog.listener()
     
     async def on_automod_rule_delete(self, rule: discord.AutoModRule):
-        await self.client.call_addons('on_automod_rule_delete', (rule,))
+        await self.client.call_mdextras('on_automod_rule_delete', (rule,))
     
 async def setup(client: McDisClient):
     await client.add_cog(on_automod_rule_delete(client))

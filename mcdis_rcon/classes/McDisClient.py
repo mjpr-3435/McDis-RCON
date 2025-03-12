@@ -24,7 +24,8 @@ class McDisClient(commands.Bot):
         self.uploader                                           = Uploader()
         self.is_running                                         = False
         self.display_panel                                      = False
-
+        self.discord_listeners                                  = [x[:-3]for x in os.listdir(os.path.join(package_path, 'behaviours')) if x.endswith('.py')]
+        
         os.makedirs(self.path_backups        , exist_ok = True)
         os.makedirs(self.path_addons         , exist_ok = True)
         
@@ -697,7 +698,7 @@ class McDisClient(commands.Bot):
         
         await asyncio.sleep(1)
         
-        await self.call_addons('on_restart', (self, interaction))
+        await self.call_mdextras('on_restart', (self, interaction))
 
         any_process_open = lambda: any([process.is_running()  for process in self.processes])
 
@@ -801,7 +802,7 @@ class McDisClient(commands.Bot):
             return self._('✖ The path must be a file.')
         
         return True
-
+    
     async def   call_addons             (self, function: str, args: tuple = tuple()):
         for name, addon in self.addons.items():
             try:
@@ -814,6 +815,17 @@ class McDisClient(commands.Bot):
                     title=f'{function}() of {addon}',
                     error=traceback.format_exc()
                 )
+
+    async def   call_mdextras           (self, function: str, args: tuple = tuple(), plugins : bool = True, addons : bool = True):
+        if addons:
+            await self.call_addons(function, args)
+
+        if plugins:
+            if function in self.discord_listeners: 
+                function += 'listener_'
+
+            for process in self.processes:
+                await process.call_plugins(function, args)
 
     async def   error_report            (self, *, title: str, error: str, should_print: bool = True):
         error_log = f'- Error Report [{title}]:\n\n{error}'.replace('`','’')

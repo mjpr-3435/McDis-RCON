@@ -8,7 +8,7 @@ class on_audit_log_entry_create(commands.Cog):
     @commands.Cog.listener()
     
     async def on_audit_log_entry_create(self, entry: discord.AuditLogEntry):
-        await self.client.call_addons('on_audit_log_entry_create', (entry,))
+        await self.client.call_mdextras('on_audit_log_entry_create', (entry,))
 
 async def setup(client: McDisClient):
     await client.add_cog(on_audit_log_entry_create(client))
