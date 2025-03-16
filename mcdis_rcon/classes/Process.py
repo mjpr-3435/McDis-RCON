@@ -231,23 +231,16 @@ class Process():
                     error = traceback.format_exc())
                 return
             
-        make_zip(self.path_files, bkp_path, counter)
-
         log_filename = 'backup_log.txt'
+        log_path = os.path.join(self.path_files, log_filename)
         log_content = f'Backup created on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n'
 
-        with zipfile.ZipFile(bkp_path, 'a') as zipf:
-            zipf.writestr(log_filename, log_content)
+        with open(log_path, 'w') as log_file:
+            log_file.write(log_content)
 
-        with zipfile.ZipFile(bkp_path, 'a') as zipf:
-            if log_filename in zipf.namelist():
-                temp_zip = zipfile.ZipFile(bkp_path, 'w')
-                for item in zipf.infolist():
-                    if item.filename != log_filename:
-                        temp_zip.writestr(item.filename, zipf.read(item.filename))
-                temp_zip.close()
-            
-            zipf.writestr(log_filename, log_content)
+        make_zip(self.path_files, bkp_path, counter)
+
+        os.remove(log_path)
     
     def         unpack_bkp              (self, backup,  *, counter : list = None):
         shutil.rmtree(self.path_files)
