@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="mcdis_rcon",
-    version="0.4.19a",
+    version="0.4.20a",
     packages=find_packages(),
     include_package_data=True,
     package_data={
