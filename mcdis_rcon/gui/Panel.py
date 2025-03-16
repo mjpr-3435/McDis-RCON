@@ -58,7 +58,8 @@ class GuideButton           (discord.ui.Button):
             title = f'> McDis RCON v{mcdis_vers}',
             colour = embed_colour,
             description = 
-            f'Coded by KassiuLo.\n[[Kassius\' Discord]](https://discord.gg/xB9N38HBJY)')
+            'The guide will be implemented soon, but in the meantime, you can find it on GitHub.'
+            '\n\nCoded by KassiuLo.\n[[Kassius\' Discord]](https://discord.gg/xB9N38HBJY)')
         embed.set_image(url = 'https://i.imgur.com/phe4JAf.png')
         embed.set_footer()
         embed.url = 'https://github.com/mjpr-3435/McDis-RCON'
