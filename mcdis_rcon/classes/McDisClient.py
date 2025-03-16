@@ -691,14 +691,14 @@ class McDisClient(commands.Bot):
         await message.delete()
 
     async def   restart                 (self, interaction: discord.Interaction):
+        self.unload_addons()
+        
         await interaction.response.edit_message(
             content = self._('Checking if there are open processes...'),
             embed = None,
             view = None)
         
         await asyncio.sleep(1)
-        
-        await self.call_mdextras('on_restart', (self, interaction))
 
         any_process_open = lambda: any([process.is_running()  for process in self.processes])
 
@@ -743,13 +743,7 @@ class McDisClient(commands.Bot):
         os.execv(command, sys.argv)
     
     def         on_stop                 (self):
-        for addon in self.addons:
-            try: 
-                try: func = getattr(addon, 'on_stop')
-                except AttributeError: continue
-                func(self)
-            except: 
-                print(self._('Error in {} of {}: {}').format('on_stop()', addon.__name__, traceback.format_exc()))
+        self.unload_addons()
 
         any_process_open = lambda: any([process.is_running() for process in self.processes])
         
