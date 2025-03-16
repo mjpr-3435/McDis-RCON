@@ -316,8 +316,6 @@ For more details about these implementations, check out:
 - [AeternumBot](https://github.com/mjpr-3435/AeternumBot)  
 - EnigmaBot (Coming soon)
 
-Here is the translation to English:
-
 
 ## 6. File Manager
 
