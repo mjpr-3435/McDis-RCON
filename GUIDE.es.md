@@ -374,8 +374,8 @@ En servidores como Aeternum SMP, se han definido comandos específicos para auto
 
 ![Commands MobSwitch](https://i.imgur.com/5KCcmi2.png)  
 
-- **`⬅️`** → Regresa a la interfaz de `.mdcommands`.  
-- **`🔄`** → Permite alternar entre las distintas acciones del comando.  
+- **`⬅️`** → Regresa a la interfaz de `.mdcommands`.   
+- **`🔄`** → Recarga la interfaz.
 - **`Execute`** → Ejecuta el comando en la consola del proceso.  
 - **`Edit`** → Abre el archivo `.yml` para editarlo.  
 - **`Delete`** → Elimina el comando.  

@@ -338,11 +338,9 @@ When a file is selected instead of a folder, the `Request`, `Edit`, and `Delete`
 
 - **`⬅️`** → Go back to the previous folder.
 - **`🔄`** → Reload the interface.
-- **`Request`** → Requests the file for download, with a 5MB limit due to Discord restrictions.
+- **`Request`** → Requests the file for download, with a 5MB limit due to Discord restrictions. For larger files, Flask can be used (explained later).
 - **`Edit`** → Allows renaming the file.
 - **`Delete`** → Deletes the file.
-
-For larger files, Flask can be used (explained later).
 
 ### Text File Editor
 
@@ -370,7 +368,7 @@ On servers like Aeternum SMP, specific commands have been defined to automate ta
 ![Commands MobSwitch](https://i.imgur.com/5KCcmi2.png)
 
 - **`⬅️`** → Go back to the `.mdcommands` interface.
-- **`🔄`** → Switch between different command actions.
+- **`🔄`** → Reload the interface.
 - **`Execute`** → Executes the command in the process console.
 - **`Edit`** → Opens the `.yml` file for editing.
 - **`Delete`** → Deletes the command.
