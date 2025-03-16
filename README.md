@@ -2,10 +2,10 @@
 [![Python Versions](https://img.shields.io/pypi/pyversions/mcdis_rcon.svg?maxAge=3600)](https://pypi.org/project/mcdis_rcon)
 [![PyPI Version](https://img.shields.io/pypi/v/mcdis_rcon.svg)](https://pypi.org/project/mcdis_rcon)
 [![License](https://img.shields.io/github/license/mjpr-3435/McDis-RCON.svg)](https://github.com/mjpr-3435/McDis-RCON/blob/master/LICENSE)
+[![English](https://img.shields.io/badge/README-English-blue)](README.md)
+[![Español](https://img.shields.io/badge/README-Español-brightgreen)](README.es.md)
 
 McDis-RCON is a Python application that allows you to relay the console of a Minecraft server to Discord, facilitating remote and efficient management through a Discord bot.
-
-[[Español]](README.es.md)
 
 ## ✨ Features
 
@@ -37,7 +37,10 @@ To install **McDis-RCON**, simply run the following command:
 pip install mcdis-rcon
 ```
 
-## ⚙️ Configuration
+## ⚙️ User Guide
+
+[![English](https://img.shields.io/badge/Guide-English-blue)](GUIDE.en.md)
+[![Español](https://img.shields.io/badge/Guía-Español-brightgreen)](GUIDE.es.md)
 
 After installing **McDis-RCON**, run the following command in the folder where you want to store your server files:
 
@@ -53,7 +56,7 @@ mcdis run
 
 In the following repositories, you can see how McDis-RCON is configured in EnigmaTech SMP and Aeternum SMP.
 - [AeternumBot](https://github.com/mjpr-3435/AeternumBot)
-- [EnigmaBot](https://github.com/mjpr-3435/AeternumBot)
+- EnigmaBot (Coming Soon)
 
 📌 **Coming Soon**: I will publish a more comprehensive documentation and also integrate the full guide in McDis's panel.
 
