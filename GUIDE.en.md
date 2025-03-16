@@ -47,7 +47,6 @@ Commands: start, stop, restart, kill, mdreload, adreload, status, exit
 Once McDis-RCON is running, it will handle the `Ctrl + C` signal, attempting to stop processes using the commands defined in `stop_cmd`.  
 If a process takes more than 60 seconds to close, it will be forcibly terminated before the program exits. You can also manage processes directly from the console.
 
-Ahora con esto:
 
 ## 3. File Structure
 
