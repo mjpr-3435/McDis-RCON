@@ -14,6 +14,7 @@ import zipfile
 import logging
 import zipimport
 import gettext
+import aiohttp
 import socket
 import random
 import psutil
@@ -41,7 +42,7 @@ from datetime import datetime
 from typing import Union, Callable
 from pathlib import Path
 
-mcdis_vers          = "0.4.21a"
+mcdis_vers          = "0.4.30a"
 package_path        = os.path.dirname(__file__)
 embed_colour        = 0x2f3136
 blank_space         = '‎ '

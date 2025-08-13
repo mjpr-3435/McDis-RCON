@@ -13,10 +13,6 @@ def init():
         if not os.path.exists(filename):
             shutil.copy(src_path, filename)
 
-def run():
-    from ..main import run
-    run()
-
 def main():
     parser = argparse.ArgumentParser(description="McDis RCON CLI")
     subparsers = parser.add_subparsers(dest='command')
@@ -26,8 +22,14 @@ def main():
     init_parser.set_defaults(func=init)
 
     # Subcommand `run`
+    from ..main import run
     mcdis_parser = subparsers.add_parser('run', help='Run the main function')
     mcdis_parser.set_defaults(func=run)
+
+    # Subcommand `run`
+    from ..main import update_po
+    mcdis_parser = subparsers.add_parser('po', help='Update the .po file')
+    mcdis_parser.set_defaults(func = update_po)
 
     # Parse args and call the appropriate function
     args = parser.parse_args()

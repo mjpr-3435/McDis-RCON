@@ -61,29 +61,22 @@ def mcdis_path(path: str) -> str:
 def un_mcdis_path(path: str) -> str:
     return '.' if path == 'McDis' else path.removeprefix(f'McDis{os.sep}')
 
-def get_path_size(path: str, *, string = True) -> Union[str, int]:
-    if not os.path.exists(path): return 'Not Found' if string else 0
-    
-    total = 0
-    
+def get_path_size(path: str, *, string: bool = True) -> Union[str, int]:
     try:
-        if not os.path.isdir(path):
-            total = os.path.getsize(path)
-        
-        else:
-            with os.scandir(path) as it:
-                for entry in it:
-                    if entry.is_file():
-                        total += entry.stat().st_size
-                    elif entry.is_dir():
-                        total += get_path_size(entry.path, string = False)
-        
+        result = subprocess.run(
+            ['du', '-sb', path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            check=True
+        )
+        total = int(result.stdout.split()[0])
+
         if string:
             magnitude = ['B', 'KB', 'MB', 'GB', 'TB']
             i = int(math.log(total, 1024)) if total != 0 else 0
-
-            return f'{total / (1024 ** (i)) :.1f} {magnitude[i]}'
-        else: 
+            return f'{total / (1024 ** i):.1f} {magnitude[i]}'
+        else:
             return total
 
     except:

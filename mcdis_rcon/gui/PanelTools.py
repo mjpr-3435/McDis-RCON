@@ -11,6 +11,7 @@ class ToolsView      (discord.ui.View):
         self.add_item(ProcessesButton   (self.client))
         self.add_item(UploaderButton    (self.client))
         self.add_item(FlaskButton       (self.client))
+        self.add_item(FilesManagerButton(self.client))
         # self.add_item(ReloadButton      (self.client))
 
 class BackButton            (discord.ui.Button):
@@ -75,6 +76,19 @@ class FlaskButton           (discord.ui.Button):
         await interaction.response.send_message(
             embed = FlaskEmbed(self.view.client),
             view = FlaskView(self.view.client),
+            ephemeral = True)
+        
+class FilesManagerButton           (discord.ui.Button):
+    def __init__(self, client: McDisClient):
+        super().__init__(label = 'Files Manager', style = discord.ButtonStyle.gray)
+        self.view : ToolsView
+
+    async def callback(self, interaction: discord.Interaction):
+        from .PanelFiles import FilesView, FilesEmbed
+
+        await interaction.response.send_message(
+            embed = FilesEmbed(self.view.client),
+            view = FilesView(self.view.client),
             ephemeral = True)
 
 class ReloadButton      (discord.ui.Button):

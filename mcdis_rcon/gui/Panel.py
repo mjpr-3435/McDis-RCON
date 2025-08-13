@@ -31,8 +31,9 @@ class FilesButton           (discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         from .FileManager import FileManagerView, FileManagerEmbed
+        await interaction.response.defer(ephemeral = True, thinking=True)
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             embed = FileManagerEmbed(self.view.client),
             view = FileManagerView(self.view.client),
             ephemeral = True)

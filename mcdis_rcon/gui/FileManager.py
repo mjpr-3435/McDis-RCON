@@ -773,16 +773,16 @@ class FileManagerEmbed     (discord.Embed):
         self.dir_count      = elements_on(path, include_files = False, recursive = False)
 
         self.title = f"> **{mcdis_path(self.path)}**"
-        footer = f"Size: {get_path_size(self.path)}"
+        footer = '' if self.client.files_manager.fast_mode else f"Size: {get_path_size(self.path)}"
 
         if os.path.isdir(self.path):
             self._add_directory_fields()
-            footer += self._generate_footer_for_dirs_and_files()
+            footer = '' if self.client.files_manager.fast_mode else footer + self._generate_footer_for_dirs_and_files()
         else:
             self._add_file_content()
-            footer += self._generate_footer_for_file()
+            footer = '' if self.client.files_manager.fast_mode else footer + self._generate_footer_for_file()
 
-        self.set_footer(text = f"{blank_space * 184}\n{footer}")
+        if not self.client.files_manager.fast_mode: self.set_footer(text = f"{blank_space * 184}\n{footer}")
 
     def _add_directory_fields                   (self):
         dirs, files = self._get_sorted_dirs_and_files()

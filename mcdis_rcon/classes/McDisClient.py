@@ -8,6 +8,7 @@ class McDisClient(commands.Bot):
         from .Network import Network
         from .Server import Server
         from .Flask import FlaskManager
+        from .FilesManager import FilesManager
         
         self.prefix                                             = '!!'
         self.cwd                                                = os.getcwd()
@@ -22,6 +23,7 @@ class McDisClient(commands.Bot):
         self.networks   : list[Network]                         = []
         self.servers    : list[Server]                          = []
         self.uploader                                           = Uploader()
+        self.files_manager                            = FilesManager()
         self.is_running                                         = False
         self.display_panel                                      = False
         self.discord_listeners                                  = [x[:-3]for x in os.listdir(os.path.join(package_path, 'behaviours')) if x.endswith('.py')]
@@ -248,16 +250,11 @@ class McDisClient(commands.Bot):
     
     async def   _load_banner           (self, *, loop: bool = True, view: bool = True):
         from ..gui.Panel import PanelView, PanelEmbed
-        first_iteration = True
 
-        while loop or first_iteration:
-            first_iteration = False
-            file = None
-
-            if os.path.exists('banner.png'): 
-                file = discord.File('banner.png')
-            
+        while True:
             try:
+                file = None
+                if os.path.exists('banner.png'): file = discord.File('banner.png')
                 messages =  [msg async for msg in self.panel.history(limit = None, oldest_first = True)]
                 
                 if not messages:
@@ -286,7 +283,16 @@ class McDisClient(commands.Bot):
                         embed = PanelEmbed(self), 
                         view = PanelView(self), 
                         attachments = [file] if file else [])
+                
+                if not loop: break
 
+            except (aiohttp.ClientError, discord.HTTPException):
+                try:
+                    self.panel = await self.fetch_channel(self.panel.id)
+                except Exception:
+                    await asyncio.sleep(1)
+                    continue
+    
             except:
                 await self.error_report(
                     title = 'Server Panel',

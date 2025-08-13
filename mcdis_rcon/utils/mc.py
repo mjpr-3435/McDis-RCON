@@ -2,11 +2,13 @@ from ..modules import *
 
 def mc_uuid(player: str, *, online : bool = True):
     if online:
-        response = requests.get(f'https://api.mojang.com/users/profiles/minecraft/{player}')
-
-        if response.status_code == 200:
-            data = response.json()
-            return uuid.UUID(data['id']).__str__()
+        try:
+            response = requests.get(f'https://api.mojang.com/users/profiles/minecraft/{player}', timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                return uuid.UUID(data['id']).__str__()
+        except Exception:
+            return "00000000-0000-0000-0000-000000000000"
     else:
         hash = hashlib.md5(f"OfflinePlayer:{player}".encode('utf-8')).digest()
         byte_array = [byte for byte in hash]

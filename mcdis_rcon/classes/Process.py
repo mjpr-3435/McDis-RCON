@@ -315,6 +315,13 @@ class Process():
 
                 else: 
                     await asyncio.sleep(0.1)
+                    
+            except (aiohttp.ClientError, discord.HTTPException):
+                try:
+                    remote_console = await thread(f'Console {self.name}', self.client.panel)
+                except Exception:
+                    await asyncio.sleep(1)
+                    continue
 
             except:
                 await self.error_report(

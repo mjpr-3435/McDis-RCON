@@ -471,3 +471,6 @@ msgstr  "Estás seguro de que deseas eliminar el directorio `{}`?"
 
 msgid   "Are you sure you want to delete the file `{}`?"
 msgstr  "Estás seguro de que deseas eliminar el archivo `{}`?"
+
+msgid   "This banner lets you configure the File Manager functions."
+msgstr  "Este banner te permite configurar las funciones del administrador de archivos."
