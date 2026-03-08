@@ -359,25 +359,26 @@ class Process():
         asyncio.create_task(self._relay_console())
         threading.Thread(target = self._read_console).start()
             
-        try: 
+        try:
             while self.process.poll() is None or not self._console_log.empty():
-                if self._console_log.empty(): 
-                    await asyncio.sleep(0.1)
-                    continue
+                while not self._console_log.empty():
 
-                log = self._console_log.get()
-                for i in range(100): log : str = log.replace(f'[{i}m','')
-                if log.replace('\n','').strip() == '': continue
-                if not any([x in log for x in self.blacklist if x]): self._console_relay.put(log)
-                
-                asyncio.create_task(self._listener_events(log))
+                    log = self._console_log.get()
+                    for i in range(100): log : str = log.replace(f'[{i}m','')
+                    if log.replace('\n','').strip() == '': continue
+                    if not any([x in log for x in self.blacklist if x]): self._console_relay.put(log)
+
+                    asyncio.create_task(self._listener_events(log))
+
+                await asyncio.sleep(0)
+
         except:
             await self.error_report(
-                title = 'listener_console()',
-                error = traceback.format_exc()
+                title='listener_console()',
+                error=traceback.format_exc()
             )
             return
-        
+
         self.stop()
 
     ###         Utils               ###
