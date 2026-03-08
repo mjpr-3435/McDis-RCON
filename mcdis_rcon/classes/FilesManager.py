@@ -4,4 +4,4 @@ from ..utils import *
 class FilesManager():
     def __init__(self):
         self.overwrite      = False
-        self.fast_mode      = False
+        self.fast_mode      = True

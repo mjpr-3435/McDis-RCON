@@ -17,14 +17,13 @@ class BackupsView       (discord.ui.View):
         self.add_item(BackButton        (self.client))
         self.add_item(UpdateButton      (self.client))
         self.add_item(FilesButton       (self.client))
-
+    
     def _get_backups(self):
         pattern = os.path.join(
             self.process.path_bkps,
-            f'{self.process.name} [1-{self.client.config["Backups"]}].zip',
+            f'{self.process.name} [1-{self.client.config["Backups"]}]',
         )
-        
-        backups = glob.glob(pattern)
+        backups = [b for b in glob.glob(pattern) if os.path.isdir(b)]
         backups.sort()
         return backups
 
@@ -61,7 +60,7 @@ class BackupSelect      (discord.ui.Select):
                 await confirmation_interaction.response.defer()
                 await confirmation_interaction.followup.edit_message(
                     message_id = confirmation_interaction.message.id,
-                    content = self.view.client._('Compressing files...'),
+                    content = self.view.client._('Copying files...'),
                     embed = None,
                     view = None)
                 
@@ -82,7 +81,7 @@ class BackupSelect      (discord.ui.Select):
                     if counter[1] == 0: 
                         await asyncio.sleep(0.1)
                     else:
-                        show = self.view.client._('`[{}]`: `[{}/{}]` files have been compressed...')\
+                        show = self.view.client._('`[{}]`: `[{}/{}]` files have been processed...')\
                             .format(self.view.process.name, counter[0], counter[1])
                         await confirmation_interaction.followup.edit_message(
                             message_id = confirmation_interaction.message.id,
@@ -90,9 +89,9 @@ class BackupSelect      (discord.ui.Select):
                         await asyncio.sleep(0.5)
                 
                 if reports['error']:
-                    msg = self.view.client._('✖ An error occurred while compressing files.')
+                    msg = self.view.client._('✖ An error occurred while copying files.')
                 else:
-                    msg = self.view.client._('✔ The files have been successfully compressed.')
+                    msg = self.view.client._('✔ The files have been successfully processed.')
 
                 await confirmation_interaction.followup.edit_message(
                 message_id = confirmation_interaction.message.id,
@@ -220,12 +219,11 @@ class BackupsEmbed      (discord.Embed):
     def _get_backups(self):
         pattern = os.path.join(
             self.process.path_bkps,
-            f'{self.process.name} [1-{self.client.config["Backups"]}].zip',
+            f'{self.process.name} [1-{self.client.config["Backups"]}]',
         )
-        backups = glob.glob(pattern)
+        backups = [b for b in glob.glob(pattern) if os.path.isdir(b)]
         backups.sort()
         return backups
-
     def _generate_description(self):
         if not self.backups:
             return f'```{self.client._("No backups were found.")}```'
@@ -245,29 +243,32 @@ class BackupsEmbed      (discord.Embed):
         self.set_footer(text=footer_text)
 
     def _mrkd(self, file: str, index: int) -> str:
-        with zipfile.ZipFile(file, 'r') as zipf:
-            log_filename = 'backup_log.txt'
+        log_path = os.path.join(file, 'backup_log.txt')
 
-            if log_filename in zipf.namelist():
-                with zipf.open(log_filename) as log_file:
-                    log_content = log_file.read().decode('utf-8')
-                    
-                    lines = log_content.splitlines()
-                    for line in lines:
-                        if line.startswith('Backup created on:'):
-                            date_str = line.replace('Backup created on:', '').strip()
-                            date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
-                            break
-            else:
-                date = "Date not found in log"
+        if os.path.exists(log_path):
+            with open(log_path, 'r', encoding='utf-8') as log_file:
+                lines = log_file.read().splitlines()
+                for line in lines:
+                    if line.startswith('Backup created on:'):
+                        date_str = line.replace('Backup created on:', '').strip()
+                        date = datetime.strptime(
+                            date_str, '%Y-%m-%d %H:%M:%S'
+                        ).strftime('%Y-%m-%d %H:%M:%S')
+                        break
+                else:
+                    date = "Date not found in log"
+        else:
+            date = "Date not found in log"
 
-        size = get_path_size(file)
+        size = 'Skipped' if self.client.files_manager.fast_mode else get_path_size(file)
         offset_hours, offset_minutes = divmod(
             time.timezone // 60 if time.localtime().tm_isdst == 0 else time.altzone // 60,
             60,
         )
+
         return (
             f"```asciidoc\n{index + 1}. {os.path.basename(file)}\n"
             f"   ↳ Disk Usage:: {5 * blank_space}{size}\n"
-            f"   ↳ Date:: {11 * blank_space}{date} (UTC {offset_hours:+03}:{offset_minutes:02})```"
-        )     
+            f"   ↳ Date:: {11 * blank_space}{date} "
+            f"(UTC {offset_hours:+03}:{offset_minutes:02})```"
+        )

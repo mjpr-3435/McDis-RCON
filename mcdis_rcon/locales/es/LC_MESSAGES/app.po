@@ -180,6 +180,9 @@ msgstr  "[Uploader]: El Uploader está abierto actualmente."
 msgid   "[Flask]: Flask is currently running."
 msgstr  "[Flask]: Flask está abierto actualmente."
 
+msgid   "[Fast Mode]: Managed folders skipped."
+msgstr  "[Fast Mode]: Cálculo de carpetas administradas omitido."
+
 msgid   "> Server Resources"
 msgstr  "> Recursos del servidor"
 
@@ -254,17 +257,17 @@ msgstr  "Selecciona un backup"
 msgid   "✖ The process must be closed."
 msgstr  "✖ El proceso debe estar cerrado."
 
-msgid   "Compressing files..."
-msgstr  "Comprimiendo archivos..."
+msgid   "Copying files..."
+msgstr  "Copiando archivos..."
 
-msgid   "`[{}]`: `[{}/{}]` files have been compressed..."
-msgstr  "`[{}]`: `[{}/{}]` archivos han sido comprimidos..."
+msgid   "`[{}]`: `[{}/{}]` files have been processed..."
+msgstr  "`[{}]`: `[{}/{}]` archivos han sido procesados..."
 
-msgid   "✖ An error occurred while compressing files."
-msgstr  "✖ Ocurrió un error mientras se comprimían los archivos."
+msgid   "✖ An error occurred while copying files."
+msgstr  "✖ Ocurrió un error mientras se copiaban los archivos."
 
-msgid   "✔ The files have been successfully compressed."
-msgstr  "✔ Los archivos fueron comprimidos satisfactoriamente."
+msgid   "✔ The files have been successfully processed."
+msgstr  "✔ Los archivos fueron procesados satisfactoriamente."
 
 msgid   "Are you sure you want to make a backup?"
 msgstr  "Estás seguro que deseas crear un backup?"
@@ -313,6 +316,18 @@ msgstr  "Nombre"
 
 msgid   "Are you sure you want to delete the `{}` command?"
 msgstr  "Estás seguro que deseas eliminar el comando `{}`"
+
+msgid   "✖ An error occurred while compressing files."
+msgstr  "✖ Ocurrió un error mientras se comprimian los archivos."
+
+msgid   "✔ The files have been successfully compressed."
+msgstr  "✔ Los archivos se comprimieron exitosamente."
+
+msgid   "`[{}]`: `[{}/{}]` files have been compressed..."
+msgstr  "`[{}]`: `[{}/{}]` archivos han sido comprimidos..."
+
+msgid   "`[{}]`: Compressing files..."
+msgstr  "`[{}]`: Comprimiendo archivos..."
 
 msgid   "Description"
 msgstr  "Descripción"

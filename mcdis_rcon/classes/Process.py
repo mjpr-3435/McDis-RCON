@@ -201,55 +201,70 @@ class Process():
         return ram_usage(self.real_process)
 
     def         disk_usage              (self, string = True) -> float:
-        return get_path_size(self.path_files, string = string)
+        if self.client.files_manager.fast_mode:
+            return 'Skipped'
+        else:
+            return get_path_size(self.path_files, string = string)
 
     ###         Backups Logic       ###
 
-    def         make_bkp                (self,          *, counter : list = None):
-        if self.is_running(): return
+    def         make_bkp                (self, *, counter: list = None, Force: bool = False):
+        if not Force and self.is_running():
+            return
 
-        os.makedirs(self.path_bkps, exist_ok = True)
+        os.makedirs(self.path_bkps, exist_ok=True)
 
-        bkp_path = os.path.join(self.path_bkps, f'{self.name} 1.zip')
-        pattern = os.path.join(self.path_bkps, f'{self.name} [1-{self.client.config["Backups"]}].zip')
+        pattern = os.path.join(
+            self.path_bkps,
+            f'{self.name} [1-{self.client.config["Backups"]}]'
+        )
         bkps = glob.glob(pattern)
-        sorted_bkps = sorted(bkps, key = os.path.getmtime, reverse = True)
+        sorted_bkps = sorted(bkps, key=os.path.getmtime, reverse=True)
 
-        for i in range(self.client.config['Backups'] - 1,len(sorted_bkps)): os.remove(sorted_bkps.pop(i))
+        for i in range(self.client.config['Backups'] - 1, len(sorted_bkps)):
+            shutil.rmtree(sorted_bkps.pop(i))
 
         sorted_bkps.reverse()
-    
+
         for bkp in sorted_bkps:
             new_index = (len(sorted_bkps) + 1) - sorted_bkps.index(bkp)
-            new_name = os.path.join(self.path_bkps, f"{self.name} {new_index}.zip")
-            
+            new_name = os.path.join(self.path_bkps, f"{self.name} {new_index}")
             try:
                 os.rename(bkp, new_name)
             except:
                 self.error_report(
-                    title = 'Renaming in make_bkp()',
-                    error = traceback.format_exc())
+                    title='Renaming in make_bkp()',
+                    error=traceback.format_exc()
+                )
                 return
-            
+
+        bkp_path = os.path.join(self.path_bkps, f'{self.name} 1')
+
         log_filename = 'backup_log.txt'
         log_path = os.path.join(self.path_files, log_filename)
-        log_content = f'Backup created on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n'
+        log_content = (
+            f'Backup created on: '
+            f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n'
+        )
 
         with open(log_path, 'w') as log_file:
             log_file.write(log_content)
 
-        make_zip(self.path_files, bkp_path, counter)
+        copy_dir(self.path_files, bkp_path, counter)
 
         os.remove(log_path)
-    
-    def         unpack_bkp              (self, backup,  *, counter : list = None):
+
+    def         unpack_bkp              (self, backup, *, counter: list = None):
+        if self.is_running():
+            return
+        
         shutil.rmtree(self.path_files)
+        os.makedirs(self.path_files, exist_ok=True)
 
-        os.makedirs(self.path_files, exist_ok = True)
         source = os.path.join(self.path_bkps, backup)
+        copy_dir(source, self.path_files, counter)
 
-        unpack_zip(source, self.path_files, counter)
-   
+
     ###         Behaviours          ###
 
     async def   discord_listener        (self, message: discord.Message):

@@ -134,6 +134,10 @@ class PanelEmbed            (discord.Embed):
 
         if self.client.config['Flask']['Allow'] and self.client.flask.is_running == True: 
             self._add_warning(self.client._('[Flask]: Flask is currently running.'))
+        
+        if self.client.files_manager.fast_mode:  
+            self._add_warning(self.client._('[Fast Mode]: Managed folders skipped.'))
+
 
         self.add_field(inline = True, name = self.client._('> Server Resources'), value =
             f'```asciidoc\n'

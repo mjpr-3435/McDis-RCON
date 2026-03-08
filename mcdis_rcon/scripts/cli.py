@@ -13,6 +13,8 @@ def init():
         if not os.path.exists(filename):
             shutil.copy(src_path, filename)
 
+    print("✔ Successfully generated md_config.yml.")
+
 def main():
     parser = argparse.ArgumentParser(description="McDis RCON CLI")
     subparsers = parser.add_subparsers(dest='command')

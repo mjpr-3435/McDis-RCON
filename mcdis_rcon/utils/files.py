@@ -82,6 +82,20 @@ def get_path_size(path: str, *, string: bool = True) -> Union[str, int]:
     except:
         return 'Error' if string else 0
 
+def copy_dir(source: str, destination: str, counter: list = None):
+    if counter:
+        counter[0], counter[1] = 0, elements_on(source)
+
+    shutil.copytree(
+        source,
+        destination,
+        dirs_exist_ok=True,
+        copy_function=lambda src, dst: (
+            shutil.copy2(src, dst),
+            counter and counter.__setitem__(0, counter[0] + 1)
+        )[0]
+    )
+
 def make_zip(source : str, destination : str, counter : list = None):
     if counter: 
         counter[0], counter[1] = 0, elements_on(source)
