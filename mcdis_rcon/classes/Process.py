@@ -5,8 +5,15 @@ from ..utils import *
 
 from .McDisClient import McDisClient
 
+from typing import TypedDict
+
+class ProcessConfig(TypedDict):
+    start_cmd: str
+    stop_cmd: str
+    blacklist: list[str]
+
 class Process():
-    def __init__(self, name: str, client: McDisClient, config: dict):
+    def __init__(self, name: str, client: McDisClient, config: ProcessConfig):
         self.name                   = name
         self.path_files             = name
         self.client                 = client
