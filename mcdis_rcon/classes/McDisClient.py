@@ -148,6 +148,8 @@ class McDisClient(commands.Bot):
 
         lang.install()
         self._ = lang.gettext
+        
+        self.prefix = (self.config['Bot Prefix'] or '').strip() or self.prefix
 
         print(self._('Your configuration has been loaded successfully.'))
 
