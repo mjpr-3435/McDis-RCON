@@ -1,3 +1,5 @@
+from typing import Any
+
 from ..modules import *
 from ..utils import *
 
@@ -396,7 +398,7 @@ class Process():
     def         add_log                 (self, log: str):
         self._console_relay.put(self.log_format(log))
 
-    async def   call_plugins            (self, function: str, args: tuple = tuple()):
+    async def   call_plugins            (self, function: str, args: tuple[Any, ...] = tuple()) -> None:
        for name, plugin in self.plugins.items():
             try: 
                 func = getattr(plugin, function, None)
