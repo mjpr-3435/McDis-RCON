@@ -221,7 +221,7 @@ When the process loads or reloads plugins, it looks inside `McDis/<process>/.mdp
 
 - **`.py` files**: If they contain a class `mdplugin`, an instance of this class is created.  
 
-When the class is instantiated, an `McDisClient` object from McDis-RCON is passed as an argument.
+When the class is instantiated, an `Server` or `Network` object from McDis-RCON is passed as an argument.
 
 </details>
 
@@ -247,17 +247,17 @@ If we want the bot to react to all messages in the panel channel when the SMP pr
 
 ```python
 import discord
-from mcdis_rcon.classes import McDisClient
+from mcdis_rcon.classes import Server
 
 class mdplugin:
-    def __init__(self, client: McDisClient):
-        self.client = client
+    def __init__(self, server: Server):
+        self.server = server
 
     async def listener_on_message(self, message: discord.Message):
         if message.author.bot:
             return  # Ignore messages from bots
 
-        if message.channel.id == self.client.panel.id:
+        if message.channel.id == self.server.client.panel.id:
             await message.add_reaction('✅')
 ```
 
@@ -273,11 +273,11 @@ If we want a plugin to detect when a player connects, we can analyze the server 
 `McDis/SMP/.mdplugins/player_tracker.py`  
 
 ```python
-from mcdis_rcon.classes import McDisClient
+from mcdis_rcon.classes import Server
 
 class mdplugin:
-    def __init__(self, client: McDisClient):
-        self.client = client
+    def __init__(self, server: Server):
+        self.server = server
 
     def listener_events(self, log: str):
         if "joined the game" in log:
@@ -293,11 +293,11 @@ class mdplugin:
 Before reloading the plugins, McDis-RCON checks if the loaded plugins have an `unload` method. This method takes no arguments and allows cleanup actions before reloading.  
 
 ```python
-from mcdis_rcon.classes import McDisClient
+from mcdis_rcon.classes import Server
 
 class mdplugin:
-    def __init__(self, client: McDisClient):
-        self.client = client
+    def __init__(self, server: Server):
+        self.server = server
 
     def unload(self):
         # Actions before unloading

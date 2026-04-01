@@ -225,7 +225,7 @@ Cuando el proceso carga o recarga los plugins, busca dentro de `McDis/<process>/
 
 - **Archivos `.py`**: Si contienen una clase `mdplugin`, se crea una instancia de esta clase.  
 
-Al instanciar la clase, se le pasa como argumento un objeto `McDisClient` de McDis-RCON.
+Al instanciar la clase, se le pasa como argumento un objeto `Server` o `Network` de McDis-RCON.
 
 </details>
 
@@ -251,17 +251,17 @@ Si queremos que el bot reaccione a todos los mensajes en el canal del panel cuan
 
 ```python
 import discord
-from mcdis_rcon.classes import McDisClient
+from mcdis_rcon.classes import Server
 
 class mdplugin:
-    def __init__(self, client: McDisClient):
-        self.client = client
+    def __init__(self, server: Server):
+        self.server = server
 
     async def listener_on_message(self, message: discord.Message):
         if message.author.bot:
             return  # Ignorar mensajes de bots
 
-        if message.channel.id == self.client.panel.id:
+        if message.channel.id == self.server.client.panel.id:
             await message.add_reaction('✅')
 ```
 
@@ -274,14 +274,14 @@ El método `listener_on_message` sigue la misma estructura que la documentada en
   <summary>Ejemplo: Detectar jugadores que se conectan mediante logs</summary>
 
 Si queremos que un plugin detecte cuando un jugador se conecta, podemos analizar los logs del servidor. Suponiendo que los mensajes de conexión tienen el formato `Player <nombre> joined the game`, podemos escribir un plugin en:  
-`McDis/SMP/.mdplugins/player_tracker.py`  
+`McDis/SMP/.mdplugins/player_tracker.py`
 
 ```python
-from mcdis_rcon.classes import McDisClient
+from mcdis_rcon.classes import Server
 
 class mdplugin:
-    def __init__(self, client: McDisClient):
-        self.client = client
+    def __init__(self, server: Server):
+        self.server = server
 
     def listener_events(self, log: str):
         if "joined the game" in log:
@@ -298,11 +298,11 @@ class mdplugin:
 Antes de recargar los plugins, McDis-RCON verifica si los plugins cargados tienen un método `unload`. Este método no recibe argumentos y permite ejecutar acciones de limpieza antes de recargar.  
 
 ```python
-from mcdis_rcon.classes import McDisClient
+from mcdis_rcon.classes import Server
 
 class mdplugin:
-    def __init__(self, client: McDisClient):
-        self.client = client
+    def __init__(self, server: Server):
+        self.server = server
 
     def unload(self):
         # Acciones antes de la descarga
