@@ -1,3 +1,5 @@
+from typing import Any
+
 from ..modules import *
 from ..utils import *
 
@@ -798,7 +800,7 @@ class McDisClient(commands.Bot):
         
         return True
     
-    async def   call_addons             (self, function: str, args: tuple = tuple()):
+    async def   call_addons             (self, function: str, args: tuple[Any, ...] = tuple()):
         for name, addon in self.addons.items():
             try:
                 func = getattr(addon, function, None)
@@ -811,7 +813,7 @@ class McDisClient(commands.Bot):
                     error=traceback.format_exc()
                 )
 
-    async def   call_mdextras           (self, function: str, args: tuple = tuple(), plugins : bool = True, addons : bool = True):
+    async def   call_mdextras           (self, function: str, args: tuple[Any, ...] = tuple(), plugins : bool = True, addons : bool = True):
         if addons:
             await self.call_addons(function, args)
 
