@@ -1,3 +1,5 @@
+from typing import Any
+
 from ..modules import *
 from ..utils import *
 
@@ -148,6 +150,8 @@ class McDisClient(commands.Bot):
 
         lang.install()
         self._ = lang.gettext
+        
+        self.prefix = (self.config['Bot Prefix'] or '').strip() or self.prefix
 
         print(self._('Your configuration has been loaded successfully.'))
 
@@ -241,12 +245,7 @@ class McDisClient(commands.Bot):
                         )
 
     async def   _load_behaviours       (self):
-        behaviours_dir = os.path.join(package_path, 'behaviours')
-
-        scripts = [filename for filename in os.listdir(behaviours_dir) if filename.endswith('.py')]
-
-        for script in scripts:
-            await self.load_extension(f'mcdis_rcon.behaviours.{script.removesuffix(".py")}')
+        await self.load_extension(f'mcdis_rcon.behaviours.events')
     
     async def   _load_banner           (self, *, loop: bool = True, view: bool = True):
         from ..gui.Panel import PanelView, PanelEmbed
@@ -803,7 +802,7 @@ class McDisClient(commands.Bot):
         
         return True
     
-    async def   call_addons             (self, function: str, args: tuple = tuple()):
+    async def   call_addons             (self, function: str, args: tuple[Any, ...] = tuple()):
         for name, addon in self.addons.items():
             try:
                 func = getattr(addon, function, None)
@@ -816,7 +815,7 @@ class McDisClient(commands.Bot):
                     error=traceback.format_exc()
                 )
 
-    async def   call_mdextras           (self, function: str, args: tuple = tuple(), plugins : bool = True, addons : bool = True):
+    async def   call_mdextras           (self, function: str, args: tuple[Any, ...] = tuple(), plugins : bool = True, addons : bool = True):
         if addons:
             await self.call_addons(function, args)
 

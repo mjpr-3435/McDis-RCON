@@ -1,10 +1,19 @@
+from typing import Any
+
 from ..modules import *
 from ..utils import *
 
 from .McDisClient import McDisClient
 
+from typing import TypedDict
+
+class ProcessConfig(TypedDict):
+    start_cmd: str
+    stop_cmd: str
+    blacklist: list[str]
+
 class Process():
-    def __init__(self, name: str, client: McDisClient, config: dict):
+    def __init__(self, name: str, client: McDisClient, config: ProcessConfig):
         self.name                   = name
         self.path_files             = name
         self.client                 = client
@@ -396,7 +405,7 @@ class Process():
     def         add_log                 (self, log: str):
         self._console_relay.put(self.log_format(log))
 
-    async def   call_plugins            (self, function: str, args: tuple = tuple()):
+    async def   call_plugins            (self, function: str, args: tuple[Any, ...] = tuple()) -> None:
        for name, plugin in self.plugins.items():
             try: 
                 func = getattr(plugin, function, None)
