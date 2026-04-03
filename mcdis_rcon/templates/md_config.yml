@@ -15,6 +15,10 @@
 ### Advice        : Use a dedicated bot for McDis.
 Bot Token:
 
+### Description   : The global bot and servers prefix.
+### Default Value : "!!"
+Bot Prefix: "!!"
+
 ### Description   : The ID of the channel where the McDis panel will be created.
 ### Advice        : Use a clean channel for the McDis panel.
 Panel ID:
