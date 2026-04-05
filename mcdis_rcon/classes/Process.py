@@ -1,11 +1,11 @@
+from typing import TypedDict
+from psutil import Process as PsutilProcess
+from queue import Queue
 from typing import Any
 
 from ..modules import *
 from ..utils import *
-
 from .McDisClient import McDisClient
-
-from typing import TypedDict
 
 class ProcessConfig(TypedDict):
     start_cmd: str
@@ -14,32 +14,32 @@ class ProcessConfig(TypedDict):
 
 class Process():
     def __init__(self, name: str, client: McDisClient, config: ProcessConfig):
-        self.name                   = name
-        self.path_files             = name
-        self.client                 = client
-        self.prefix                 = self.client.prefix
-        self.path_bkps              = os.path.join(client.path_backups, self.name)
-        self.path_plugins           = os.path.join(self.path_files,'.mdplugins')
-        self.path_commands          = os.path.join(self.path_files,'.mdcommands')
-        self.start_cmd              = config['start_cmd']
-        self.stop_cmd               = config['stop_cmd']
-        self.blacklist              = config['blacklist']
-        self.plugins                = {}
-        self.process                = None
-        self.real_process           = None
-        self._relaying              = False
-        self._stop_relay            = False
-        self._stop_relay_reason     = None
-        self._console_log           = None
-        self._console_relay         = None
-        self._max_logs_in_queue     = 1000
+        self.name                               = name
+        self.path_files                         = name
+        self.client                     = client
+        self.prefix: str                             = self.client.prefix
+        self.path_bkps                          = os.path.join(client.path_backups, self.name)
+        self.path_plugins                       = os.path.join(self.path_files,'.mdplugins')
+        self.path_commands                      = os.path.join(self.path_files,'.mdcommands')
+        self.start_cmd                          = config['start_cmd']
+        self.stop_cmd                           = config['stop_cmd']
+        self.blacklist                    = config['blacklist']
+        self.plugins: list[object]                   = []
+        self.process: subprocess.Popen[bytes] | None = None
+        self.real_process                            = None
+        self._relaying                               = False
+        self._stop_relay                             = False
+        self._stop_relay_reason                      = None
+        self._console_log: Queue[str] | None         = None
+        self._console_relay: Queue[str] | None       = None
+        self._max_logs_in_queue                      = 1000
         
         dirs = [self.path_files, self.path_bkps, self.path_plugins, self.path_commands]
         for dir in dirs: os.makedirs(dir, exist_ok = True)
 
     ###         Manager Logic       ###
 
-    def         is_running               (self, poll_based: bool = False) -> str:
+    def         is_running               (self, poll_based: bool = False) -> bool:
         if self.process != None:
             if self.process.poll() is None or not poll_based:
                 return True
@@ -56,7 +56,7 @@ class Process():
             self._console_log            = queue.Queue()
             self._console_relay          = queue.Queue()
 
-            self.process = subprocess.Popen(    self.start_cmd.split(' '), 
+            self.process = subprocess.Popen(self.start_cmd.split(' '), 
                                                 cwd = self.path_files, 
                                                 stdout = subprocess.PIPE, 
                                                 stderr = subprocess.PIPE, 
@@ -73,7 +73,7 @@ class Process():
             )
             self.stop()
 
-    def         stop                    (self, *, omit_task = False):
+    def         stop                    (self, *, omit_task: bool = False):
         if not self.is_running(): return
         
         self.execute(self.stop_cmd)
@@ -100,18 +100,19 @@ class Process():
         self._console_relay        = None
         self.unload_plugins()
 
-    def         kill                    (self, *, omit_task = False):
+    def         kill                    (self, *, omit_task: bool = False):
         if isinstance(self.process, subprocess.Popen): 
             try: self.process.kill()
             except: pass
 
         self._find_real_process()
-        try: self.real_process.kill()
-        except: pass
+        if self.real_process:
+            try: self.real_process.kill()
+            except: pass
 
         if not omit_task: asyncio.create_task(self.stop_task())
     
-    def         load_plugins            (self, *, reload = False):
+    def         load_plugins            (self, *, reload: bool = False):
         if not self.is_running(): return
         
         if reload:
@@ -123,7 +124,7 @@ class Process():
 
         valid_extensions = ['.py', '.mcdis']
         files_in_plugins_dir = os.listdir(self.path_plugins)
-        cond = lambda file: os.path.splitext(file)[1] in valid_extensions
+        cond: Callable[[str], bool] = lambda file: os.path.splitext(file)[1] in valid_extensions
 
         plugins = [file for file in files_in_plugins_dir if cond(file)]
 
@@ -138,19 +139,14 @@ class Process():
                     if plugin.endswith('.py'):
                         module_path = os.path.join(self.path_plugins, plugin)
                         spec = importlib.util.spec_from_file_location(plugin.removesuffix('.py'), module_path)
+                        if not spec or not spec.loader:
+                            continue
                         mod = importlib.util.module_from_spec(spec)
                         spec.loader.exec_module(mod)
                         
-                    elif plugin.endswith('.mcdis') and False:
-                        plugin_path = os.path.join(self.path_plugins, plugin)
-                        sys.path.insert(0, plugin_path)
-                        
-                        mod = importlib.import_module(f'mdplugin.__init__')
-                        sys.path.pop(0)
-                    
-                    plugin_instance = mod.mdplugin(self)
-                    self.plugins[os.path.splitext(plugin)[0]] = plugin_instance
-                    logs.append(f'Plugin imported:: {plugin}')
+                        plugin_instance = mod.mdplugin(self)
+                        self.plugins.append(plugin_instance)
+                        logs.append(f'Plugin imported:: {plugin}')
                     
                 except:
                     asyncio.create_task(
@@ -165,11 +161,12 @@ class Process():
         for log in logs: self.add_log(log)
 
     def         unload_plugins          (self):
-        for name, plugin in self.plugins.items():
-            if hasattr(plugin, 'unload') and callable(plugin.unload):
-                plugin.unload()
+        for plugin in self.plugins:
+            unload = getattr(plugin, "unload", None)
+            if callable(unload):
+                unload()
 
-        self.plugins = {}
+        self.plugins = []
 
     async def   restart                 (self):
         if not self.is_running(): return
@@ -183,7 +180,7 @@ class Process():
 
     ###         Resources           ###
     
-    def         _find_real_process(self):
+    def         _find_real_process(self) -> PsutilProcess | None:
         abs_file_path = os.path.abspath(self.path_files)
         
         for process in psutil.process_iter():
@@ -196,7 +193,7 @@ class Process():
                 
                 if cond_1 and cond_2 and cond_3 and cond_4:
                     self.real_process = process
-                    break
+                    return self.real_process
             except: pass
 
     def         ram_usage               (self) -> str:
@@ -206,10 +203,13 @@ class Process():
             self._find_real_process()
         elif not self.real_process.is_running():
             self._find_real_process()
+        
+        if not self.real_process:
+            return '??'
             
         return ram_usage(self.real_process)
 
-    def         disk_usage              (self, string = True) -> float:
+    def         disk_usage              (self, string: bool = True) -> Union[str, int]:
         if self.client.files_manager.fast_mode:
             return 'Skipped'
         else:
@@ -217,7 +217,7 @@ class Process():
 
     ###         Backups Logic       ###
 
-    def         make_bkp                (self, *, counter: list = None, Force: bool = False):
+    def         make_bkp                (self, *, counter: list[int] | None = None, Force: bool = False):
         if not Force and self.is_running():
             return
 
@@ -241,9 +241,11 @@ class Process():
             try:
                 os.rename(bkp, new_name)
             except:
-                self.error_report(
-                    title='Renaming in make_bkp()',
-                    error=traceback.format_exc()
+                asyncio.create_task(
+                    self.error_report(
+                        title='Renaming in make_bkp()',
+                        error=traceback.format_exc()
+                    )
                 )
                 return
 
@@ -263,7 +265,7 @@ class Process():
 
         os.remove(log_path)
 
-    def         unpack_bkp              (self, backup, *, counter: list = None):
+    def         unpack_bkp              (self, backup: str, *, counter: list[int] | None = None):
         if self.is_running():
             return
         
@@ -306,10 +308,12 @@ class Process():
         self._stop_relay = True
     
     def         _read_console          (self):
+        if not self.process or not self.process.stdout: return
         while self.process.poll() is None:
             try:
                 log = self.process.stdout.readline().decode().strip()
-                self._console_log.put(log)
+                if self._console_log:
+                    self._console_log.put(log)
             except:
                 pass
         
@@ -318,40 +322,41 @@ class Process():
         remote_console      = await thread(f'Console {self.name}', self.client.panel)
         await remote_console.send('```\n[Initializing Process...]\n```')
 
-        while (self.process.poll() is None or not self._console_relay.empty()) and not self._stop_relay:
-            try:
-                logs = '\n'.join([self._console_relay.get() for _ in range(10) if not self._console_relay.empty()])
-
-                if logs.replace('\n','').strip() != '':
-                    logs = logs.replace('_','⎽').replace('*',' ').replace('`','’').strip()
-                    await remote_console.send(f'```md\n{truncate(logs, 1990)}```')
-
-                if self._console_relay.qsize() < 10: 
-                    await asyncio.sleep(0.5)
-
-                elif self._max_logs_in_queue < self._console_relay.qsize(): 
-                    self._console_relay = queue.Queue()
-                    log = self.log_format(
-                        f'McDis was {self._max_logs_in_queue} logs behind; omitting relaying these logs...'
-                        )
-                        
-                    await remote_console.send(f'```md\n{log}\n```')
-
-                else: 
-                    await asyncio.sleep(0.1)
-                    
-            except (aiohttp.ClientError, discord.HTTPException):
+        if self.process and self._console_relay:
+            while (self.process.poll() is None or not self._console_relay.empty()) and not self._stop_relay:
                 try:
-                    remote_console = await thread(f'Console {self.name}', self.client.panel)
-                except Exception:
-                    await asyncio.sleep(1)
-                    continue
+                    logs = '\n'.join([self._console_relay.get() for _ in range(10) if not self._console_relay.empty()])
 
-            except:
-                await self.error_report(
-                    title = 'relay_console()',
-                    error = traceback.format_exc())
-        
+                    if logs.replace('\n','').strip() != '':
+                        logs = logs.replace('_','⎽').replace('*',' ').replace('`','’').strip()
+                        await remote_console.send(f'```md\n{truncate(logs, 1990)}```')
+
+                    if self._console_relay.qsize() < 10: 
+                        await asyncio.sleep(0.5)
+
+                    elif self._max_logs_in_queue < self._console_relay.qsize(): 
+                        self._console_relay = queue.Queue()
+                        log = self.log_format(
+                            f'McDis was {self._max_logs_in_queue} logs behind; omitting relaying these logs...'
+                            )
+                            
+                        await remote_console.send(f'```md\n{log}\n```')
+
+                    else: 
+                        await asyncio.sleep(0.1)
+                        
+                except (aiohttp.ClientError, discord.HTTPException):
+                    try:
+                        remote_console = await thread(f'Console {self.name}', self.client.panel)
+                    except Exception:
+                        await asyncio.sleep(1)
+                        continue
+
+                except:
+                    await self.error_report(
+                        title = 'relay_console()',
+                        error = traceback.format_exc())
+            
         if self._stop_relay_reason: 
             await remote_console.send(
                 f'```md\n{truncate(self._stop_relay_reason, 1990)}\n```'
@@ -369,17 +374,18 @@ class Process():
         threading.Thread(target = self._read_console).start()
             
         try:
-            while self.process.poll() is None or not self._console_log.empty():
-                while not self._console_log.empty():
+            if self.process and self._console_log and self._console_relay:
+                while self.process.poll() is None or not self._console_log.empty():
+                    while not self._console_log.empty():
 
-                    log = self._console_log.get()
-                    for i in range(100): log : str = log.replace(f'[{i}m','')
-                    if log.replace('\n','').strip() == '': continue
-                    if not any([x in log for x in self.blacklist if x]): self._console_relay.put(log)
+                        log = self._console_log.get()
+                        for i in range(100): log : str = log.replace(f'[{i}m','')
+                        if log.replace('\n','').strip() == '': continue
+                        if not any([x in log for x in self.blacklist if x]): self._console_relay.put(log)
 
-                    asyncio.create_task(self._listener_events(log))
+                        asyncio.create_task(self._listener_events(log))
 
-                await asyncio.sleep(0)
+                    await asyncio.sleep(0)
 
         except:
             await self.error_report(
@@ -394,8 +400,9 @@ class Process():
     
     def         execute                 (self, command: str):
         try:
-            self.process.stdin.write((command + '\n').encode())
-            self.process.stdin.flush()
+            if self.process and self.process.stdin:
+                self.process.stdin.write((command + '\n').encode())
+                self.process.stdin.flush()
         except:
             pass
 
@@ -403,10 +410,11 @@ class Process():
         return f'[McDis] [{datetime.now().strftime("%H:%M:%S")}] [MainThread/{type}]: {log}'
     
     def         add_log                 (self, log: str):
-        self._console_relay.put(self.log_format(log))
+        if self._console_relay:
+            self._console_relay.put(self.log_format(log))
 
     async def   call_plugins            (self, function: str, args: tuple[Any, ...] = tuple()) -> None:
-       for name, plugin in self.plugins.items():
+       for plugin in self.plugins:
             try: 
                 func = getattr(plugin, function, None)
                 if func:
@@ -438,3 +446,5 @@ class Process():
         discord_message = await remote_console.send(mrkd)
 
         return discord_message
+    
+    

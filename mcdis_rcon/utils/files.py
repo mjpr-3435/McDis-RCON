@@ -82,7 +82,7 @@ def get_path_size(path: str, *, string: bool = True) -> Union[str, int]:
     except:
         return 'Error' if string else 0
 
-def copy_dir(source: str, destination: str, counter: list = None):
+def copy_dir(source: str, destination: str, counter: list[int] | None = None):
     if counter:
         counter[0], counter[1] = 0, elements_on(source)
 
@@ -96,7 +96,7 @@ def copy_dir(source: str, destination: str, counter: list = None):
         )[0]
     )
 
-def make_zip(source : str, destination : str, counter : list = None):
+def make_zip(source : str, destination : str, counter: list[int] | None = None):
     if counter: 
         counter[0], counter[1] = 0, elements_on(source)
     
@@ -111,7 +111,7 @@ def make_zip(source : str, destination : str, counter : list = None):
                 zipf.write(file_path, os.path.relpath(file_path, source))
                 if counter: counter[0] += 1
 
-def unpack_zip(source: str, destination: str, counter: list = None):
+def unpack_zip(source: str, destination: str, counter: list[int] | None = None):
     with zipfile.ZipFile(source, 'r') as zip_ref:
         total_files = len(zip_ref.namelist())
 
