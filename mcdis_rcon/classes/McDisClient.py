@@ -1,7 +1,30 @@
-from typing import Any
+from typing import Any, TypedDict
+
+from mcdis_rcon.classes.Process import ProcessConfig
 
 from ..modules import *
 from ..utils import *
+
+class FlaskConfig(TypedDict):
+    Allow: bool
+    IP: str
+    Port: int
+    
+class ProcessesTypesConfig(TypedDict):
+    Networks: list[ProcessConfig]
+    Servers: list[ProcessConfig]
+    
+McDisClientConfig = TypedDict(
+    'McDisClientConfig',
+    {
+        'Bot Token': str,
+        'Panel ID': int,
+        'Language': str,
+        'Backups': int,
+        'Flask': FlaskConfig,
+        'Processes': ProcessesTypesConfig
+    }
+)
 
 class McDisClient(commands.Bot):
     def __init__(self):
@@ -12,20 +35,20 @@ class McDisClient(commands.Bot):
         from .Flask import FlaskManager
         from .FilesManager import FilesManager
         
-        self.prefix                                             = '!!'
-        self.cwd                                                = os.getcwd()
-        self.config     : dict                                  = {}
+        self.prefix: str                                        = '!!'
+        self.cwd                                           = os.getcwd()
+        self.config     : McDisClientConfig                     = {}
         self.panel      : discord.TextChannel                   = None
         self._          : Callable[[str], str]                  = None
         self.path_backups                                       = '.mdbackups'
         self.path_addons                                        = '.mdaddons'
-        self.addons                                             = {}
+        self.addons                             = {}
         self.flask      : FlaskManager                          = None
         self.processes  : list[Union[Network,Server]]           = []
         self.networks   : list[Network]                         = []
         self.servers    : list[Server]                          = []
         self.uploader                                           = Uploader()
-        self.files_manager                            = FilesManager()
+        self.files_manager                                      = FilesManager()
         self.is_running                                         = False
         self.display_panel                                      = False
         self.discord_listeners                                  = [x[:-3]for x in os.listdir(os.path.join(package_path, 'behaviours')) if x.endswith('.py')]
