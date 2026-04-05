@@ -21,10 +21,12 @@ def mc_uuid(player: str, *, online : bool = True):
         return offline_player_uuid
 
 def online_uuid_to_name(uuid : str):
-    response = requests.get(f"https://api.mojang.com/user/profiles/{uuid.replace('-', '')}/names")
-
-    if response.status_code == 200:
-        current_name = response.json()[-1]["name"]
-        return current_name
-    else:
-        return 'Not Found'
+    try:
+        response = requests.get(
+            f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}", timeout=5
+        )
+        if response.status_code == 200:
+            return response.json().get("name", "unknown")
+        return "unknown"
+    except Exception:
+        return "unknown"
