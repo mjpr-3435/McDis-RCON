@@ -9,6 +9,7 @@ dependencies = [
     "discord-py>=2.7.1",
     "flask>=3.1.3",
     "psutil>=7.2.2",
+    "types-psutil>=7.2.2.20260408",
 ]
 
 [dependency-groups]

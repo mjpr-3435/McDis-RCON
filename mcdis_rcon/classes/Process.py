@@ -1,166 +1,191 @@
-from typing import TypedDict
-from psutil import Process as PsutilProcess
+import asyncio
+import contextlib
+import glob
+import importlib
+import os
+import queue
+import shutil
+import subprocess
+import threading
+import traceback
+from datetime import datetime
 from queue import Queue
-from typing import Any
+from typing import Any, TypedDict
 
-from ..modules import *
-from ..utils import *
+import aiohttp
+import discord
+import psutil
+from psutil import Process as PsutilProcess
+
+from ..utils.discord_utils import thread
+from ..utils.files import copy_dir, get_path_size
+from ..utils.hardware import ram_usage
+from ..utils.mrkd import truncate
 from .McDisClient import McDisClient
+
 
 class ProcessConfig(TypedDict):
     start_cmd: str
     stop_cmd: str
     blacklist: list[str]
 
-class Process():
+
+class Process:
     def __init__(self, name: str, client: McDisClient, config: ProcessConfig):
-        self.name                               = name
-        self.path_files                         = name
-        self.client                     = client
-        self.prefix: str                             = self.client.prefix
-        self.path_bkps                          = os.path.join(client.path_backups, self.name)
-        self.path_plugins                       = os.path.join(self.path_files,'.mdplugins')
-        self.path_commands                      = os.path.join(self.path_files,'.mdcommands')
-        self.start_cmd                          = config['start_cmd']
-        self.stop_cmd                           = config['stop_cmd']
-        self.blacklist                    = config['blacklist']
-        self.plugins: list[object]                   = []
+        self.name = name
+        self.path_files = name
+        self.client = client
+        self.prefix: str = self.client.prefix
+        self.path_bkps = os.path.join(client.path_backups, self.name)
+        self.path_plugins = os.path.join(self.path_files, ".mdplugins")
+        self.path_commands = os.path.join(self.path_files, ".mdcommands")
+        self.start_cmd = config["start_cmd"]
+        self.stop_cmd = config["stop_cmd"]
+        self.blacklist = config["blacklist"]
+        self.plugins: list[object] = []
         self.process: subprocess.Popen[bytes] | None = None
-        self.real_process                            = None
-        self._relaying                               = False
-        self._stop_relay                             = False
-        self._stop_relay_reason                      = None
-        self._console_log: Queue[str] | None         = None
-        self._console_relay: Queue[str] | None       = None
-        self._max_logs_in_queue                      = 1000
-        
+        self.real_process = None
+        self._relaying = False
+        self._stop_relay = False
+        self._stop_relay_reason: None | str = None
+        self._console_log: Queue[str] | None = None
+        self._console_relay: Queue[str] | None = None
+        self._max_logs_in_queue = 1000
+
         dirs = [self.path_files, self.path_bkps, self.path_plugins, self.path_commands]
-        for dir in dirs: os.makedirs(dir, exist_ok = True)
+        for dir in dirs:
+            os.makedirs(dir, exist_ok=True)
 
     ###         Manager Logic       ###
 
-    def         is_running               (self, poll_based: bool = False) -> bool:
-        if self.process != None:
-            if self.process.poll() is None or not poll_based:
-                return True
-            return False
+    def is_running(self, poll_based: bool = False) -> bool:
+        if self.process is not None:
+            return bool(self.process.poll() is None or not poll_based)
         return False
-           
-    def         start                   (self):
-        if self.is_running() : return
+
+    def start(self) -> None:
+        if self.is_running():
+            return
 
         try:
             dirs = [self.path_files, self.path_plugins, self.path_commands]
-            for dir in dirs: os.makedirs(dir, exist_ok = True)
+            for dir in dirs:
+                os.makedirs(dir, exist_ok=True)
 
-            self._console_log            = queue.Queue()
-            self._console_relay          = queue.Queue()
+            self._console_log = queue.Queue()
+            self._console_relay = queue.Queue()
 
-            self.process = subprocess.Popen(self.start_cmd.split(' '), 
-                                                cwd = self.path_files, 
-                                                stdout = subprocess.PIPE, 
-                                                stderr = subprocess.PIPE, 
-                                                stdin = subprocess.PIPE,
-                                                start_new_session = True)
+            self.process = subprocess.Popen(
+                self.start_cmd.split(" "),
+                cwd=self.path_files,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                start_new_session=True,
+            )
             self.load_plugins()
             asyncio.create_task(self._listener_console())
         except:
-            asyncio.create_task(
-                self.error_report(
-                    title = 'start()',
-                    error = traceback.format_exc()        
-                )
-            )
+            asyncio.create_task(self.error_report(title="start()", error=traceback.format_exc()))
             self.stop()
 
-    def         stop                    (self, *, omit_task: bool = False):
-        if not self.is_running(): return
-        
+    def stop(self, *, omit_task: bool = False) -> None:
+        if not self.is_running():
+            return
+
         self.execute(self.stop_cmd)
 
-        if not omit_task: asyncio.create_task(self.stop_task())
+        if not omit_task:
+            asyncio.create_task(self.stop_task())
 
-    async def   stop_task               (self):
-        while self.is_running(poll_based = True) or self._relaying: 
+    async def stop_task(self) -> None:
+        while self.is_running(poll_based=True) or self._relaying:
             await asyncio.sleep(0.1)
 
         self.finalize()
 
-    async def   kill_task               (self):
+    async def kill_task(self) -> None:
         await asyncio.sleep(5)
 
         self.finalize()
 
-    def         finalize                (self):
-        self.process               = None
-        self.real_process          = None
-        self._stop_relay           = False
-        self._stop_relay_reason    = None
-        self._console_log          = None
-        self._console_relay        = None
+    def finalize(self) -> None:
+        self.process = None
+        self.real_process = None
+        self._stop_relay = False
+        self._stop_relay_reason = None
+        self._console_log = None
+        self._console_relay = None
         self.unload_plugins()
 
-    def         kill                    (self, *, omit_task: bool = False):
-        if isinstance(self.process, subprocess.Popen): 
-            try: self.process.kill()
-            except: pass
+    def kill(self, *, omit_task: bool = False) -> None:
+        if isinstance(self.process, subprocess.Popen):
+            with contextlib.suppress(BaseException):
+                self.process.kill()
 
         self._find_real_process()
         if self.real_process:
-            try: self.real_process.kill()
-            except: pass
+            with contextlib.suppress(BaseException):
+                self.real_process.kill()
 
-        if not omit_task: asyncio.create_task(self.stop_task())
-    
-    def         load_plugins            (self, *, reload: bool = False):
-        if not self.is_running(): return
-        
+        if not omit_task:
+            asyncio.create_task(self.stop_task())
+
+    def load_plugins(self, *, reload: bool = False) -> None:
+        if not self.is_running():
+            return
+
         if reload:
             self.unload_plugins()
-            logs = ['Reloading McDis Plugin System...',
-                    'McDis Plugin System is starting up',]
+            logs = [
+                "Reloading McDis Plugin System...",
+                "McDis Plugin System is starting up",
+            ]
         else:
-            logs = ['McDis Plugin System is starting up']
+            logs = ["McDis Plugin System is starting up"]
 
-        valid_extensions = ['.py', '.mcdis']
+        valid_extensions = [".py", ".mcdis"]
         files_in_plugins_dir = os.listdir(self.path_plugins)
         cond: Callable[[str], bool] = lambda file: os.path.splitext(file)[1] in valid_extensions
 
         plugins = [file for file in files_in_plugins_dir if cond(file)]
 
         if not plugins:
-            logs.append('No plugins to import')
+            logs.append("No plugins to import")
 
         else:
-            logs.append('Importing mdplugins...')
+            logs.append("Importing mdplugins...")
 
             for plugin in plugins:
                 try:
-                    if plugin.endswith('.py'):
+                    if plugin.endswith(".py"):
                         module_path = os.path.join(self.path_plugins, plugin)
-                        spec = importlib.util.spec_from_file_location(plugin.removesuffix('.py'), module_path)
+                        spec = importlib.util.spec_from_file_location(
+                            plugin.removesuffix(".py"), module_path
+                        )
                         if not spec or not spec.loader:
                             continue
                         mod = importlib.util.module_from_spec(spec)
                         spec.loader.exec_module(mod)
-                        
+
                         plugin_instance = mod.mdplugin(self)
                         self.plugins.append(plugin_instance)
-                        logs.append(f'Plugin imported:: {plugin}')
-                    
+                        logs.append(f"Plugin imported:: {plugin}")
+
                 except:
                     asyncio.create_task(
                         self.error_report(
-                            title = f'Unable to import plugin {plugin}',
-                            error = traceback.format_exc()
+                            title=f"Unable to import plugin {plugin}", error=traceback.format_exc()
                         )
                     )
-        
-        if not reload: logs.append('Initializing process...')
 
-        for log in logs: self.add_log(log)
+        if not reload:
+            logs.append("Initializing process...")
 
-    def         unload_plugins          (self):
+        for log in logs:
+            self.add_log(log)
+
+    def unload_plugins(self) -> None:
         for plugin in self.plugins:
             unload = getattr(plugin, "unload", None)
             if callable(unload):
@@ -168,69 +193,69 @@ class Process():
 
         self.plugins = []
 
-    async def   restart                 (self):
-        if not self.is_running(): return
-        
+    async def restart(self) -> None:
+        if not self.is_running():
+            return
+
         self.stop()
-            
+
         while self.is_running():
             await asyncio.sleep(0.1)
 
         self.start()
 
     ###         Resources           ###
-    
-    def         _find_real_process(self) -> PsutilProcess | None:
+
+    def _find_real_process(self) -> PsutilProcess | None:
         abs_file_path = os.path.abspath(self.path_files)
-        
+
         for process in psutil.process_iter():
             try:
-                javas = ['java', 'java.exe']
+                javas = ["java", "java.exe"]
                 cond_1 = process.name() in javas
                 cond_2 = os.path.commonpath([abs_file_path, process.cwd()]) == abs_file_path
-                cond_3 = any([java in process.cmdline()[0] for java in javas])
+                cond_3 = any(java in process.cmdline()[0] for java in javas)
                 cond_4 = process.memory_info().rss // (1024**2) > 50
-                
+
                 if cond_1 and cond_2 and cond_3 and cond_4:
                     self.real_process = process
                     return self.real_process
-            except: pass
+            except:
+                return None
+        return None
 
-    def         ram_usage               (self) -> str:
-        if not self.is_running(): 
+    def ram_usage(self) -> str:
+        if not self.is_running():
             pass
-        elif not isinstance(self.real_process, psutil.Process):
+        elif (
+            not isinstance(self.real_process, psutil.Process) or not self.real_process.is_running()
+        ):
             self._find_real_process()
-        elif not self.real_process.is_running():
-            self._find_real_process()
-        
+
         if not self.real_process:
-            return '??'
-            
+            return "??"
+
         return ram_usage(self.real_process)
 
-    def         disk_usage              (self, string: bool = True) -> Union[str, int]:
+    def disk_usage(self, string: bool = True) -> str | int:
         if self.client.files_manager.fast_mode:
-            return 'Skipped'
+            return "Skipped"
         else:
-            return get_path_size(self.path_files, string = string)
+            return get_path_size(self.path_files, string=string)
 
     ###         Backups Logic       ###
 
-    def         make_bkp                (self, *, counter: list[int] | None = None, Force: bool = False):
+    def make_bkp(self, *, counter: list[int] | None = None, Force: bool = False) -> None:
         if not Force and self.is_running():
             return
 
         os.makedirs(self.path_bkps, exist_ok=True)
 
-        pattern = os.path.join(
-            self.path_bkps,
-            f'{self.name} [1-{self.client.config["Backups"]}]'
-        )
+        pattern = os.path.join(self.path_bkps, f"{self.name} [1-{self.client.config['Backups']}]")
         bkps = glob.glob(pattern)
         sorted_bkps = sorted(bkps, key=os.path.getmtime, reverse=True)
 
-        for i in range(self.client.config['Backups'] - 1, len(sorted_bkps)):
+        for i in range(self.client.config["Backups"] - 1, len(sorted_bkps)):
             shutil.rmtree(sorted_bkps.pop(i))
 
         sorted_bkps.reverse()
@@ -242,73 +267,70 @@ class Process():
                 os.rename(bkp, new_name)
             except:
                 asyncio.create_task(
-                    self.error_report(
-                        title='Renaming in make_bkp()',
-                        error=traceback.format_exc()
-                    )
+                    self.error_report(title="Renaming in make_bkp()", error=traceback.format_exc())
                 )
                 return
 
-        bkp_path = os.path.join(self.path_bkps, f'{self.name} 1')
+        bkp_path = os.path.join(self.path_bkps, f"{self.name} 1")
 
-        log_filename = 'backup_log.txt'
+        log_filename = "backup_log.txt"
         log_path = os.path.join(self.path_files, log_filename)
-        log_content = (
-            f'Backup created on: '
-            f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n'
-        )
+        log_content = f"Backup created on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
 
-        with open(log_path, 'w') as log_file:
+        with open(log_path, "w") as log_file:
             log_file.write(log_content)
 
         copy_dir(self.path_files, bkp_path, counter)
 
         os.remove(log_path)
 
-    def         unpack_bkp              (self, backup: str, *, counter: list[int] | None = None):
+    def unpack_bkp(self, backup: str, *, counter: list[int] | None = None) -> None:
         if self.is_running():
             return
-        
+
         shutil.rmtree(self.path_files)
         os.makedirs(self.path_files, exist_ok=True)
 
         source = os.path.join(self.path_bkps, backup)
         copy_dir(source, self.path_files, counter)
 
-
     ###         Behaviours          ###
 
-    async def   discord_listener        (self, message: discord.Message):
-        if not isinstance(message.channel, discord.Thread): return
-        elif not message.channel.parent_id == self.client.panel.id: return
-        elif not message.channel.name == f'Console {self.name}': return
-        
-        if message.content.lower() == 'start':
+    async def discord_listener(self, message: discord.Message) -> None:
+        if (
+            not isinstance(message.channel, discord.Thread)
+            or message.channel.parent_id != self.client.panel.id
+            or message.channel.name != f"Console {self.name}"
+        ):
+            return
+
+        if message.content.lower() == "start":
             self.start()
-        
-        elif message.content.lower() == 'kill':
+
+        elif message.content.lower() == "kill":
             self.kill()
 
-        elif message.content.lower() == 'restart':
+        elif message.content.lower() == "restart":
             await self.restart()
 
-        elif message.content.lower() == 'stop':
+        elif message.content.lower() == "stop":
             self.stop()
 
-        elif message.content.lower() == 'mdreload':
-            self.load_plugins(reload = True)
+        elif message.content.lower() == "mdreload":
+            self.load_plugins(reload=True)
 
         else:
             self.execute(message.content)
-    
+
     ###         Relay Logic         ###
 
-    def         stop_relaying           (self, reason: str):
+    def stop_relaying(self, reason: str) -> None:
         self._stop_relay_reason = reason
         self._stop_relay = True
-    
-    def         _read_console          (self):
-        if not self.process or not self.process.stdout: return
+
+    def _read_console(self) -> None:
+        if not self.process or not self.process.stdout:
+            return
         while self.process.poll() is None:
             try:
                 log = self.process.stdout.readline().decode().strip()
@@ -316,135 +338,132 @@ class Process():
                     self._console_log.put(log)
             except:
                 pass
-        
-    async def   _relay_console         (self):
-        self._relaying     = True
-        remote_console      = await thread(f'Console {self.name}', self.client.panel)
-        await remote_console.send('```\n[Initializing Process...]\n```')
+
+    async def _relay_console(self) -> None:
+        self._relaying = True
+        remote_console = await thread(f"Console {self.name}", self.client.panel)
+        await remote_console.send("```\n[Initializing Process...]\n```")
 
         if self.process and self._console_relay:
-            while (self.process.poll() is None or not self._console_relay.empty()) and not self._stop_relay:
+            while (
+                self.process.poll() is None or not self._console_relay.empty()
+            ) and not self._stop_relay:
                 try:
-                    logs = '\n'.join([self._console_relay.get() for _ in range(10) if not self._console_relay.empty()])
+                    logs = "\n".join(
+                        [
+                            self._console_relay.get()
+                            for _ in range(10)
+                            if not self._console_relay.empty()
+                        ]
+                    )
 
-                    if logs.replace('\n','').strip() != '':
-                        logs = logs.replace('_','⎽').replace('*',' ').replace('`','’').strip()
-                        await remote_console.send(f'```md\n{truncate(logs, 1990)}```')
+                    if logs.replace("\n", "").strip() != "":
+                        logs = logs.replace("_", "⎽").replace("*", " ").replace("`", "’").strip()
+                        await remote_console.send(f"```md\n{truncate(logs, 1990)}```")
 
-                    if self._console_relay.qsize() < 10: 
+                    if self._console_relay.qsize() < 10:
                         await asyncio.sleep(0.5)
 
-                    elif self._max_logs_in_queue < self._console_relay.qsize(): 
+                    elif self._max_logs_in_queue < self._console_relay.qsize():
                         self._console_relay = queue.Queue()
                         log = self.log_format(
-                            f'McDis was {self._max_logs_in_queue} logs behind; omitting relaying these logs...'
-                            )
-                            
-                        await remote_console.send(f'```md\n{log}\n```')
+                            f"McDis was {self._max_logs_in_queue} logs behind; omitting relaying these logs..."
+                        )
 
-                    else: 
+                        await remote_console.send(f"```md\n{log}\n```")
+
+                    else:
                         await asyncio.sleep(0.1)
-                        
+
                 except (aiohttp.ClientError, discord.HTTPException):
                     try:
-                        remote_console = await thread(f'Console {self.name}', self.client.panel)
+                        remote_console = await thread(f"Console {self.name}", self.client.panel)
                     except Exception:
                         await asyncio.sleep(1)
                         continue
 
                 except:
-                    await self.error_report(
-                        title = 'relay_console()',
-                        error = traceback.format_exc())
-            
-        if self._stop_relay_reason: 
-            await remote_console.send(
-                f'```md\n{truncate(self._stop_relay_reason, 1990)}\n```'
-                )
-            
-        await remote_console.send('```\n[Process Stopped]\n```')
+                    await self.error_report(title="relay_console()", error=traceback.format_exc())
+
+        if self._stop_relay_reason:
+            await remote_console.send(f"```md\n{truncate(self._stop_relay_reason, 1990)}\n```")
+
+        await remote_console.send("```\n[Process Stopped]\n```")
 
         self._relaying = False
 
-    async def   _listener_events       (self, log: str):
-        await self.call_plugins('listener_events', (log, ))
+    async def _listener_events(self, log: str) -> None:
+        await self.call_plugins("listener_events", (log,))
 
-    async def   _listener_console        (self):
+    async def _listener_console(self) -> None:
         asyncio.create_task(self._relay_console())
-        threading.Thread(target = self._read_console).start()
-            
+        threading.Thread(target=self._read_console).start()
+
         try:
             if self.process and self._console_log and self._console_relay:
                 while self.process.poll() is None or not self._console_log.empty():
                     while not self._console_log.empty():
-
                         log = self._console_log.get()
-                        for i in range(100): log : str = log.replace(f'[{i}m','')
-                        if log.replace('\n','').strip() == '': continue
-                        if not any([x in log for x in self.blacklist if x]): self._console_relay.put(log)
+                        for i in range(100):
+                            log: str = log.replace(f"[{i}m", "")
+                        if log.replace("\n", "").strip() == "":
+                            continue
+                        if not any(x in log for x in self.blacklist if x):
+                            self._console_relay.put(log)
 
                         asyncio.create_task(self._listener_events(log))
 
                     await asyncio.sleep(0)
 
         except:
-            await self.error_report(
-                title='listener_console()',
-                error=traceback.format_exc()
-            )
+            await self.error_report(title="listener_console()", error=traceback.format_exc())
             return
 
         self.stop()
 
     ###         Utils               ###
-    
-    def         execute                 (self, command: str):
+
+    def execute(self, command: str) -> None:
         try:
             if self.process and self.process.stdin:
-                self.process.stdin.write((command + '\n').encode())
+                self.process.stdin.write((command + "\n").encode())
                 self.process.stdin.flush()
         except:
             pass
 
-    def         log_format              (self, log: str, type: str = 'INFO'):
-        return f'[McDis] [{datetime.now().strftime("%H:%M:%S")}] [MainThread/{type}]: {log}'
-    
-    def         add_log                 (self, log: str):
+    def log_format(self, log: str, type: str = "INFO") -> str:
+        return f"[McDis] [{datetime.now().strftime('%H:%M:%S')}] [MainThread/{type}]: {log}"
+
+    def add_log(self, log: str) -> None:
         if self._console_relay:
             self._console_relay.put(self.log_format(log))
 
-    async def   call_plugins            (self, function: str, args: tuple[Any, ...] = tuple()) -> None:
-       for plugin in self.plugins:
-            try: 
+    async def call_plugins(self, function: str, args: tuple[Any, ...] = ()) -> None:
+        for plugin in self.plugins:
+            try:
                 func = getattr(plugin, function, None)
                 if func:
                     await func(*args)
-            except: 
+            except:
                 await self.error_report(
-                    title = f'{function}() of {plugin}',
-                    error = traceback.format_exc()
-                    )
+                    title=f"{function}() of {plugin}", error=traceback.format_exc()
+                )
 
-    async def   error_report            (self, *, title: str, error: str):
-        formatted_title = f'{self.name}: {title}'
-        
-        error_link = await  self.client.error_report(
-            title = formatted_title,
-            error = error
-        )
+    async def error_report(self, *, title: str, error: str) -> None:
+        formatted_title = f"{self.name}: {title}"
 
-        formatted_error = self.log_format(f'Error report created. {formatted_title}')
-        mrkd = f'{error_link}\n```md\n{formatted_error}\n```'
-        remote_console = await thread(f'Console {self.name}', self.client.panel)
+        error_link = await self.client.error_report(title=formatted_title, error=error)
+
+        formatted_error = self.log_format(f"Error report created. {formatted_title}")
+        mrkd = f"{error_link}\n```md\n{formatted_error}\n```"
+        remote_console = await thread(f"Console {self.name}", self.client.panel)
 
         await remote_console.send(mrkd)
-    
-    async def   send_to_console         (self, message : str) -> discord.Message:
-        mrkd = f'```md\n{truncate(message, 1990)}\n```'
-        remote_console = await thread(f'Console {self.name}', self.client.panel)
+
+    async def send_to_console(self, message: str) -> discord.Message:
+        mrkd = f"```md\n{truncate(message, 1990)}\n```"
+        remote_console = await thread(f"Console {self.name}", self.client.panel)
 
         discord_message = await remote_console.send(mrkd)
 
         return discord_message
-    
-    
