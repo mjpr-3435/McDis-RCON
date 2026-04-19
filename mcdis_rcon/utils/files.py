@@ -1,3 +1,7 @@
+from typing import Any
+
+import ruamel.yaml
+
 from ..modules import *
 
 
@@ -49,7 +53,7 @@ def write_in_file(file_path: str, content: str):
             file.write(line + "\n")
 
 
-def read_yml(file_path: str) -> dict:
+def read_yml(file_path: str) -> Any:
     with open(file_path) as file:
         yaml = ruamel.yaml.YAML()
         yaml.indent(mapping=2, sequence=4, offset=2)
