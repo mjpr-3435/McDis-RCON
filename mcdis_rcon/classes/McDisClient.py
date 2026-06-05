@@ -1,14 +1,32 @@
+import asyncio
+import gettext
+import importlib
 import os
+import signal
+import sys
+import threading
+import time
+import traceback
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any, NotRequired, TypedDict, cast
 
+import aiohttp
 import discord
 from discord.ext import commands
 
 from mcdis_rcon.classes.Process import ProcessConfig
 
-from ..modules import *
-from ..utils import *
-from ..utils.files import read_yml
+from ..modules import allowed_languages, blank_space, package_path
+from ..utils import (
+    execute_and_wait,
+    is_valid_path_name,
+    mcdis_path,
+    read_yml,
+    thread,
+    truncate,
+    un_mcdis_path,
+)
 
 
 class FlaskConfig(TypedDict):
@@ -93,21 +111,22 @@ class McDisClient(commands.Bot):
             os._exit(0)
 
         try:
-            if not isinstance(self.config['Bot Token'], str):
+            if not isinstance(self.config['Bot Token'], str):  # pyright: ignore[reportUnnecessaryIsInstance]
                 print("The 'Bot Token' variable must be a string.")
                 os._exit(0)
 
-            elif not isinstance(self.config['Panel ID'], int):
+            elif not isinstance(self.config['Panel ID'], int):  # pyright: ignore[reportUnnecessaryIsInstance]
                 print("The 'Panel ID' variable must be an integer.")
                 os._exit(0)
 
             elif self.config['Language'] not in allowed_languages:
                 print(
-                    f"The 'Language' variable must be one of the following: {', '.join(allowed_languages)}."
+                    "The 'Language' variable must be one of the following: "
+                    f'{", ".join(allowed_languages)}.'
                 )
                 os._exit(0)
 
-            elif not isinstance(self.config['Backups'], int):
+            elif not isinstance(self.config['Backups'], int):  # pyright: ignore[reportUnnecessaryIsInstance]
                 print("The 'Backups' variable must be an integer between 1 and 5.")
                 os._exit(0)
 
@@ -117,32 +136,32 @@ class McDisClient(commands.Bot):
                 )
                 os._exit(0)
 
-            elif not isinstance(self.config['Flask']['Allow'], bool):
+            elif not isinstance(self.config['Flask']['Allow'], bool):  # pyright: ignore[reportUnnecessaryIsInstance]
                 print("The 'Flask: Allow' variable must be a boolean.")
                 os._exit(0)
 
             elif not self.config['Flask']['Allow']:
                 pass
 
-            elif not isinstance(self.config['Flask']['IP'], str):
+            elif not isinstance(self.config['Flask']['IP'], str):  # pyright: ignore[reportUnnecessaryIsInstance]
                 print("The 'Flask: IP' variable must be a string.")
                 os._exit(0)
 
-            elif not isinstance(self.config['Flask']['Port'], int):
+            elif not isinstance(self.config['Flask']['Port'], int):  # pyright: ignore[reportUnnecessaryIsInstance]
                 print("The 'Flask: Port' variable must be an integer.")
                 os._exit(0)
 
             names: list[str] = []
 
             for process_type in ('Servers', 'Networks'):
-                if self.config['Processes'][process_type] is None:
+                if self.config['Processes'][process_type] is None:  # pyright: ignore[reportUnnecessaryComparison]
                     self.config['Processes'][process_type] = {}
                     continue
 
                 for process in self.config['Processes'][process_type]:
                     process_config = self.config['Processes'][process_type][process]
 
-                    if not isinstance(process, str):
+                    if not isinstance(process, str):  # pyright: ignore[reportUnnecessaryIsInstance]
                         print(f'{process}: The process names must be string.')
                         os._exit(0)
 
@@ -152,7 +171,8 @@ class McDisClient(commands.Bot):
 
                     elif process in [self.path_backups, self.path_addons, 'Flask']:
                         print(
-                            f"{process}:  A process cannot be named '{self.path_backups}', '{self.path_addons}' or Flask."
+                            f"{process}:  A process cannot be named '{self.path_backups}', "
+                            f"'{self.path_addons}' or Flask."
                         )
                         os._exit(0)
 
@@ -162,20 +182,21 @@ class McDisClient(commands.Bot):
 
                     elif not is_valid_path_name(process):
                         print(
-                            f'{process}: Process names can only contain letters, numbers, periods (.), hyphens (-), underscores (_), and spaces.'
+                            f'{process}: Process names can only contain letters, numbers, '
+                            'periods (.), hyphens (-), underscores (_), and spaces.'
                         )
                         os._exit(0)
 
-                    elif not isinstance(process_config['start_cmd'], str) or not isinstance(
+                    elif not isinstance(process_config['start_cmd'], str) or not isinstance(  # pyright: ignore[reportUnnecessaryIsInstance]
                         process_config['stop_cmd'], str
                     ):
                         print(f"{process}: The 'start_cmd' variable must be a string.")
                         os._exit(0)
 
-                    elif process_config['blacklist'] == None:
+                    elif process_config['blacklist'] is None:  # pyright: ignore[reportUnnecessaryComparison]
                         process_config['blacklist'] = []
 
-                    elif not all([isinstance(x, str) for x in process_config['blacklist']]):
+                    elif not all(isinstance(x, str) for x in process_config['blacklist']):  # pyright: ignore[reportUnnecessaryIsInstance]
                         print(f"{process}: The 'blacklist' variable must be a list of strings.")
                         os._exit(0)
 
@@ -249,7 +270,9 @@ class McDisClient(commands.Bot):
         files_in_addons_dir = os.listdir(self.path_addons)
 
         valid_extensions = ['.py', '.mcdis']
-        cond: Callable[[str], bool] = lambda file: os.path.splitext(file)[1] in valid_extensions
+
+        def cond(file: str) -> bool:
+            return os.path.splitext(file)[1] in valid_extensions
 
         addons = [
             file
@@ -303,7 +326,7 @@ class McDisClient(commands.Bot):
 
                 if not reload:
                     print(self._('     -> Imported {}').format(addon))
-            except:
+            except Exception:
                 if not reload:
                     print(self._('     -> Unable to import {}').format(addon))
 
@@ -334,7 +357,7 @@ class McDisClient(commands.Bot):
                     else:
                         await self.panel.send(embed=PanelEmbed(self), view=PanelView(self))
 
-                elif self.user is not None and not messages[0].author.id == self.user.id:
+                elif self.user is not None and messages[0].author.id != self.user.id:
                     while messages:
                         await self.panel.purge()
                         messages = [
@@ -370,7 +393,7 @@ class McDisClient(commands.Bot):
                     await asyncio.sleep(1)
                     continue
 
-            except:
+            except Exception:
                 await self.error_report(title='Server Panel', error=traceback.format_exc())
 
             view = False
@@ -404,7 +427,8 @@ class McDisClient(commands.Bot):
             print(self._('Error: {}').format(error))
             os._exit(0)
 
-        signal_handler = lambda sig, frame: threading.Thread(target=self.on_stop).start()
+        def signal_handler(_sig: int, _frame: Any) -> None:
+            threading.Thread(target=self.on_stop).start()
 
         signal.signal(signal.SIGINT, signal_handler)
         self.is_running = True
@@ -422,7 +446,7 @@ class McDisClient(commands.Bot):
                 command = input('>>')
                 asyncio.run_coroutine_threadsafe(self.console_interface(command), self.loop)
                 time.sleep(3)
-        except:
+        except Exception:
             pass
 
     async def console_interface(self, command: str) -> None:
@@ -461,7 +485,7 @@ class McDisClient(commands.Bot):
             process_name = command.removeprefix('start').lower().strip()
             process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
-            if not process:
+            if process is None:
                 print(
                     self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                         '', 'start', '', 'start'
@@ -485,7 +509,7 @@ class McDisClient(commands.Bot):
             process_name = command.removeprefix('stop').lower().strip()
             process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
-            if not process:
+            if process is None:
                 print(
                     self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                         '', 'stop', '', 'stop'
@@ -507,7 +531,7 @@ class McDisClient(commands.Bot):
             process_name = command.removeprefix('kill').lower().strip()
             process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
-            if not process:
+            if process is None:
                 print(
                     self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                         '', 'kill', '', 'kill'
@@ -533,7 +557,7 @@ class McDisClient(commands.Bot):
             process_name = command.removeprefix('restart').lower().strip()
             process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
-            if not process:
+            if process is None:
                 print(
                     self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                         '', 'restart', '', 'restart'
@@ -557,7 +581,7 @@ class McDisClient(commands.Bot):
             process_name = command.removeprefix('mdreload').lower().strip()
             process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
 
-            if not process:
+            if process is None:
                 print(
                     self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                         '', 'mdreload', '', 'mdreload'
@@ -650,7 +674,7 @@ class McDisClient(commands.Bot):
 
                 await message.delete()
 
-                if not process:
+                if process is None:
                     response = await message.channel.send(
                         self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                             self.prefix, 'start', self.prefix, 'start'
@@ -679,7 +703,7 @@ class McDisClient(commands.Bot):
 
                 await message.delete()
 
-                if not process:
+                if process is None:
                     response = await message.channel.send(
                         self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                             self.prefix, 'stop', self.prefix, 'stop'
@@ -708,7 +732,7 @@ class McDisClient(commands.Bot):
 
                 await message.delete()
 
-                if not process:
+                if process is None:
                     response = await message.channel.send(
                         self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                             self.prefix, 'kill', self.prefix, 'kill'
@@ -737,7 +761,7 @@ class McDisClient(commands.Bot):
 
                 await message.delete()
 
-                if not process:
+                if process is None:
                     response = await message.channel.send(
                         self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                             self.prefix, 'restart', self.prefix, 'restart'
@@ -768,7 +792,7 @@ class McDisClient(commands.Bot):
 
                 await message.delete()
 
-                if not process:
+                if process is None:
                     response = await message.channel.send(
                         self._('✖ Specify the process. E.g.: `{}{} <name>` or `{}{}-all`.').format(
                             self.prefix, 'mdreload', self.prefix, 'mdreload'
@@ -802,7 +826,7 @@ class McDisClient(commands.Bot):
     async def upload_logic(self, message: discord.Message) -> None:
         if (
             message.author.bot
-            or not message.channel.id == self.panel.id
+            or message.channel.id != self.panel.id
             or not message.attachments
             or not self.uploader.is_running
         ):
@@ -954,11 +978,9 @@ class McDisClient(commands.Bot):
     ) -> str | bool:
         real_path = un_mcdis_path(path)
         new_path = os.path.join(self.cwd, real_path)
-        # Note: If `real_path` is an absolute path, `os.path.join(self.cwd, real_path)` will ignore `self.cwd`
-        # and use only `real_path`. This behavior ensures that absolute paths override the base path provided.
-        # To prevent escaping from `self.cwd`, a check is performed to ensure `new_path` starts with `self.cwd`.
+        # Absolute paths override `self.cwd`; keep the result inside the McDis cwd.
 
-        if not path.split(os.sep)[0] == 'McDis':
+        if path.split(os.sep)[0] != 'McDis':
             return self._('✖ The path must be a McDis path. E.g.: `McDis/Backups`.')
         if not new_path.startswith(self.cwd):
             return self._('✖ You must work within the directory where McDis is running.')
@@ -971,8 +993,8 @@ class McDisClient(commands.Bot):
 
         return True
 
-    async def call_addons(self, function: str, args: tuple[Any, ...] = tuple()) -> None:
-        for name, addon in self.addons.items():
+    async def call_addons(self, function: str, args: tuple[Any, ...] = ()) -> None:
+        for _name, addon in self.addons.items():
             try:
                 func = getattr(addon, function, None)
                 if func:
@@ -986,7 +1008,7 @@ class McDisClient(commands.Bot):
     async def call_mdextras(
         self,
         function: str,
-        args: tuple[Any, ...] = tuple(),
+        args: tuple[Any, ...] = (),
         plugins: bool = True,
         addons: bool = True,
     ) -> None:
@@ -1031,7 +1053,7 @@ class McDisClient(commands.Bot):
         return decorator
 
     def unload_addons(self) -> None:
-        for name, addon in self.addons.items():
+        for _name, addon in self.addons.items():
             if hasattr(addon, 'unload') and callable(addon.unload):
                 addon.unload()
 
