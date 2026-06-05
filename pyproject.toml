@@ -33,6 +33,9 @@ strict = true
 [tool.ruff]
 line-length = 100
 
+[tool.ruff.format]
+quote-style = "single"
+
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
 

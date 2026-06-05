@@ -2,105 +2,121 @@ from ..modules import *
 from ..classes import *
 from ..utils import *
 
-class UploaderView          (discord.ui.View):
-    def __init__(self, client : McDisClient):
+
+class UploaderView(discord.ui.View):
+    def __init__(self, client: McDisClient) -> None:
         super().__init__(timeout=None)
         self.client = client
 
-        self.add_item(UpdateButton      (self.client))
-        self.add_item(EditButton        (self.client))
-        self.add_item(StateButton       (self.client))
-        self.add_item(OverwriteButton   (self.client))
-        
-class UpdateButton          (discord.ui.Button):
-    def __init__(self, client : McDisClient):
-        super().__init__(label = emoji_update, style = discord.ButtonStyle.gray)
-        self.view : UploaderView
+        self.add_item(UpdateButton(self.client))
+        self.add_item(EditButton(self.client))
+        self.add_item(StateButton(self.client))
+        self.add_item(OverwriteButton(self.client))
 
-    async def callback(self, interaction: discord.Interaction):
+
+class UpdateButton(discord.ui.Button[Any]):
+    def __init__(self, client: McDisClient) -> None:
+        super().__init__(label=emoji_update, style=discord.ButtonStyle.gray)
+        self.view: UploaderView
+
+    async def callback(self, interaction: discord.Interaction) -> None:
         await interaction.response.edit_message(
-            embed = UploaderEmbed(self.view.client),
-            view = UploaderView(self.view.client)
+            embed=UploaderEmbed(self.view.client), view=UploaderView(self.view.client)
         )
 
-class EditButton            (discord.ui.Button):
-    def __init__(self, client : McDisClient):
-        super().__init__(label = emoji_pin, style = discord.ButtonStyle.gray)
-        self.view : UploaderView
 
-    async def callback(self, interaction: discord.Interaction):
-        class EditPath(discord.ui.Modal, title = self.view.client._('Edit the path to upload')):
-            name = discord.ui.TextInput(
-                label = self.view.client._('Path to upload'),
-                style = discord.TextStyle.short,
-                default = mcdis_path(self.view.client.uploader.path_to_upload)
+class EditButton(discord.ui.Button[Any]):
+    def __init__(self, client: McDisClient) -> None:
+        super().__init__(label=emoji_pin, style=discord.ButtonStyle.gray)
+        self.view: UploaderView
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        class EditPath(discord.ui.Modal, title=self.view.client._('Edit the path to upload')):
+            name: discord.ui.TextInput[Any] = discord.ui.TextInput(
+                label=self.view.client._('Path to upload'),
+                style=discord.TextStyle.short,
+                default=mcdis_path(self.view.client.uploader.path_to_upload),
             )
 
-            async def on_submit(modal, interaction: discord.Interaction):
-                response = self.view.client.is_valid_mcdis_path(modal.name.value, check_if_dir = True)
+            async def on_submit(modal, interaction: discord.Interaction) -> None:
+                response = self.view.client.is_valid_mcdis_path(modal.name.value, check_if_dir=True)
 
                 if response is True:
                     self.view.client.uploader.path_to_upload = un_mcdis_path(modal.name.value)
-                    await interaction.response.edit_message(embed = UploaderEmbed(self.view.client))
+                    await interaction.response.edit_message(embed=UploaderEmbed(self.view.client))
                 else:
-                    await interaction.response.send_message(response, ephemeral = True)
+                    await interaction.response.send_message(response, ephemeral=True)
 
         await interaction.response.send_modal(EditPath())
 
-class StateButton           (discord.ui.Button):
-    def __init__(self, client : McDisClient):
-        label = 'Close' if client.uploader.is_running else 'Run'
-        super().__init__(label = label, style=discord.ButtonStyle.gray)
-        self.view : UploaderView
 
-    async def callback(self, interaction: discord.Interaction):
+class StateButton(discord.ui.Button[Any]):
+    def __init__(self, client: McDisClient) -> None:
+        label = 'Close' if client.uploader.is_running else 'Run'
+        super().__init__(label=label, style=discord.ButtonStyle.gray)
+        self.view: UploaderView
+
+    async def callback(self, interaction: discord.Interaction) -> None:
         self.view.client.uploader.is_running = not self.view.client.uploader.is_running
 
         self.label = 'Close' if self.view.client.uploader.is_running else 'Run'
         await interaction.response.edit_message(
-            embed = UploaderEmbed(self.view.client),
-            view = self.view)
+            embed=UploaderEmbed(self.view.client), view=self.view
+        )
 
-class OverwriteButton       (discord.ui.Button):
-    def __init__(self, client : McDisClient):
+
+class OverwriteButton(discord.ui.Button[Any]):
+    def __init__(self, client: McDisClient) -> None:
         label = 'Overwrite' if client.uploader.overwrite else 'Do Not Overwrite'
-        super().__init__(label = label, style=discord.ButtonStyle.gray)
-        self.view : UploaderView
+        super().__init__(label=label, style=discord.ButtonStyle.gray)
+        self.view: UploaderView
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction) -> None:
         self.view.client.uploader.overwrite = not self.view.client.uploader.overwrite
 
         self.label = 'Overwrite' if self.view.client.uploader.overwrite else 'Do Not Overwrite'
         await interaction.response.edit_message(
-            embed = UploaderEmbed(self.view.client),
-            view = self.view)
+            embed=UploaderEmbed(self.view.client), view=self.view
+        )
 
-class UploaderEmbed         (discord.Embed):
-    def __init__(self, client : McDisClient):
-        super().__init__(title = f'> {client._("Uploader Manager")}', colour=embed_colour)
+
+class UploaderEmbed(discord.Embed):
+    def __init__(self, client: McDisClient) -> None:
+        super().__init__(title=f'> {client._("Uploader Manager")}', colour=embed_colour)
         self.client = client
-        
+
         self._add_description()
         self._add_status_field()
         self._add_path_field()
 
-    def _add_description(self):
-        self.add_field(inline = True, name = '', value = 
-            self.client._('If the Uploader is active, all files uploaded to this channel will be sent to the specified destination.')
+    def _add_description(self) -> Any:
+        self.add_field(
+            inline=True,
+            name='',
+            value=self.client._(
+                'If the Uploader is active, all files uploaded to this channel will be sent to the specified destination.'
+            ),
         )
 
-    def _add_status_field(self):
+    def _add_status_field(self) -> Any:
         state = 'Running' if self.client.uploader.is_running else 'Closed'
         overwrite = 'Overwrite' if self.client.uploader.overwrite else 'Do Not Overwrite'
-        
-        self.add_field(inline = True, name = '', value =
-            '`• State:                  '[:-len(state)] + state + '`\n'
-            '`• Upload:                 '[:-len(overwrite)] + overwrite + '`\n'
+
+        self.add_field(
+            inline=True,
+            name='',
+            value='`• State:                  '[: -len(state)]
+            + state
+            + '`\n`• Upload:                 '[: -len(overwrite)]
+            + overwrite
+            + '`\n',
         )
 
-    def _add_path_field(self):
+    def _add_path_field(self) -> Any:
         path_to_upload = mcdis_path(self.client.uploader.path_to_upload)
-        
-        self.add_field(inline = False, name = '', value =
-            f'**{self.client._("Path to upload")}:**\n```{emoji_pin} {path_to_upload}```'
+
+        self.add_field(
+            inline=False,
+            name='',
+            value=f'**{self.client._("Path to upload")}:**\n```{emoji_pin} {path_to_upload}```',
         )

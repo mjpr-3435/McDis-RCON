@@ -4,11 +4,12 @@ from ..utils import *
 from .Process import Process, ProcessConfig
 from .McDisClient import McDisClient
 
+
 class Server(Process):
-    def __init__(self, name: str, client: McDisClient, config: ProcessConfig):
+    def __init__(self, name: str, client: McDisClient, config: ProcessConfig) -> None:
         super().__init__(name, client, config)
-        
-    def send_response(self, target: str, message: str | list[str], *, colour: str = "gray"):
+
+    def send_response(self, target: str, message: str | list[str], *, colour: str = 'gray') -> None:
         if isinstance(message, str):
             self.execute(f'tellraw {target} {{"text": "{message}","color":"{colour}"}}')
 

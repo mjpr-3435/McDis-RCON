@@ -2,6 +2,8 @@ import discord
 
 from ..modules import *
 
+InteractionCallback = Callable[[discord.Interaction[Any]], object]
+
 
 def isAdmin(member: discord.Member) -> bool:
     return member.guild_permissions.administrator
@@ -10,41 +12,43 @@ def isAdmin(member: discord.Member) -> bool:
 async def thread(
     name: str, channel: discord.TextChannel, *, public: bool = False
 ) -> discord.Thread:
-    async for thread in channel.archived_threads():
-        await thread.edit(archived=False)
+    async for archived_thread in channel.archived_threads():
+        await archived_thread.edit(archived=False)
 
-    thread = next(filter(lambda x: x.name == name, channel.threads), None)
+    existing_thread = next(filter(lambda x: x.name == name, channel.threads), None)
 
-    if thread:
-        return thread
+    if existing_thread:
+        return existing_thread
 
     if not public:
-        thread = await channel.create_thread(name=name.strip())
-        return thread
+        new_thread = await channel.create_thread(name=name.strip())
+        return new_thread
 
     else:
-        message = await channel.send("_")
-        thread = await channel.create_thread(name=name.strip(), message=message)
+        message = await channel.send('_')
+        public_thread = await channel.create_thread(name=name.strip(), message=message)
         await message.delete()
-        return thread
+        return public_thread
 
 
 async def confirmation_request(
     description: str,
     *,
-    on_confirmation: Callable = None,
-    on_reject: Callable = None,
-    interaction: discord.Interaction = None,
-    channel: discord.TextChannel = None,
+    on_confirmation: InteractionCallback | None = None,
+    on_reject: InteractionCallback | None = None,
+    interaction: discord.Interaction[Any] | None = None,
+    channel: discord.TextChannel | None = None,
     ephemeral: bool = True,
-):
+) -> None:
 
     class confirmation_views(discord.ui.View):
-        def __init__(self):
+        def __init__(self) -> None:
             super().__init__(timeout=None)
 
-        @discord.ui.button(label="✔", style=discord.ButtonStyle.gray)
-        async def proceed_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        @discord.ui.button(label='✔', style=discord.ButtonStyle.gray)
+        async def proceed_button(
+            self, interaction: discord.Interaction[Any], button: discord.ui.Button[Any]
+        ) -> None:
             if not on_confirmation:
                 await interaction.response.edit_message(delete_after=0)
                 return
@@ -54,13 +58,15 @@ async def confirmation_request(
             else:
                 on_confirmation(interaction)
 
-        @discord.ui.button(label="✖", style=discord.ButtonStyle.red)
-        async def reject_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        @discord.ui.button(label='✖', style=discord.ButtonStyle.red)
+        async def reject_button(
+            self, interaction: discord.Interaction[Any], button: discord.ui.Button[Any]
+        ) -> None:
             if not on_reject:
                 await interaction.response.edit_message(delete_after=0)
                 return
 
-            if inspect.iscoroutinefunction(on_confirmation):
+            if inspect.iscoroutinefunction(on_reject):
                 await on_reject(interaction)
             else:
                 on_reject(interaction)

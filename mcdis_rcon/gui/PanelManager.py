@@ -1,100 +1,117 @@
 from ..modules import *
 from ..classes import *
 from ..utils import *
-    
-class McDisManagerView      (discord.ui.View):
-    def __init__(self, client: McDisClient):
-        super().__init__(timeout = None)
+
+
+class McDisManagerView(discord.ui.View):
+    def __init__(self, client: McDisClient) -> None:
+        super().__init__(timeout=None)
         self.client = client
-        self.index  = 0
-        
-        self.add_item(BackButton        (self.client))
-        self.add_item(ProcessButton     (self.client))
-        self.add_item(StartButton       (self.client))
-        self.add_item(StopButton        (self.client))
-        self.add_item(KillButton        (self.client))
+        self.index = 0
 
-class BackButton            (discord.ui.Button):
-    def __init__(self, client : McDisClient):
-        super().__init__(label = emoji_arrow_left, style = discord.ButtonStyle.gray)
-        self.view : McDisManagerView
+        self.add_item(BackButton(self.client))
+        self.add_item(ProcessButton(self.client))
+        self.add_item(StartButton(self.client))
+        self.add_item(StopButton(self.client))
+        self.add_item(KillButton(self.client))
 
-    async def callback(self, interaction: discord.Interaction):
+
+class BackButton(discord.ui.Button[Any]):
+    def __init__(self, client: McDisClient) -> None:
+        super().__init__(label=emoji_arrow_left, style=discord.ButtonStyle.gray)
+        self.view: McDisManagerView
+
+    async def callback(self, interaction: discord.Interaction) -> None:
         from .Panel import PanelView
 
-        await interaction.response.edit_message(
-            view = PanelView(self.view.client))
+        await interaction.response.edit_message(view=PanelView(self.view.client))
 
-class ProcessButton         (discord.ui.Button):
-    def __init__(self, client : McDisClient):
+
+class ProcessButton(discord.ui.Button[Any]):
+    def __init__(self, client: McDisClient) -> None:
         label = self._get_label(client.processes[0])
-        super().__init__(label = label, style = discord.ButtonStyle.gray)
-        self.view : McDisManagerView
+        super().__init__(label=label, style=discord.ButtonStyle.gray)
+        self.view: McDisManagerView
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction) -> None:
         self.view.index = (self.view.index + 1) % len(self.view.client.processes)
         self.label = self._get_label(self.view.client.processes[self.view.index])
 
-        await interaction.response.edit_message(view = self.view)
+        await interaction.response.edit_message(view=self.view)
 
-    def _get_label(self, process: Process):
-        return f"Server {process.name}" if isinstance(process, Server) else process.name
-   
-class StartButton           (discord.ui.Button):
-    def __init__(self, client : McDisClient):
-        super().__init__(label = 'Start', style = discord.ButtonStyle.gray)
-        self.view : McDisManagerView
+    def _get_label(self, process: Process) -> Any:
+        return f'Server {process.name}' if isinstance(process, Server) else process.name
 
-    async def callback(self, interaction: discord.Interaction):
+
+class StartButton(discord.ui.Button[Any]):
+    def __init__(self, client: McDisClient) -> None:
+        super().__init__(label='Start', style=discord.ButtonStyle.gray)
+        self.view: McDisManagerView
+
+    async def callback(self, interaction: discord.Interaction) -> None:
         if self.view.client.processes[self.view.index].is_running():
             await interaction.response.send_message(
-                self.view.client._('✖ `[{}]`: The process was already open.')
-                                .format(self.view.client.processes[self.view.index].name), 
-                ephemeral = True)
-        
+                self.view.client._('✖ `[{}]`: The process was already open.').format(
+                    self.view.client.processes[self.view.index].name
+                ),
+                ephemeral=True,
+            )
+
         else:
             self.view.client.processes[self.view.index].start()
             await interaction.response.send_message(
-                self.view.client._('✔ `[{}]`: Initializing process.')
-                                .format(self.view.client.processes[self.view.index].name), 
-                ephemeral = True)
+                self.view.client._('✔ `[{}]`: Initializing process.').format(
+                    self.view.client.processes[self.view.index].name
+                ),
+                ephemeral=True,
+            )
 
-class StopButton            (discord.ui.Button):
-    def __init__(self, client : McDisClient):
-        super().__init__(label = 'Stop', style = discord.ButtonStyle.gray)
-        self.view : McDisManagerView
 
-    async def callback(self, interaction: discord.Interaction):
+class StopButton(discord.ui.Button[Any]):
+    def __init__(self, client: McDisClient) -> None:
+        super().__init__(label='Stop', style=discord.ButtonStyle.gray)
+        self.view: McDisManagerView
+
+    async def callback(self, interaction: discord.Interaction) -> None:
         if not self.view.client.processes[self.view.index].is_running():
             await interaction.response.send_message(
-                self.view.client._('✖ `[{}]`: The process was not open.')
-                                .format(self.view.client.processes[self.view.index].name), 
-                ephemeral = True)
-            
+                self.view.client._('✖ `[{}]`: The process was not open.').format(
+                    self.view.client.processes[self.view.index].name
+                ),
+                ephemeral=True,
+            )
+
         else:
             self.view.client.processes[self.view.index].stop()
             await interaction.response.send_message(
-                self.view.client._('✔ `[{}]`: Stopping process.')
-                                .format(self.view.client.processes[self.view.index].name), 
-                ephemeral = True)
+                self.view.client._('✔ `[{}]`: Stopping process.').format(
+                    self.view.client.processes[self.view.index].name
+                ),
+                ephemeral=True,
+            )
 
-class KillButton            (discord.ui.Button):
-    def __init__(self, client : McDisClient):
-        super().__init__(label = 'Kill', style = discord.ButtonStyle.red)
-        self.view : McDisManagerView
 
-    async def callback(self, interaction: discord.Interaction):
-        async def on_confirmation(confirmation_interaction: discord.Interaction):
+class KillButton(discord.ui.Button[Any]):
+    def __init__(self, client: McDisClient) -> None:
+        super().__init__(label='Kill', style=discord.ButtonStyle.red)
+        self.view: McDisManagerView
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        async def on_confirmation(confirmation_interaction: discord.Interaction) -> None:
             await confirmation_interaction.response.edit_message(
-                content = self.view.client._('✔ `[{}]`: Forcibly stopped process.')
-                                        .format(self.view.client.processes[self.view.index].name),
-                embed = None,
-                view = None)
-            
+                content=self.view.client._('✔ `[{}]`: Forcibly stopped process.').format(
+                    self.view.client.processes[self.view.index].name
+                ),
+                embed=None,
+                view=None,
+            )
+
             self.view.client.processes[self.view.index].kill()
 
         await confirmation_request(
-            self.view.client._('Are you sure you want to kill the `{}` process?')
-                            .format(self.view.client.processes[self.view.index].name),
-            on_confirmation = on_confirmation,
-            interaction = interaction)
+            self.view.client._('Are you sure you want to kill the `{}` process?').format(
+                self.view.client.processes[self.view.index].name
+            ),
+            on_confirmation=on_confirmation,
+            interaction=interaction,
+        )
