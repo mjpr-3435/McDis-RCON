@@ -1,6 +1,6 @@
 import asyncio
 import gettext
-import importlib
+import importlib.util
 import os
 import signal
 import sys
@@ -15,7 +15,7 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from mcdis_rcon.classes.Process import ProcessConfig
+from mcdis_rcon.classes.Process import Process, ProcessConfig
 
 from ..modules import allowed_languages, blank_space, package_path
 from ..utils import (
@@ -75,7 +75,7 @@ class McDisClient(commands.Bot):
         self.path_addons = '.mdaddons'
         self.addons: dict[str, object] = {}
         self.flask = cast(FlaskManager, None)
-        self.processes: list[Network | Server] = []
+        self.processes: list[Process] = []
         self.networks: list[Network] = []
         self.servers: list[Server] = []
         self.uploader = Uploader()
@@ -223,7 +223,7 @@ class McDisClient(commands.Bot):
         lang.install()
         self._ = lang.gettext
 
-        self.prefix = (self.config['Bot Prefix'] or '').strip() or self.prefix
+        self.prefix = (self.config.get('Bot Prefix') or '').strip() or self.prefix
 
         print(self._('Your configuration has been loaded successfully.'))
 
@@ -269,7 +269,7 @@ class McDisClient(commands.Bot):
 
         files_in_addons_dir = os.listdir(self.path_addons)
 
-        valid_extensions = ['.py', '.mcdis']
+        valid_extensions = ['.py']
 
         def cond(file: str) -> bool:
             return os.path.splitext(file)[1] in valid_extensions
@@ -310,15 +310,8 @@ class McDisClient(commands.Bot):
                     mod = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(mod)
 
-                elif addon.endswith('.mcdis') and False:
-                    addon_name = addon.removesuffix('.mcdis')
-
-                    addon_path = os.path.join(self.path_addons, addon)
-                    sys.path.insert(0, addon_path)
-
-                    mod = importlib.import_module('mdaddon.__init__')
-
-                    sys.path.pop(0)
+                else:
+                    continue
 
                 addon_factory = cast(Callable[[McDisClient], object], mod.mdaddon)
                 addon_instance = addon_factory(self)
@@ -483,7 +476,7 @@ class McDisClient(commands.Bot):
 
         elif self.is_command(command.lower(), 'start', console=True):
             process_name = command.removeprefix('start').lower().strip()
-            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+            process = self._find_process(process_name)
 
             if process is None:
                 print(
@@ -507,7 +500,7 @@ class McDisClient(commands.Bot):
 
         elif self.is_command(command.lower(), 'stop', console=True):
             process_name = command.removeprefix('stop').lower().strip()
-            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+            process = self._find_process(process_name)
 
             if process is None:
                 print(
@@ -529,7 +522,7 @@ class McDisClient(commands.Bot):
 
         elif self.is_command(command.lower(), 'kill', console=True):
             process_name = command.removeprefix('kill').lower().strip()
-            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+            process = self._find_process(process_name)
 
             if process is None:
                 print(
@@ -555,7 +548,7 @@ class McDisClient(commands.Bot):
 
         elif self.is_command(command.lower(), 'restart', console=True):
             process_name = command.removeprefix('restart').lower().strip()
-            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+            process = self._find_process(process_name)
 
             if process is None:
                 print(
@@ -579,7 +572,7 @@ class McDisClient(commands.Bot):
 
         elif self.is_command(command.lower(), 'mdreload', console=True):
             process_name = command.removeprefix('mdreload').lower().strip()
-            process = next(filter(lambda x: process_name == x.name.lower(), self.processes), None)
+            process = self._find_process(process_name)
 
             if process is None:
                 print(
@@ -668,9 +661,7 @@ class McDisClient(commands.Bot):
 
             elif self.is_command(message.content.lower(), 'start'):
                 process_name = message.content.removeprefix(f'{self.prefix}start').lower().strip()
-                process = next(
-                    filter(lambda x: process_name == x.name.lower(), self.processes), None
-                )
+                process = self._find_process(process_name)
 
                 await message.delete()
 
@@ -697,9 +688,7 @@ class McDisClient(commands.Bot):
 
             elif self.is_command(message.content.lower(), 'stop'):
                 process_name = message.content.removeprefix(f'{self.prefix}stop').lower().strip()
-                process = next(
-                    filter(lambda x: process_name == x.name.lower(), self.processes), None
-                )
+                process = self._find_process(process_name)
 
                 await message.delete()
 
@@ -726,9 +715,7 @@ class McDisClient(commands.Bot):
 
             elif self.is_command(message.content.lower(), 'kill'):
                 process_name = message.content.removeprefix(f'{self.prefix}kill').lower().strip()
-                process = next(
-                    filter(lambda x: process_name == x.name.lower(), self.processes), None
-                )
+                process = self._find_process(process_name)
 
                 await message.delete()
 
@@ -755,9 +742,7 @@ class McDisClient(commands.Bot):
 
             elif self.is_command(message.content.lower(), 'restart'):
                 process_name = message.content.removeprefix(f'{self.prefix}restart').lower().strip()
-                process = next(
-                    filter(lambda x: process_name == x.name.lower(), self.processes), None
-                )
+                process = self._find_process(process_name)
 
                 await message.delete()
 
@@ -786,9 +771,7 @@ class McDisClient(commands.Bot):
                 process_name = (
                     message.content.removeprefix(f'{self.prefix}mdreload').lower().strip()
                 )
-                process = next(
-                    filter(lambda x: process_name == x.name.lower(), self.processes), None
-                )
+                process = self._find_process(process_name)
 
                 await message.delete()
 
@@ -973,6 +956,12 @@ class McDisClient(commands.Bot):
             else dummy.startswith(command)
         )
 
+    def _find_process(self, process_name: str) -> Process | None:
+        return next(
+            (process for process in self.processes if process_name == process.name.lower()),
+            None,
+        )
+
     def is_valid_mcdis_path(
         self, path: str, *, check_if_file: bool = False, check_if_dir: bool = False
     ) -> str | bool:
@@ -1053,8 +1042,9 @@ class McDisClient(commands.Bot):
         return decorator
 
     def unload_addons(self) -> None:
-        for _name, addon in self.addons.items():
-            if hasattr(addon, 'unload') and callable(addon.unload):
-                addon.unload()
+        for addon in self.addons.values():
+            unload = getattr(addon, 'unload', None)
+            if callable(unload):
+                unload()
 
         self.addons = {}
