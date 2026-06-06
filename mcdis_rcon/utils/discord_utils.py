@@ -1,6 +1,10 @@
+import inspect
+from collections.abc import Callable
+from typing import Any
+
 import discord
 
-from ..modules import *
+from ..modules import embed_colour
 
 InteractionCallback = Callable[[discord.Interaction[Any]], object]
 
@@ -9,9 +13,7 @@ def isAdmin(member: discord.Member) -> bool:
     return member.guild_permissions.administrator
 
 
-async def thread(
-    name: str, channel: discord.TextChannel, *, public: bool = False
-) -> discord.Thread:
+async def thread(name: str, channel: discord.TextChannel, *, public: bool = False) -> discord.Thread:
     async for archived_thread in channel.archived_threads():
         await archived_thread.edit(archived=False)
 
@@ -46,9 +48,7 @@ async def confirmation_request(
             super().__init__(timeout=None)
 
         @discord.ui.button(label='✔', style=discord.ButtonStyle.gray)
-        async def proceed_button(
-            self, interaction: discord.Interaction[Any], button: discord.ui.Button[Any]
-        ) -> None:
+        async def proceed_button(self, interaction: discord.Interaction[Any], button: discord.ui.Button[Any]) -> None:
             if not on_confirmation:
                 await interaction.response.edit_message(delete_after=0)
                 return
@@ -59,9 +59,7 @@ async def confirmation_request(
                 on_confirmation(interaction)
 
         @discord.ui.button(label='✖', style=discord.ButtonStyle.red)
-        async def reject_button(
-            self, interaction: discord.Interaction[Any], button: discord.ui.Button[Any]
-        ) -> None:
+        async def reject_button(self, interaction: discord.Interaction[Any], button: discord.ui.Button[Any]) -> None:
             if not on_reject:
                 await interaction.response.edit_message(delete_after=0)
                 return

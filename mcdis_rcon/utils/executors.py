@@ -1,4 +1,6 @@
-from ..modules import *
+import asyncio
+import threading
+from collections.abc import Callable
 
 
 async def execute_and_wait(

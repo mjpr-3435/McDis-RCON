@@ -1,8 +1,5 @@
-from ..modules import *
-from ..utils import *
-
-from .Process import Process, ProcessConfig
 from .McDisClient import McDisClient
+from .Process import Process, ProcessConfig
 
 
 class Server(Process):
@@ -13,6 +10,6 @@ class Server(Process):
         if isinstance(message, str):
             self.execute(f'tellraw {target} {{"text": "{message}","color":"{colour}"}}')
 
-        elif isinstance(message, list) and all(isinstance(i, str) for i in message):
+        else:
             for msg in message:
                 self.execute(f'tellraw {target} {{"text": "{msg}","color":"{colour}"}}')

@@ -1,12 +1,10 @@
-from ..modules import *
 from ..classes import *
+from ..modules import *
 from ..utils import *
 
 
 class ProcessesView(discord.ui.View):
-    def __init__(
-        self, client: McDisClient, processes: list[psutil.Process], path: str = '.', page: int = 1
-    ):
+    def __init__(self, client: McDisClient, processes: list[psutil.Process], path: str = '.', page: int = 1):
         super().__init__(timeout=None)
         self.client = client
         self.path = path
@@ -48,10 +46,7 @@ class ProcessesView(discord.ui.View):
             name = self.processes[i].name()
             option_label = f'{emoji_file} {i + 1}. {truncate(name, 50)}'
             cmd_1 = ' '.join(
-                [
-                    os.path.basename(cmd) if os.path.exists(cmd) else cmd
-                    for cmd in self.processes[i].cmdline()
-                ]
+                [os.path.basename(cmd) if os.path.exists(cmd) else cmd for cmd in self.processes[i].cmdline()]
             )
             cmd_1 = truncate(cmd_1, 32)
 
@@ -181,9 +176,7 @@ class NextPageButton(discord.ui.Button[Any]):
         self.view: ProcessesView
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        self.view.page = (
-            self.view.page + 1 if self.view.page < self.view.max_page else self.view.max_page
-        )
+        self.view.page = self.view.page + 1 if self.view.page < self.view.max_page else self.view.max_page
 
         await self.view._update_page(interaction)
 
@@ -221,9 +214,7 @@ class UpdateButton(discord.ui.Button[Any]):
 
 
 class ProcessesEmbed(discord.Embed):
-    def __init__(
-        self, client: McDisClient, processes: list[psutil.Process], path: str = '.', page: int = 1
-    ):
+    def __init__(self, client: McDisClient, processes: list[psutil.Process], path: str = '.', page: int = 1):
         super().__init__(
             title=client._('> Processes in `{}`').format(mcdis_path(path)),
             colour=embed_colour,
@@ -255,9 +246,7 @@ class ProcessesEmbed(discord.Embed):
         if len(self.processes) != 0:
             self.set_footer(
                 text=f'{184 * blank_space}\n'
-                + self.client._(
-                    'If you want to close a process, select it from the dropdown below.'
-                )
+                + self.client._('If you want to close a process, select it from the dropdown below.')
             )
 
         else:
@@ -270,9 +259,7 @@ class ProcessesEmbed(discord.Embed):
         cwd = os.path.relpath(process.cwd(), os.getcwd())
         cwd = truncate(cwd, 32)
 
-        cmd_1 = ' '.join(
-            [os.path.basename(cmd) if os.path.exists(cmd) else cmd for cmd in process.cmdline()]
-        )
+        cmd_1 = ' '.join([os.path.basename(cmd) if os.path.exists(cmd) else cmd for cmd in process.cmdline()])
         cmd_1 = truncate(cmd_1, 32)
 
         mrkd_string = (

@@ -1,11 +1,21 @@
+import math
+from collections.abc import Mapping, Sequence
+from typing import Protocol, cast
+
 import psutil
 
-from ..modules import *
+
+class TemperatureSensor(Protocol):
+    label: str
+    current: float
 
 
 def get_cpu_temp() -> str:
     try:
-        temps = psutil.sensors_temperatures()  # type: ignore[attr-defined]
+        temps = cast(
+            Mapping[str, Sequence[TemperatureSensor]],
+            psutil.sensors_temperatures(),  # type: ignore[attr-defined]
+        )
         for sensor in ['coretemp', 'k10temp']:
             if sensor in temps:
                 for temp in temps[sensor]:

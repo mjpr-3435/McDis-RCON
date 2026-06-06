@@ -1,5 +1,5 @@
-from ..modules import *
 from ..classes import *
+from ..modules import *
 from ..utils import *
 
 
@@ -60,9 +60,7 @@ class StateButton(discord.ui.Button[Any]):
         self.view.client.uploader.is_running = not self.view.client.uploader.is_running
 
         self.label = 'Close' if self.view.client.uploader.is_running else 'Run'
-        await interaction.response.edit_message(
-            embed=UploaderEmbed(self.view.client), view=self.view
-        )
+        await interaction.response.edit_message(embed=UploaderEmbed(self.view.client), view=self.view)
 
 
 class OverwriteButton(discord.ui.Button[Any]):
@@ -75,9 +73,7 @@ class OverwriteButton(discord.ui.Button[Any]):
         self.view.client.uploader.overwrite = not self.view.client.uploader.overwrite
 
         self.label = 'Overwrite' if self.view.client.uploader.overwrite else 'Do Not Overwrite'
-        await interaction.response.edit_message(
-            embed=UploaderEmbed(self.view.client), view=self.view
-        )
+        await interaction.response.edit_message(embed=UploaderEmbed(self.view.client), view=self.view)
 
 
 class UploaderEmbed(discord.Embed):

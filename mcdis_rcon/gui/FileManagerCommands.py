@@ -1,5 +1,5 @@
-from ..modules import *
 from ..classes import *
+from ..modules import *
 from ..utils import *
 
 
@@ -130,8 +130,7 @@ class CommandsEmbed(discord.Embed):
         self.client = client
 
         self.description = self.client._(
-            'In the dropdown below, you will find various predefined commands.\n'
-            'Select the one you wish to use.'
+            'In the dropdown below, you will find various predefined commands.\nSelect the one you wish to use.'
         )
 
         self.set_footer(text=f'{184 * blank_space}\n{client._("Dropdown:")}')

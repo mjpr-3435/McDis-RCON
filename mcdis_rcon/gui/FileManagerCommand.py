@@ -1,12 +1,10 @@
-from ..modules import *
 from ..classes import *
+from ..modules import *
 from ..utils import *
 
 
 class CommandView(discord.ui.View):
-    def __init__(
-        self, client: McDisClient, process: Process, command: str, action: int = 1
-    ) -> None:
+    def __init__(self, client: McDisClient, process: Process, command: str, action: int = 1) -> None:
         super().__init__(timeout=None)
         self.client = client
         self.process = process
@@ -51,9 +49,7 @@ class ActionSelect(discord.ui.Select[Any]):
         self.view.action = int(self.values[0])
 
         await interaction.response.edit_message(
-            embed=CommandEmbed(
-                self.view.client, self.view.process, self.view.command, self.view.action
-            ),
+            embed=CommandEmbed(self.view.client, self.view.process, self.view.command, self.view.action),
             view=self.view,
         )
 
@@ -91,14 +87,10 @@ class ExecuteButton(discord.ui.Button[Any]):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         if not self.view.process.is_running():
-            await interaction.response.send_message(
-                self.view.client._("✖ The process isn't open."), ephemeral=True
-            )
+            await interaction.response.send_message(self.view.client._("✖ The process isn't open."), ephemeral=True)
             return
 
-        await interaction.response.send_message(
-            self.view.client._('✔ Executing commands...'), ephemeral=True
-        )
+        await interaction.response.send_message(self.view.client._('✔ Executing commands...'), ephemeral=True)
 
         commands = self.view._get_commands()
 
@@ -122,9 +114,7 @@ class EditButton(discord.ui.Button[Any]):
         try:
             yml_content = read_file(self.view.command_path)
         except:
-            await self.view.client.error_report(
-                title='Reading Command', error=traceback.format_exc()
-            )
+            await self.view.client.error_report(title='Reading Command', error=traceback.format_exc())
             return
 
         class edit_command(discord.ui.Modal, title=self.view.client._('Edit the command')):
@@ -145,17 +135,13 @@ class EditButton(discord.ui.Button[Any]):
                 try:
                     write_in_file(self.view.command_path, str(modal.content))
                 except:
-                    await self.view.client.error_report(
-                        title='Writing command.yml', error=traceback.format_exc()
-                    )
+                    await self.view.client.error_report(title='Writing command.yml', error=traceback.format_exc())
                     return
 
                 try:
                     os.rename(self.view.command_path, new_path_file)
                 except:
-                    await self.view.client.error_report(
-                        title='Renaming command.yml', error=traceback.format_exc()
-                    )
+                    await self.view.client.error_report(title='Renaming command.yml', error=traceback.format_exc())
                     return
 
                 await interaction.response.edit_message(
@@ -178,9 +164,7 @@ class DeleteButton(discord.ui.Button[Any]):
             try:
                 os.remove(self.view.command_path)
             except:
-                await self.view.client.error_report(
-                    title='Delete command.yml', error=traceback.format_exc()
-                )
+                await self.view.client.error_report(title='Delete command.yml', error=traceback.format_exc())
 
             else:
                 await confirmation_interaction.response.edit_message(delete_after=0)
@@ -200,9 +184,7 @@ class DeleteButton(discord.ui.Button[Any]):
 
 
 class CommandEmbed(discord.Embed):
-    def __init__(
-        self, client: McDisClient, process: Process, command: str, action: int = 1
-    ) -> None:
+    def __init__(self, client: McDisClient, process: Process, command: str, action: int = 1) -> None:
         title = os.path.join(process.name, command.removesuffix('.yml'))
         super().__init__(title=title, colour=embed_colour)
 
@@ -219,7 +201,7 @@ class CommandEmbed(discord.Embed):
 
     def _load_data(self) -> Any:
         file_path = os.path.join(self.process.path_commands, self.command)
-        with open(file_path, 'r') as file:
+        with open(file_path) as file:
             yaml = ruamel.yaml.YAML()
             yaml.indent(mapping=2, sequence=4, offset=2)
             yaml.preserve_quotes = True

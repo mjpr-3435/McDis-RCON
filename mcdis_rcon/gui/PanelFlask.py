@@ -1,5 +1,5 @@
-from ..modules import *
 from ..classes import *
+from ..modules import *
 from ..utils import *
 
 
@@ -21,9 +21,7 @@ class UpdateButton(discord.ui.Button[Any]):
         self.view: FlaskView
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        await interaction.response.edit_message(
-            embed=FlaskEmbed(self.view.client), view=FlaskView(self.view.client)
-        )
+        await interaction.response.edit_message(embed=FlaskEmbed(self.view.client), view=FlaskView(self.view.client))
 
 
 class StateButton(discord.ui.Button[Any]):
@@ -139,7 +137,7 @@ class CleanLinksButton(discord.ui.Button[Any]):
 
 class FlaskEmbed(discord.Embed):
     def __init__(self, client: McDisClient) -> None:
-        super().__init__(title=f'> Flask', colour=embed_colour)
+        super().__init__(title='> Flask', colour=embed_colour)
         self.client = client
 
         self._add_description()
@@ -195,7 +193,9 @@ class FlaskEmbed(discord.Embed):
         for id, data in links.items():
             user = data['user']
             file = truncate(mcdis_path(data['file']), 48)
-            link = f'http://{self.client.config["Flask"]["IP"]}:{self.client.config["Flask"]["Port"]}/file_request?id={id}'
+            link = (
+                f'http://{self.client.config["Flask"]["IP"]}:{self.client.config["Flask"]["Port"]}/file_request?id={id}'
+            )
             dummy = f'User :: {user}\nFile :: {file}\n{link}\n\n'
             if len(content + dummy) > 1000:
                 break

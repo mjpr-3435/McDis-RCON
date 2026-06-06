@@ -1,5 +1,5 @@
-from ..modules import *
 from ..classes import *
+from ..modules import *
 from ..utils import *
 
 
@@ -19,9 +19,7 @@ class UpdateButton(discord.ui.Button[Any]):
         self.view: FilesView
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        await interaction.response.edit_message(
-            embed=FilesEmbed(self.view.client), view=FilesView(self.view.client)
-        )
+        await interaction.response.edit_message(embed=FilesEmbed(self.view.client), view=FilesView(self.view.client))
 
 
 class StateButton(discord.ui.Button[Any]):

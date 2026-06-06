@@ -39,8 +39,16 @@ def hover(text: str, *, color: str = 'gray', hover: str) -> str:
 
 
 def hover_and_suggest(text: str, *, color: str = 'gray', suggest: str, hover: str) -> str:
-    return f'{{"text" : "{text}", "color" : "{color}", "clickEvent": {{"action": "suggest_command" , "value": "{suggest}"}}, "hoverEvent" : {{"action": "show_text", "value": "{hover}"}}}}'
+    return (
+        f'{{"text" : "{text}", "color" : "{color}", '
+        f'"clickEvent": {{"action": "suggest_command" , "value": "{suggest}"}}, '
+        f'"hoverEvent" : {{"action": "show_text", "value": "{hover}"}}}}'
+    )
 
 
 def hover_and_run(text: str, *, color: str = 'gray', command: str, hover: str) -> str:
-    return f'{{"text" : "{text}", "color" : "{color}", "clickEvent": {{"action": "run_command" , "value": "{command}"}}, "hoverEvent" : {{"action": "show_text", "value": "{hover}"}}}}'
+    return (
+        f'{{"text" : "{text}", "color" : "{color}", '
+        f'"clickEvent": {{"action": "run_command" , "value": "{command}"}}, '
+        f'"hoverEvent" : {{"action": "show_text", "value": "{hover}"}}}}'
+    )

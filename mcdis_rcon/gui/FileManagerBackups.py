@@ -1,8 +1,5 @@
-from ..modules import *
 from ..classes import *
-from ..utils import *
 from ..modules import *
-from ..classes import *
 from ..utils import *
 
 
@@ -85,9 +82,9 @@ class BackupSelect(discord.ui.Select[Any]):
                     if counter[1] == 0:
                         await asyncio.sleep(0.1)
                     else:
-                        show = self.view.client._(
-                            '`[{}]`: `[{}/{}]` files have been processed...'
-                        ).format(self.view.process.name, counter[0], counter[1])
+                        show = self.view.client._('`[{}]`: `[{}/{}]` files have been processed...').format(
+                            self.view.process.name, counter[0], counter[1]
+                        )
                         await confirmation_interaction.followup.edit_message(
                             message_id=cast(discord.Message, confirmation_interaction.message).id,
                             content=show,
@@ -135,18 +132,16 @@ class BackupSelect(discord.ui.Select[Any]):
                     error_title=f'{self.view.process.name}: unpack_bkp()', reports=reports
                 )(self.view.process.unpack_bkp)
 
-                task = threading.Thread(
-                    target=unpack_bkp, args=(selected_backup,), kwargs={'counter': counter}
-                )
+                task = threading.Thread(target=unpack_bkp, args=(selected_backup,), kwargs={'counter': counter})
                 task.start()
 
                 while task.is_alive():
                     if counter[1] == 0:
                         await asyncio.sleep(0.1)
                     else:
-                        show = self.view.client._(
-                            '`[{}]`: `[{}/{}]` files have been unpacked...'
-                        ).format(self.view.process.name, counter[0], counter[1])
+                        show = self.view.client._('`[{}]`: `[{}/{}]` files have been unpacked...').format(
+                            self.view.process.name, counter[0], counter[1]
+                        )
                         await confirmation_interaction.followup.edit_message(
                             message_id=cast(discord.Message, confirmation_interaction.message).id,
                             content=show,
@@ -172,9 +167,7 @@ class BackupSelect(discord.ui.Select[Any]):
                 await interaction.user.send(msg)
 
             await confirmation_request(
-                self.view.client._('Are you sure you want to load the backup `{}`?').format(
-                    selected_backup
-                ),
+                self.view.client._('Are you sure you want to load the backup `{}`?').format(selected_backup),
                 on_confirmation=on_confirmation,
                 interaction=interaction,
             )
@@ -264,14 +257,12 @@ class BackupsEmbed(discord.Embed):
         log_path = os.path.join(file, 'backup_log.txt')
 
         if os.path.exists(log_path):
-            with open(log_path, 'r', encoding='utf-8') as log_file:
+            with open(log_path, encoding='utf-8') as log_file:
                 lines = log_file.read().splitlines()
                 for line in lines:
                     if line.startswith('Backup created on:'):
                         date_str = line.replace('Backup created on:', '').strip()
-                        date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').strftime(
-                            '%Y-%m-%d %H:%M:%S'
-                        )
+                        date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
                         break
                 else:
                     date = 'Date not found in log'

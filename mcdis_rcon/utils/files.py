@@ -1,8 +1,21 @@
-from typing import Any
+import json
+import math
+import os
+import re
+import shutil
+import subprocess
+import zipfile
+from collections.abc import Callable, Mapping, Sequence
+from typing import Any, cast
 
+import nbtlib  # type: ignore[import-untyped]
 import ruamel.yaml
 
-from ..modules import *
+
+def load_nbt_file(file_path: str) -> Any:
+    nbtlib_module = cast(Any, nbtlib)
+    load = cast(Callable[[str], Any], nbtlib_module.load)
+    return load(file_path)
 
 
 def read_properties(file_path: str) -> dict[str, str]:
@@ -19,12 +32,12 @@ def read_properties(file_path: str) -> dict[str, str]:
 
 
 def read_dat_files(file_path: str) -> Any:
-    return nbtlib.load(file_path)
+    return load_nbt_file(file_path)
 
 
 def show_dat_files(*, file_path: str | None = None, nbt: Any = None) -> None:
     if file_path:
-        nbt = nbtlib.load(file_path)
+        nbt = load_nbt_file(file_path)
 
     if nbt is not None:
         formatted_output = json.dumps(dat_to_dict(nbt), indent=4)
@@ -33,9 +46,11 @@ def show_dat_files(*, file_path: str | None = None, nbt: Any = None) -> None:
 
 def dat_to_dict(nbt: Any) -> Any:
     if isinstance(nbt, nbtlib.tag.Compound):
-        return {key: dat_to_dict(value) for key, value in nbt.items()}
+        compound = cast(Mapping[str, Any], nbt)
+        return {key: dat_to_dict(value) for key, value in compound.items()}
     elif isinstance(nbt, nbtlib.tag.List):
-        return [dat_to_dict(item) for item in nbt]
+        nbt_list = cast(Sequence[Any], nbt)
+        return [dat_to_dict(item) for item in nbt_list]
     elif isinstance(nbt, nbtlib.tag.IntArray):
         return list(nbt)
     else:
@@ -55,11 +70,13 @@ def write_in_file(file_path: str, content: str) -> None:
 
 def read_yml(file_path: str) -> Any:
     with open(file_path) as file:
-        yaml = ruamel.yaml.YAML()
-        yaml.indent(mapping=2, sequence=4, offset=2)
-        yaml.preserve_quotes = True
+        yaml_loader = ruamel.yaml.YAML()
+        yaml_loader.indent(mapping=2, sequence=4, offset=2)
+        yaml_loader.preserve_quotes = True
 
-        return yaml.load(file)
+        yaml_loader_any = cast(Any, yaml_loader)
+        load = cast(Callable[[Any], Any], yaml_loader_any.load)
+        return load(file)
 
 
 def is_valid_path_name(folder_name: str) -> bool:
@@ -101,14 +118,17 @@ def copy_dir(source: str, destination: str, counter: list[int] | None = None) ->
     if counter:
         counter[0], counter[1] = 0, elements_on(source)
 
+    def copy_with_counter(src: str, dst: str) -> str:
+        shutil.copy2(src, dst)
+        if counter:
+            counter[0] += 1
+        return dst
+
     shutil.copytree(
         source,
         destination,
         dirs_exist_ok=True,
-        copy_function=lambda src, dst: (
-            shutil.copy2(src, dst),
-            counter and counter.__setitem__(0, counter[0] + 1),
-        )[0],
+        copy_function=copy_with_counter,
     )
 
 
@@ -143,9 +163,7 @@ def unpack_zip(source: str, destination: str, counter: list[int] | None = None) 
                 counter[0] += 1
 
 
-def elements_on(
-    path: str, *, include_files: bool = True, include_dirs: bool = True, recursive: bool = True
-) -> int:
+def elements_on(path: str, *, include_files: bool = True, include_dirs: bool = True, recursive: bool = True) -> int:
     if not os.path.isdir(path):
         return 1
 

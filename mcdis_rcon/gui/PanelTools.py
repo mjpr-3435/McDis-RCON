@@ -1,5 +1,5 @@
-from ..modules import *
 from ..classes import *
+from ..modules import *
 from ..utils import *
 
 
@@ -33,7 +33,7 @@ class ProcessesButton(discord.ui.Button[Any]):
         self.view: ToolsView
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        from .PanelProcesses import ProcessesView, ProcessesEmbed
+        from .PanelProcesses import ProcessesEmbed, ProcessesView
 
         await interaction.response.defer()
 
@@ -63,7 +63,7 @@ class UploaderButton(discord.ui.Button[Any]):
         self.view: ToolsView
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        from .PanelUploader import UploaderView, UploaderEmbed
+        from .PanelUploader import UploaderEmbed, UploaderView
 
         await interaction.response.send_message(
             embed=UploaderEmbed(self.view.client),
@@ -78,7 +78,7 @@ class FlaskButton(discord.ui.Button[Any]):
         self.view: ToolsView
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        from .PanelFlask import FlaskView, FlaskEmbed
+        from .PanelFlask import FlaskEmbed, FlaskView
 
         await interaction.response.send_message(
             embed=FlaskEmbed(self.view.client), view=FlaskView(self.view.client), ephemeral=True
@@ -91,7 +91,7 @@ class FilesManagerButton(discord.ui.Button[Any]):
         self.view: ToolsView
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        from .PanelFiles import FilesView, FilesEmbed
+        from .PanelFiles import FilesEmbed, FilesView
 
         await interaction.response.send_message(
             embed=FilesEmbed(self.view.client), view=FilesView(self.view.client), ephemeral=True
@@ -107,9 +107,7 @@ class ReloadButton(discord.ui.Button[Any]):
         await interaction.response.defer(thinking=True, ephemeral=True)
         await self.view.client._load_addons(reload=True)
         addons = [addon for addon in self.view.client.addons.keys()]
-        extra = (
-            '\n • '.join([''] + addons) if addons else self.view.client._('No addons were found.')
-        )
+        extra = '\n • '.join([''] + addons) if addons else self.view.client._('No addons were found.')
         msg = self.view.client._('✔ Addons reloaded: ') + extra
 
         await interaction.followup.send(msg)

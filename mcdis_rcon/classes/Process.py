@@ -1,7 +1,7 @@
 import asyncio
 import contextlib
 import glob
-import importlib
+import importlib.util
 import os
 import queue
 import shutil
@@ -10,7 +10,6 @@ import threading
 import traceback
 from datetime import datetime
 from queue import Queue
-from collections.abc import Callable
 from typing import Any, TypedDict
 
 import aiohttp
@@ -86,7 +85,7 @@ class Process:
             )
             self.load_plugins()
             asyncio.create_task(self._listener_console())
-        except:
+        except Exception:
             asyncio.create_task(self.error_report(title='start()', error=traceback.format_exc()))
             self.stop()
 
@@ -147,7 +146,9 @@ class Process:
 
         valid_extensions = ['.py', '.mcdis']
         files_in_plugins_dir = os.listdir(self.path_plugins)
-        cond: Callable[[str], bool] = lambda file: os.path.splitext(file)[1] in valid_extensions
+
+        def cond(file: str) -> bool:
+            return os.path.splitext(file)[1] in valid_extensions
 
         plugins = [file for file in files_in_plugins_dir if cond(file)]
 
@@ -173,7 +174,7 @@ class Process:
                         self.plugins.append(plugin_instance)
                         logs.append(f'Plugin imported:: {plugin}')
 
-                except:
+                except Exception:
                     asyncio.create_task(
                         self.error_report(
                             title=f'Unable to import plugin {plugin}', error=traceback.format_exc()
@@ -221,7 +222,7 @@ class Process:
                 if cond_1 and cond_2 and cond_3 and cond_4:
                     self.real_process = process
                     return self.real_process
-            except:
+            except Exception:
                 return None
         return None
 
@@ -266,7 +267,7 @@ class Process:
             new_name = os.path.join(self.path_bkps, f'{self.name} {new_index}')
             try:
                 os.rename(bkp, new_name)
-            except:
+            except Exception:
                 asyncio.create_task(
                     self.error_report(title='Renaming in make_bkp()', error=traceback.format_exc())
                 )
@@ -337,7 +338,7 @@ class Process:
                 log = self.process.stdout.readline().decode().strip()
                 if self._console_log:
                     self._console_log.put(log)
-            except:
+            except Exception:
                 pass
 
     async def _relay_console(self) -> None:
@@ -383,7 +384,7 @@ class Process:
                         await asyncio.sleep(1)
                         continue
 
-                except:
+                except Exception:
                     await self.error_report(title='relay_console()', error=traceback.format_exc())
 
         if self._stop_relay_reason:
@@ -416,7 +417,7 @@ class Process:
 
                     await asyncio.sleep(0)
 
-        except:
+        except Exception:
             await self.error_report(title='listener_console()', error=traceback.format_exc())
             return
 
@@ -429,7 +430,7 @@ class Process:
             if self.process and self.process.stdin:
                 self.process.stdin.write((command + '\n').encode())
                 self.process.stdin.flush()
-        except:
+        except Exception:
             pass
 
     def log_format(self, log: str, type: str = 'INFO') -> str:
@@ -445,7 +446,7 @@ class Process:
                 func = getattr(plugin, function, None)
                 if func:
                     await func(*args)
-            except:
+            except Exception:
                 await self.error_report(
                     title=f'{function}() of {plugin}', error=traceback.format_exc()
                 )

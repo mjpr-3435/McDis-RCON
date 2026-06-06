@@ -1,5 +1,5 @@
-from ..modules import *
 from ..classes import *
+from ..modules import *
 from ..utils import *
 
 
@@ -32,7 +32,7 @@ class FilesButton(discord.ui.Button[Any]):
         self.view: PanelView
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        from .FileManager import FileManagerView, FileManagerEmbed
+        from .FileManager import FileManagerEmbed, FileManagerView
 
         await interaction.response.defer(ephemeral=True, thinking=True)
 
@@ -149,11 +149,11 @@ class PanelEmbed(discord.Embed):
         self.add_field(
             inline=True,
             name=self.client._('> Server Resources'),
-            value=f'```asciidoc\nCPU\nFreq::           '[: -len(cpu_freq)]
+            value='```asciidoc\nCPU\nFreq::           '[: -len(cpu_freq)]
             + cpu_freq
-            + f'\nLoad::           '[: -len(cpu_load)]
+            + '\nLoad::           '[: -len(cpu_load)]
             + cpu_load
-            + f'\nTemp::           '[: -len(cpu_temp)]
+            + '\nTemp::           '[: -len(cpu_temp)]
             + cpu_temp
             + '```',
         )
@@ -161,11 +161,11 @@ class PanelEmbed(discord.Embed):
         self.add_field(
             inline=True,
             name=omit_space,
-            value=f'```asciidoc\nRAM\nTotal::          '[: -len(ram_total)]
+            value='```asciidoc\nRAM\nTotal::          '[: -len(ram_total)]
             + ram_total
-            + f'\nUsed::           '[: -len(ram_used)]
+            + '\nUsed::           '[: -len(ram_used)]
             + ram_used
-            + f'\nLoad::           '[: -len(ram_load)]
+            + '\nLoad::           '[: -len(ram_load)]
             + ram_load
             + '```',
         )
@@ -173,40 +173,40 @@ class PanelEmbed(discord.Embed):
         self.add_field(
             inline=True,
             name=omit_space,
-            value=f'```asciidoc\nStorage\nTotal::          '[: -len(disk_total)]
+            value='```asciidoc\nStorage\nTotal::          '[: -len(disk_total)]
             + disk_total
-            + f'\nUsed::           '[: -len(disk_used)]
+            + '\nUsed::           '[: -len(disk_used)]
             + disk_used
-            + f'\nLoad::           '[: -len(disk_load)]
+            + '\nLoad::           '[: -len(disk_load)]
             + disk_load
             + '```',
         )
 
         if self.client.display_panel:
             print(
-                f'CPU\nFreq::           '[: -len(cpu_freq)]
+                'CPU\nFreq::           '[: -len(cpu_freq)]
                 + cpu_freq
-                + f'\nLoad::           '[: -len(cpu_load)]
+                + '\nLoad::           '[: -len(cpu_load)]
                 + cpu_load
-                + f'\nTemp::           '[: -len(cpu_temp)]
+                + '\nTemp::           '[: -len(cpu_temp)]
                 + cpu_temp
                 + '\n'
             )
             print(
-                f'RAM\nTotal::          '[: -len(ram_total)]
+                'RAM\nTotal::          '[: -len(ram_total)]
                 + ram_total
-                + f'\nUsed::           '[: -len(ram_used)]
+                + '\nUsed::           '[: -len(ram_used)]
                 + ram_used
-                + f'\nLoad::           '[: -len(ram_load)]
+                + '\nLoad::           '[: -len(ram_load)]
                 + ram_load
                 + '\n'
             )
             print(
-                f'Storage\nTotal::          '[: -len(disk_total)]
+                'Storage\nTotal::          '[: -len(disk_total)]
                 + disk_total
-                + f'\nUsed::           '[: -len(disk_used)]
+                + '\nUsed::           '[: -len(disk_used)]
                 + disk_used
-                + f'\nLoad::           '[: -len(disk_load)]
+                + '\nLoad::           '[: -len(disk_load)]
                 + disk_load
                 + '\n'
             )
@@ -232,11 +232,11 @@ class PanelEmbed(discord.Embed):
             self.add_field(
                 inline=True,
                 name=f'> <#{server_id}>',
-                value=f'```asciidoc\nDisk Usage::              '[: -len(disk_usage)]
+                value='```asciidoc\nDisk Usage::              '[: -len(disk_usage)]
                 + disk_usage
-                + f'\nRAM Usage::               '[: -len(ram_usage)]
+                + '\nRAM Usage::               '[: -len(ram_usage)]
                 + ram_usage
-                + f'\nState::                   '[: -len(state)]
+                + '\nState::                   '[: -len(state)]
                 + state
                 + '```',
             )
@@ -245,9 +245,9 @@ class PanelEmbed(discord.Embed):
                 print(
                     f'{server.name}\nDisk Usage::              '[: -len(disk_usage)]
                     + disk_usage
-                    + f'\nRAM Usage::               '[: -len(ram_usage)]
+                    + '\nRAM Usage::               '[: -len(ram_usage)]
                     + ram_usage
-                    + f'\nState::                   '[: -len(state)]
+                    + '\nState::                   '[: -len(state)]
                     + state
                     + '\n'
                 )
@@ -278,17 +278,11 @@ class PanelEmbed(discord.Embed):
             self.add_field(
                 inline=True,
                 name=f'> <#{network_id}>',
-                value=f'```asciidoc\nRAM Usage::               '[: -len(ram_usage)]
-                + ram_usage
-                + '```',
+                value='```asciidoc\nRAM Usage::               '[: -len(ram_usage)] + ram_usage + '```',
             )
 
             if self.client.display_panel:
-                print(
-                    f'{network.name}\nRAM Usage::               '[: -len(ram_usage)]
-                    + ram_usage
-                    + '\n'
-                )
+                print(f'{network.name}\nRAM Usage::               '[: -len(ram_usage)] + ram_usage + '\n')
 
             if (i + 1) % 2 == 0:
                 self.add_field(inline=False, name='', value='')
@@ -297,10 +291,8 @@ class PanelEmbed(discord.Embed):
         mcdis_ram_used = f'{psutil.Process().memory_info().rss / (1024**2):.1f} MB'
         self.add_field(
             inline=True,
-            name=f'> McDis RCON',
-            value=f'```asciidoc\nRAM Usage::               '[: -len(mcdis_ram_used)]
-            + mcdis_ram_used
-            + '```',
+            name='> McDis RCON',
+            value='```asciidoc\nRAM Usage::               '[: -len(mcdis_ram_used)] + mcdis_ram_used + '```',
         )
 
         if len(self.client.networks) % 2 == 0:

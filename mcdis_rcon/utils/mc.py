@@ -1,12 +1,13 @@
-from ..modules import *
+import hashlib
+import uuid
+
+import requests
 
 
 def mc_uuid(player: str, *, online: bool = True) -> str:
     if online:
         try:
-            response = requests.get(
-                f'https://api.mojang.com/users/profiles/minecraft/{player}', timeout=5
-            )
+            response = requests.get(f'https://api.mojang.com/users/profiles/minecraft/{player}', timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 return str(uuid.UUID(data['id']))
@@ -27,9 +28,7 @@ def mc_uuid(player: str, *, online: bool = True) -> str:
 
 def online_uuid_to_name(uuid: str) -> str:
     try:
-        response = requests.get(
-            f'https://sessionserver.mojang.com/session/minecraft/profile/{uuid}', timeout=5
-        )
+        response = requests.get(f'https://sessionserver.mojang.com/session/minecraft/profile/{uuid}', timeout=5)
         if response.status_code == 200:
             return str(response.json().get('name', 'unknown'))
         return 'unknown'

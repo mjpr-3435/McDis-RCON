@@ -1,6 +1,6 @@
 import argparse
-import shutil
 import os
+import shutil
 
 os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
 
