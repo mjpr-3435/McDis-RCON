@@ -1,4 +1,13 @@
 # McDis-RCON
+
+> [!WARNING]
+> **This project is no longer maintained.**
+>
+> **McDis-RCON** has been superseded by [**DisManager**](https://github.com/mjpr-3435/DisManager) — its evolution and active successor for managing processes and streaming their consoles through Discord.
+>
+> - **GitHub:** https://github.com/mjpr-3435/DisManager
+> - **PyPI:** https://pypi.org/project/dismanager/ (`pip install dismanager`)
+
 [![Python Versions](https://img.shields.io/pypi/pyversions/mcdis_rcon.svg?maxAge=3600)](https://pypi.org/project/mcdis_rcon)
 [![PyPI Version](https://img.shields.io/pypi/v/mcdis_rcon.svg)](https://pypi.org/project/mcdis_rcon)
 [![License](https://img.shields.io/github/license/mjpr-3435/McDis-RCON.svg)](https://github.com/mjpr-3435/McDis-RCON/blob/master/LICENSE)
